@@ -1,0 +1,48 @@
+[workspace]
+
+members = [ "common","day-01"]
+
+resolver = "2"
+
+[workspace.dependencies]
+color-eyre = "0.6.3"
+displaydoc = "0.2"
+itertools = "0.12"
+tap = "1"
+thiserror = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter", "ansi"] }
+tracing-error = "0.2"
+
+common.path = "common"
+
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+unwrap_used = { level = "forbid", priority = 1 }
+enum_glob_use = { level = "deny", priority = 1 }
+pedantic = "deny"
+nursery = "warn"
+todo = { level = "warn", priority = 1 }
+dbg_macro = { level = "warn", priority = 1 }
+missing_errors_doc = { level = "allow", priority = 1 }
+missing_panics_doc = { level = "allow", priority = 1 }
+cognitive_complexity = { level = "allow", priority = 1 }
+perf = "warn"
+style = "warn"
+suspicious = "warn"
+correctness = "deny"
+single_match = { level = "allow", priority = 127}
+single_match_else = { level = "allow", priority = 127}
+manual_let_else = { level = "allow", priority = 127}
+unused_async = { level = "warn", priority = 127 }
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = "symbols"
+
