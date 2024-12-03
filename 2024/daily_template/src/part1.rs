@@ -13,7 +13,7 @@ mod tests {
     fn test_example() -> Result<()> {
         let input = common::read_input!("example.txt");
         let output = process(&input)?;
-        assert_eq!(output, todo!("{{crate_name}} part1"));
+        assert_eq!(output, "{{crate_name}} part1");
         Ok(())
     }
 
@@ -21,7 +21,7 @@ mod tests {
     fn test_actual() -> Result<()> {
         let input = common::read_input!("part1.txt");
         let output = process(&input)?;
-        assert_eq!(output, todo!("{{crate_name}} part1"));
+        assert_eq!(output, "{{crate_name}} part1");
         Ok(())
     }
 }

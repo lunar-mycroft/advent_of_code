@@ -1,12 +1,11 @@
 [package]
-name = "{{project-name}}"
+name = "day-03"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 color-eyre.workspace = true
 displaydoc.workspace = true
-divan.workspace = true
 itertools.workspace = true
 regex.workspace = true
 tap.workspace = true
@@ -20,10 +19,11 @@ common.workspace = true
 [dev-dependencies]
 divan.workspace = true
 
+
 [lints]
 workspace = true
 
 [[bench]]
-name = "{{project-name}}-bench"
-path = "benches/benchmarks.rs"
+name = "day-03-bench"
+path = "benches/benchmark.rs"
 harness = false

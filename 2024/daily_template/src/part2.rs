@@ -13,14 +13,15 @@ mod tests {
     fn test_example() -> Result<()> {
         let input = common::read_input!("example.txt");
         let output = process(&input)?;
-        assert_eq!(output, todo!("{{crate_name}} part2"));
+        assert_eq!(output, "{{crate_name}} part2");
         Ok(())
     }
 
+    #[test]
     fn test_actual() -> Result<()> {
         let input = common::read_input!("part2.txt");
         let output = process(&input)?;
-        assert_eq!(output, todo!("{{crate_name}} part2"));
+        assert_eq!(output, "{{crate_name}} part2");
         Ok(())
     }
 }

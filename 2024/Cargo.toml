@@ -1,13 +1,15 @@
 [workspace]
 
-members = [ "common","day-01"]
+members = [ "common","day-01", "day-02", "day-03"]
 
 resolver = "2"
 
 [workspace.dependencies]
 color-eyre = "0.6.3"
 displaydoc = "0.2"
+divan = "0.1.7"
 itertools = "0.12"
+regex = "1.11"
 tap = "1"
 thiserror = "1.0"
 tracing = "0.1"
