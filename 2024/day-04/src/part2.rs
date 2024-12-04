@@ -1,80 +1,47 @@
-use std::collections::HashSet;
-
 use color_eyre::eyre::{ensure, Result};
 use itertools::Itertools;
 use tap::prelude::*;
 
 pub fn process(input: &str) -> Result<usize> {
     let lines = input.lines().collect_vec();
-    ensure!(
-        lines[0].len() == lines.len(),
-        "Non square inputs not allowed"
-    );
     let width = lines[0].len();
-    let down_right = (0..width)
-        .flat_map(|x| {
-            lines
-                .iter()
-                .enumerate()
-                .take(width - x)
-                .map(|(y, line)| &line[(y + x)..=(y + x)])
-                .collect::<String>()
-                .pipe_deref(mas_indexes)
-                .map(|y| (x + 1, y))
-                .collect_vec()
+    ensure!(width == lines.len(), "Non square inputs not allowed");
+    (1..width - 1)
+        .cartesian_product(1..width - 1)
+        .map(|(x, y)| {
+            (
+                format!(
+                    "{}{}{}",
+                    get_char(&lines, (x - 1, y - 1)),
+                    get_char(&lines, (x, y)),
+                    get_char(&lines, (x + 1, y + 1))
+                ),
+                format!(
+                    "{}{}{}",
+                    get_char(&lines, (x - 1, y + 1)),
+                    get_char(&lines, (x, y)),
+                    get_char(&lines, (x + 1, y - 1))
+                ),
+            )
         })
-        .chain((1..width).flat_map(|y| {
-            (0..(width - y))
-                .map(|x| (x, x + y))
-                .map(|(x, y)| &lines[y][x..=x])
-                .collect::<String>()
-                .pipe_deref(mas_indexes)
-                .map(|idx| (idx, y + idx))
-                .collect_vec()
-        }))
-        .collect::<HashSet<_>>();
-    let down_left = (0..width)
-        .flat_map(|x| {
-            lines
-                .iter()
-                .enumerate()
-                .take(width - x)
-                .map(|(y, line)| {
-                    let idx = width - y - x - 1;
-                    &line[idx..=idx]
-                })
-                .collect::<String>()
-                // .pipe(|s| dbg!(s))
-                .pipe_deref(mas_indexes)
-                .map(|idx| (width - x - 1 - idx, idx))
-                .collect_vec()
+        .filter(|(a, b)| match (a.as_str(), b.as_str()) {
+            #[expect(clippy::unnested_or_patterns)]
+            ("MAS", "MAS") | ("SAM", "SAM") | ("MAS", "SAM") | ("SAM", "MAS") => true,
+            _ => false,
         })
-        .chain((1..width).flat_map(|y| {
-            (0..(width - y))
-                .map(|x| (width - x - 1, x + y))
-                .map(|(x, y)| &lines[y][x..=x])
-                .collect::<String>()
-                .pipe_deref(mas_indexes)
-                .map(|idx| (width - 1 - idx, y + idx))
-                .collect_vec()
-        }))
-        .collect::<HashSet<_>>();
-    let intersect = down_left.intersection(&down_right).sorted().collect_vec();
-    dbg!(intersect);
-    todo!()
+        .count()
+        .pipe(Ok)
 }
 
-fn mas_indexes(s: &str) -> impl Iterator<Item = usize> + '_ {
-    s.match_indices("MAS")
-        .map(|(idx, _)| idx + 1)
-        .chain(s.match_indices("SAM").map(|(idx, _)| idx + 1))
+fn get_char<'a>(lines: &'a [&'a str], (x, y): (usize, usize)) -> &'a str {
+    &lines[y][x..=x]
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    // #[test]
+    #[test]
     fn test_example() -> Result<()> {
         let input = common::read_input!("example.txt");
         let output = process(&input)?;
@@ -82,11 +49,11 @@ mod tests {
         Ok(())
     }
 
-    // #[test]
+    #[test]
     fn test_actual() -> Result<()> {
         let input = common::read_input!("part2.txt");
         let output = process(&input)?;
-        assert_eq!(output, 0);
+        assert_eq!(output, 1824);
         Ok(())
     }
 }
