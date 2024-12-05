@@ -1,6 +1,6 @@
 use color_eyre::eyre::{OptionExt, Result};
 use itertools::Itertools;
-use std::{collections::HashMap, str::FromStr as _};
+use std::{collections::HashSet, str::FromStr as _};
 use tap::prelude::*;
 
 pub fn process(input: &str) -> Result<u32> {
@@ -18,7 +18,7 @@ pub fn process(input: &str) -> Result<u32> {
                     let (a, b) = s.split_once('|').ok_or_eyre("Invalid ordering")?;
                     (a.parse::<u32>()?, b.parse::<u32>()?).pipe(Ok)
                 })
-                .try_collect::<_, Vec<_>, color_eyre::Report>()?,
+                .try_collect::<_, HashSet<_>, color_eyre::Report>()?,
             p_sec
                 .lines()
                 .map(str::trim)
@@ -34,30 +34,14 @@ pub fn process(input: &str) -> Result<u32> {
 
     pages
         .iter()
-        .filter(|p| in_correct_order(&ordering_rules, p))
+        .filter(|p| p.is_sorted_by(|a, b| !ordering_rules.contains(&(*b, *a))))
         .map(|p| middle_page(p))
         .sum::<u32>()
         .pipe(Ok)
 }
 
-fn in_correct_order(rules: &[(u32, u32)], pages: &[u32]) -> bool {
-    let order_map: HashMap<_, _> = pages
-        .iter()
-        .copied()
-        .enumerate()
-        .map(|(idx, p)| (p, idx))
-        .collect();
-    rules.iter().all(
-        |(a, b)| match (order_map.get(a).copied(), order_map.get(b).copied()) {
-            (Some(a_idx), Some(b_idx)) if (a_idx < b_idx) => true,
-            (Some(_), Some(_)) => false,
-            _ => true,
-        },
-    )
-}
-
 fn middle_page(pages: &[u32]) -> u32 {
-    assert!(pages.len() % 2 != 0, "Even number of pages {}", pages.len());
+    debug_assert_ne!(pages.len() % 2, 0, "Even number of pages {}", pages.len());
     pages[pages.len() / 2]
 }
 

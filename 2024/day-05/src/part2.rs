@@ -1,8 +1,4 @@
-use std::{
-    cmp::Ordering,
-    collections::{HashMap, HashSet},
-    str::FromStr as _,
-};
+use std::{cmp::Ordering, collections::HashSet, str::FromStr as _};
 
 use color_eyre::eyre::{OptionExt as _, Result};
 use itertools::Itertools as _;
@@ -45,7 +41,7 @@ pub fn process(input: &str) -> Result<u32> {
 }
 
 fn correct_order(rules: &HashSet<(u32, u32)>, pages: &[u32]) -> u32 {
-    if in_correct_order(rules, pages) {
+    if pages.is_sorted_by(|a, b| !rules.contains(&(*b, *a))) {
         0
     } else {
         let mut pages = pages.to_vec();
@@ -63,24 +59,8 @@ fn correct_order(rules: &HashSet<(u32, u32)>, pages: &[u32]) -> u32 {
     }
 }
 
-fn in_correct_order(rules: &HashSet<(u32, u32)>, pages: &[u32]) -> bool {
-    let order_map: HashMap<_, _> = pages
-        .iter()
-        .copied()
-        .enumerate()
-        .map(|(idx, p)| (p, idx))
-        .collect();
-    rules.iter().all(
-        |(a, b)| match (order_map.get(a).copied(), order_map.get(b).copied()) {
-            (Some(a_idx), Some(b_idx)) if (a_idx < b_idx) => true,
-            (Some(_), Some(_)) => false,
-            _ => true,
-        },
-    )
-}
-
 fn middle_page(pages: &[u32]) -> u32 {
-    assert!(pages.len() % 2 != 0, "Even number of pages {}", pages.len());
+    debug_assert_ne!(pages.len() % 2, 0, "Even number of pages {}", pages.len());
     pages[pages.len() / 2]
 }
 
