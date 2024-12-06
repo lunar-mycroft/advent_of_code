@@ -5,10 +5,11 @@ use glam::IVec2;
 use itertools::Itertools;
 use tap::prelude::*;
 
-use crate::in_map;
+use crate::{in_map, patrol, turn_right};
 
-use super::{blocks, guard, turn_right};
+use super::{blocks, guard};
 
+#[allow(clippy::explicit_counter_loop)]
 pub fn process(input: &str) -> Result<usize> {
     let size = IVec2 {
         x: input.lines().count().try_conv::<i32>()?,
@@ -21,45 +22,30 @@ pub fn process(input: &str) -> Result<usize> {
             .try_conv::<i32>()?,
     };
     let blocks = blocks(input).collect::<HashSet<_>>();
-    let (mut guard_pos, mut guard_dir) = guard(input).ok_or_eyre("No player found")?;
-    let mut visited = HashSet::new();
-    // let obsticals = HashSet
-    let mut res = 0;
-    let mut n = 0;
-    while in_map(guard_pos, size) {
-        let old_dir = guard_dir;
-        while blocks.contains(&(guard_pos + guard_dir)) {
-            guard_dir = turn_right(guard_dir);
+    let (guard_pos, guard_dir) = guard(input).ok_or_eyre("No player found")?;
+    let canidates = patrol(guard_pos, guard_dir, &blocks)
+        .map(|(p, _)| p)
+        .take_while(|p| in_map(*p, size))
+        .unique();
+    let mut res = 0usize;
+    for canidate in canidates {
+        let mut seen = HashSet::new();
+        let mut new_blocks = blocks.clone();
+        new_blocks.insert(canidate);
+        let (mut pos, mut dir) = (guard_pos, guard_dir);
+        while in_map(pos, size) && !seen.contains(&(pos, dir)) {
+            seen.insert((pos, dir));
+            if new_blocks.contains(&(pos + dir)) {
+                dir = turn_right(dir);
+            } else {
+                pos += dir;
+            }
         }
-        if blocks.contains(&(guard_pos + old_dir)) {
-            let new_path = backtrack(guard_pos, guard_dir, &blocks)
-                .take_while(|(pos, dir)| in_map(*pos, size) && !visited.contains(&(*pos, *dir)))
-                .collect_vec();
-            visited.extend(new_path);
-        }
-        if visited.contains(&(guard_pos, guard_dir)) {
+        if seen.contains(&(pos, dir)) {
             res += 1;
         }
-        guard_pos += guard_dir;
     }
-    dbg!(n);
     Ok(res)
-}
-
-fn backtrack<'a>(
-    mut pos: IVec2,
-    mut dir: IVec2,
-    blocks: &HashSet<IVec2>,
-) -> impl Iterator<Item = (IVec2, IVec2)> + '_ {
-    std::iter::from_fn(move || {
-        let old_dir = dir;
-        while blocks.contains(&(pos - turn_right(dir))) {
-            dir = -turn_right(dir);
-        }
-        let old_pos = pos;
-        pos -= dir;
-        Some((old_pos, old_dir))
-    })
 }
 
 #[cfg(test)]
