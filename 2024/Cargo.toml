@@ -1,6 +1,6 @@
 [workspace]
 
-members = [ "common", "day-01", "day-02", "day-03", "day-04", "day-05" ]
+members = [ "common", "day-01", "day-02", "day-03", "day-04", "day-05", "day-06" ]
 
 resolver = "2"
 
@@ -8,6 +8,7 @@ resolver = "2"
 color-eyre = "0.6.3"
 displaydoc = "0.2"
 divan = "0.1.7"
+glam = "0.29"
 itertools = "0.12"
 regex = "1.11"
 tap = "1"
