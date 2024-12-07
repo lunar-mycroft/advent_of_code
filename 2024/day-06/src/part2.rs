@@ -60,12 +60,11 @@ mod tests {
         Ok(())
     }
 
-    // #[test]
+    #[test]
     fn test_actual() -> Result<()> {
         let input = common::read_input!("part2.txt");
         let output = process(&input)?;
-        assert!(output > 526);
-        assert_eq!(output, 0);
+        assert_eq!(output, 1434);
         Ok(())
     }
 }
