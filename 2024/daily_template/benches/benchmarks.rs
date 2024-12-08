@@ -20,6 +20,6 @@ fn part1() -> color_eyre::Result<()> {
 fn part2() -> color_eyre::Result<()> {
     common::read_input!("part2.txt")
         .pipe(divan::black_box)
-        .pipe_deref(part1::process)?;
+        .pipe_deref(part2::process)?;
     Ok(())
 }

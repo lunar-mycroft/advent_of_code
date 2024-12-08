@@ -1,5 +1,6 @@
 use color_eyre::eyre::Result;
 use itertools::Itertools;
+use rayon::prelude::*;
 use tap::prelude::*;
 
 use crate::Equation;
@@ -13,6 +14,20 @@ pub fn process(input: &str) -> Result<u64> {
         .try_collect()?;
     equations
         .iter()
+        .filter_map(|eq| can_match(eq.expr[0], &eq.expr[1..], eq.value).then_some(eq.value))
+        .sum::<u64>()
+        .pipe(Ok)
+}
+
+pub fn process_rayon(input: &str) -> Result<u64> {
+    let equations: Vec<_> = input
+        .lines()
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .map(str::parse::<Equation>)
+        .try_collect()?;
+    equations
+        .par_iter()
         .filter_map(|eq| can_match(eq.expr[0], &eq.expr[1..], eq.value).then_some(eq.value))
         .sum::<u64>()
         .pipe(Ok)

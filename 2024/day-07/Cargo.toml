@@ -9,6 +9,7 @@ displaydoc.workspace = true
 divan.workspace = true
 glam.workspace = true
 itertools.workspace = true
+rayon.workspace = true
 regex.workspace = true
 tap.workspace = true
 thiserror.workspace = true

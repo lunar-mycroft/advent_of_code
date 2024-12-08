@@ -10,6 +10,7 @@ divan.workspace = true
 glam.workspace = true
 itertools.workspace = true
 regex.workspace = true
+rayon.workspace = true
 tap.workspace = true
 thiserror.workspace = true
 tracing.workspace = true
