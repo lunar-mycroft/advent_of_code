@@ -1,7 +1,10 @@
 use color_eyre::eyre::Result;
 use tap::prelude::*;
 
-pub fn process(input: &str) -> Result<String> {
+use crate::Puzzle;
+
+#[allow(clippy::needless_pass_by_value)]
+pub fn process(puzzle: Puzzle) -> String {
     todo!("{{crate_name}} part1")
 }
 
@@ -11,16 +14,16 @@ mod tests {
 
     #[test]
     fn test_example() -> Result<()> {
-        let input = common::read_input!("example.txt");
-        let output = process(&input)?;
+        let input = common::read_input!("example.txt").parse()?;
+        let output = process(input);
         assert_eq!(output, "{{crate_name}} part1");
         Ok(())
     }
 
     #[test]
     fn test_actual() -> Result<()> {
-        let input = common::read_input!("part1.txt");
-        let output = process(&input)?;
+        let input = common::read_input!("part1.txt").parse()?;
+        let output = process(input);
         assert_eq!(output, "{{crate_name}} part1");
         Ok(())
     }
