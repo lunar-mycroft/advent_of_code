@@ -22,6 +22,9 @@ pub fn process(mut puzzle: Puzzle) -> usize {
         .0;
     for (file_pos, (_, file_size)) in files.into_iter().rev() {
         for (space_pos, space_size) in &mut free_spaces {
+            if *space_pos >= file_pos {
+                break;
+            }
             if *space_size >= file_size && (*space_pos < file_pos) {
                 puzzle.swap_chunks(file_pos, *space_pos, file_size);
                 *space_size -= file_size;
