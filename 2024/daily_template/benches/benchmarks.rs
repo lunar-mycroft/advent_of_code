@@ -11,15 +11,17 @@ fn main() {
 #[divan::bench]
 fn part1() -> color_eyre::Result<()> {
     common::read_input!("part1.txt")
+        .parse::<Puzzle>()?
         .pipe(divan::black_box)
-        .pipe_deref(part1::process)?;
+        .pipe(part1::process);
     Ok(())
 }
 
 #[divan::bench]
 fn part2() -> color_eyre::Result<()> {
     common::read_input!("part2.txt")
+        .parse::<Puzzle>()?
         .pipe(divan::black_box)
-        .pipe_deref(part2::process)?;
+        .pipe(part2::process);
     Ok(())
 }
