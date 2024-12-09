@@ -6,8 +6,11 @@ pub fn process(mut puzzle: Puzzle) -> usize {
     while left < right {
         match (puzzle.ids[left], puzzle.ids[right]) {
             (_, None) => right -= 1,
-            (None, Some(_)) => puzzle.ids.swap(left, right),
             (Some(_), Some(_)) => left += 1,
+            (None, Some(_)) => {
+                puzzle.ids.swap(left, right);
+                left += 1;
+            }
         }
     }
     puzzle.checksum()
