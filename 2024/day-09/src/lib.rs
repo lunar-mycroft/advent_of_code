@@ -5,7 +5,7 @@ use tap::{Pipe, TryConv};
 pub mod part1;
 pub mod part2;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Puzzle {
     ids: Vec<Option<usize>>,
 }
@@ -55,8 +55,8 @@ impl std::fmt::Display for Puzzle {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for id in &self.ids {
             match *id {
-                Some(id) => write!(f, "{id}"),
-                None => write!(f, "."),
+                Some(id) => write!(f, "{id},"),
+                None => write!(f, ".,"),
             }?;
         }
         Ok(())
