@@ -6,7 +6,7 @@ use tap::{Pipe, TryConv};
 pub mod part1;
 pub mod part2;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Puzzle {
     width: usize,
     heights: Vec<u8>,
