@@ -4,9 +4,40 @@ use tap::prelude::*;
 pub mod part1;
 pub mod part2;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Puzzle {
     stones: Vec<u64>,
+}
+
+impl Puzzle {
+    fn simulate(mut self, steps: u8) -> usize {
+        for _ in 0..steps {
+            self.stones = self.stones.into_iter().flat_map(replace_stone).collect();
+        }
+        self.stones.len()
+    }
+
+    fn sum(self, steps: u8, mut stones_after: impl FnMut(u64, u8) -> usize) -> usize {
+        self.stones
+            .into_iter()
+            .map(|stone| stones_after(stone, steps))
+            .sum()
+    }
+}
+
+fn replace_stone(stone: u64) -> Vec<u64> {
+    match stone {
+        0 => vec![1],
+        n if n.ilog(10) % 2 == 1 => {
+            let s = n.to_string();
+            let (a, b) = s.split_at(s.len() / 2);
+            vec![
+                a.parse().expect("will always be valid"),
+                b.parse().expect("will always be valid"),
+            ]
+        }
+        n => vec![n * 2024],
+    }
 }
 
 impl std::str::FromStr for Puzzle {
