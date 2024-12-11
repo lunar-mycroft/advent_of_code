@@ -27,6 +27,15 @@ fn part1_dfs() -> color_eyre::Result<()> {
 }
 
 #[divan::bench]
+fn part1_no_visited() -> color_eyre::Result<()> {
+    common::read_input!("part1.txt")
+        .parse::<Puzzle>()?
+        .pipe(divan::black_box)
+        .pipe(part1::process_no_visited);
+    Ok(())
+}
+
+#[divan::bench]
 fn part2() -> color_eyre::Result<()> {
     common::read_input!("part2.txt")
         .parse::<Puzzle>()?

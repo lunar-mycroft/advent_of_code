@@ -24,6 +24,16 @@ pub fn process_dfs(puzzle: Puzzle) -> usize {
         .sum()
 }
 
+#[allow(clippy::needless_pass_by_value)]
+#[must_use]
+pub fn process_no_visited(puzzle: Puzzle) -> usize {
+    puzzle
+        .iter()
+        .filter_map(|(pos, h)| (h == 0).then_some(pos))
+        .map(|p| score_no_visited(p, &puzzle))
+        .sum()
+}
+
 fn score(trailhead: IVec2, map: &Puzzle) -> usize {
     let (mut visited, mut fringe) = (
         once(trailhead).collect::<HashSet<_>>(),
@@ -37,6 +47,19 @@ fn score(trailhead: IVec2, map: &Puzzle) -> usize {
             .flat_map(|p| [p + IVec2::X, p + IVec2::Y, p - IVec2::X, p - IVec2::Y])
             .filter(|p| map.get(*p) == Some(height))
             .filter(|p| !visited.contains(p))
+            .collect();
+    }
+    fringe.iter().copied().count()
+}
+
+fn score_no_visited(trailhead: IVec2, map: &Puzzle) -> usize {
+    let mut fringe = once(trailhead).collect::<HashSet<_>>();
+    for height in 1..=9u8 {
+        fringe = fringe
+            .iter()
+            .copied()
+            .flat_map(|p| [p + IVec2::X, p + IVec2::Y, p - IVec2::X, p - IVec2::Y])
+            .filter(|p| map.get(*p) == Some(height))
             .collect();
     }
     fringe.iter().copied().count()
@@ -78,17 +101,23 @@ mod tests {
     fn test_example() -> Result<()> {
         let input: Puzzle = common::read_input!("example.txt").parse()?;
         let bfs = input.clone().pipe(process);
-        let dfs = process_dfs(input);
+        let dfs = input.clone().pipe(process_dfs);
+        let no_visited = process_no_visited(input);
         assert_eq!(bfs, 36);
         assert_eq!(dfs, 36);
+        assert_eq!(no_visited, 36);
         Ok(())
     }
 
     #[test]
     fn test_example2() -> Result<()> {
         let input: Puzzle = common::read_input!("example2.txt").parse()?;
-        let output = process(input);
-        assert_eq!(output, 2);
+        let bfs = input.clone().pipe(process);
+        let dfs = input.clone().pipe(process_dfs);
+        let no_visited = process_no_visited(input);
+        assert_eq!(bfs, 2);
+        assert_eq!(dfs, 2);
+        assert_eq!(no_visited, 2);
         Ok(())
     }
 
@@ -96,9 +125,11 @@ mod tests {
     fn test_example3() -> Result<()> {
         let input: Puzzle = common::read_input!("example3.txt").parse()?;
         let bfs = input.clone().pipe(process);
-        let dfs = process_dfs(input);
+        let dfs = input.clone().pipe(process_dfs);
+        let no_visited = process_no_visited(input);
         assert_eq!(bfs, 4);
         assert_eq!(dfs, 4);
+        assert_eq!(no_visited, 4);
         Ok(())
     }
 
@@ -106,9 +137,11 @@ mod tests {
     fn test_actual() -> Result<()> {
         let input: Puzzle = common::read_input!("part1.txt").parse()?;
         let bfs = input.clone().pipe(process);
-        let dfs = process_dfs(input);
+        let dfs = input.clone().pipe(process_dfs);
+        let no_visited = process_no_visited(input);
         assert_eq!(bfs, 746);
         assert_eq!(dfs, 746);
+        assert_eq!(no_visited, 746);
         Ok(())
     }
 }
