@@ -346,6 +346,7 @@ dependencies = [
  "common",
  "displaydoc",
  "divan",
+ "either",
  "glam",
  "itertools",
  "rayon",

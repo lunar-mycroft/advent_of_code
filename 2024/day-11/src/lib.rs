@@ -1,3 +1,6 @@
+use std::collections::HashMap;
+
+use either::Either;
 use itertools::Itertools as _;
 use tap::prelude::*;
 
@@ -17,11 +20,52 @@ impl Puzzle {
         self.stones.len()
     }
 
-    fn sum(self, steps: u8, mut stones_after: impl FnMut(u64, u8) -> usize) -> usize {
+    fn simulate_no_alloc(mut self, steps: usize) -> usize {
+        std::iter::from_fn(move || {
+            self.stones = self
+                .stones
+                .iter()
+                .copied()
+                .flat_map(replace_stone_either)
+                .collect_vec();
+            self.stones.clone().pipe(Some)
+        })
+        .nth(steps - 1)
+        .expect("n must be greater than zero")
+        .len()
+    }
+
+    fn depth_first(self, steps: u8, mut stones_after: impl FnMut(u64, u8) -> usize) -> usize {
         self.stones
             .into_iter()
             .map(|stone| stones_after(stone, steps))
             .sum()
+    }
+
+    fn breadth_first(self, steps: u8) -> usize {
+        let mut counts = self
+            .stones
+            .into_iter()
+            .fold(HashMap::new(), |mut counts, stone| {
+                *counts.entry(stone).or_insert(0usize) += 1usize;
+                counts
+            });
+        for _ in 0..steps {
+            let mut new_counts = HashMap::new();
+            for (stone, count) in counts {
+                match stone {
+                    0 => *new_counts.entry(1).or_insert(0usize) += count,
+                    n if n.ilog(10) % 2 == 1 => {
+                        let (a, b) = split_digits(n);
+                        *new_counts.entry(a).or_insert(0usize) += count;
+                        *new_counts.entry(b).or_insert(0usize) += count;
+                    }
+                    n => *new_counts.entry(n * 2024).or_insert(0usize) += count,
+                }
+            }
+            counts = new_counts;
+        }
+        counts.into_values().sum()
     }
 }
 
@@ -38,6 +82,21 @@ fn replace_stone(stone: u64) -> Vec<u64> {
         }
         n => vec![n * 2024],
     }
+}
+
+#[inline]
+fn replace_stone_either(stone: u64) -> impl Iterator<Item = u64> {
+    match stone {
+        0 => Either::Left([1]),
+        n if n.ilog(10) % 2 == 1 => split_digits(n).conv::<[_; 2]>().pipe(Either::Right),
+        n => Either::Left([n * 2024]),
+    }
+    .into_iter()
+}
+
+const fn split_digits(stone: u64) -> (u64, u64) {
+    let div = 10u64.pow(stone.ilog10() / 2 + 1);
+    (stone / div, stone % div)
 }
 
 impl std::str::FromStr for Puzzle {

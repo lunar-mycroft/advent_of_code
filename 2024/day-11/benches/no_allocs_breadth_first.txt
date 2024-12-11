@@ -1,0 +1,8 @@
+day_11_bench            fastest       │ slowest       │ median        │ mean          │ samples │ iters
+├─ part1                30.41 ms      │ 38.73 ms      │ 31.24 ms      │ 31.61 ms      │ 100     │ 100
+├─ part1_no_alloc       8.847 ms      │ 11.7 ms       │ 9.486 ms      │ 9.526 ms      │ 100     │ 100
+├─ part1_sum            13.21 ms      │ 13.95 ms      │ 13.34 ms      │ 13.38 ms      │ 100     │ 100
+├─ part2                18.06 ms      │ 23.76 ms      │ 18.94 ms      │ 19.02 ms      │ 100     │ 100
+├─ part2_breadth_first  10.8 ms       │ 11.45 ms      │ 10.91 ms      │ 10.94 ms      │ 100     │ 100
+╰─ part2_str_free       15.05 ms      │ 18.13 ms      │ 15.82 ms      │ 15.96 ms      │ 100     │ 100
+

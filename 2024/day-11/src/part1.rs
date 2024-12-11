@@ -8,8 +8,15 @@ pub fn process(puzzle: Puzzle) -> usize {
 
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
+#[inline]
+pub fn process_no_alloc(puzzle: Puzzle) -> usize {
+    puzzle.simulate_no_alloc(25)
+}
+
+#[must_use]
+#[allow(clippy::needless_pass_by_value)]
 pub fn process_sum(puzzle: Puzzle) -> usize {
-    puzzle.sum(25, stones_after)
+    puzzle.depth_first(25, stones_after)
 }
 
 fn stones_after(stone: u64, steps: u8) -> usize {
@@ -57,8 +64,10 @@ mod tests {
     fn test_actual() -> Result<()> {
         let input: Puzzle = common::read_input!("part1.txt").parse()?;
         let simulate = input.clone().pipe(process);
+        let simulate_no_alloc = input.clone().simulate_no_alloc(25);
         let sum = input.pipe(process_sum);
         assert_eq!(simulate, 218_079);
+        assert_eq!(simulate_no_alloc, 218_079);
         assert_eq!(sum, 218_079);
         Ok(())
     }
