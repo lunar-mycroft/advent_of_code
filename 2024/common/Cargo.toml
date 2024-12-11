@@ -4,6 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+displaydoc.workspace = true
+itertools.workspace = true
+glam.workspace = true
+tap.workspace = true
+thiserror.workspace = true
 
 [lints]
 workspace = true

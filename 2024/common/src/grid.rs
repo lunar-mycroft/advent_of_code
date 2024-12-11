@@ -1,0 +1,194 @@
+use std::{
+    num::TryFromIntError,
+    ops::{Index, IndexMut},
+    str::FromStr,
+};
+
+use glam::IVec2;
+use itertools::Itertools;
+use tap::prelude::*;
+
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub struct Grid<T> {
+    items: Vec<T>,
+    size: IVec2,
+}
+
+impl<T> Grid<T> {
+    #[must_use]
+    pub const fn size(&self) -> IVec2 {
+        self.size
+    }
+    #[must_use]
+    pub fn get(&self, pos: IVec2) -> Option<&T> {
+        self.index(pos).and_then(|idx| self.items.get(idx))
+    }
+
+    #[must_use]
+    pub fn get_mut(&mut self, pos: IVec2) -> Option<&mut T> {
+        self.index(pos).and_then(|idx| self.items.get_mut(idx))
+    }
+
+    pub fn map<U>(self, op: impl FnMut(T) -> U) -> Grid<U> {
+        Grid {
+            size: self.size,
+            items: self.items.into_iter().map(op).collect_vec(),
+        }
+    }
+
+    #[inline]
+    pub fn iter(&self) -> std::slice::Iter<'_, T> {
+        self.items.iter()
+    }
+
+    #[must_use]
+    pub const fn positions(&self) -> Positions {
+        Positions {
+            current: IVec2::ZERO,
+            size: self.size,
+        }
+    }
+
+    #[allow(clippy::cast_sign_loss)]
+    fn index(&self, pos: IVec2) -> Option<usize> {
+        if pos.min_element() < 0 || pos.x >= self.size.x || pos.y >= self.size.y {
+            None
+        } else {
+            Some((pos.y as usize) * (self.size.x as usize) + (pos.x as usize))
+        }
+    }
+}
+
+impl<T> Index<IVec2> for Grid<T> {
+    type Output = T;
+
+    fn index(&self, index: IVec2) -> &Self::Output {
+        self.get(index).expect("Position out of bounds")
+    }
+}
+
+impl<T> IndexMut<IVec2> for Grid<T> {
+    fn index_mut(&mut self, index: IVec2) -> &mut Self::Output {
+        self.get_mut(index).expect("Position out of bounds")
+    }
+}
+
+impl FromStr for Grid<char> {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.trim();
+        let (height, width) = (
+            s.lines().count(),
+            s.lines()
+                .map(str::trim)
+                .map(str::len)
+                .unique()
+                .at_most_one()
+                .map_err(|_| Error::InconsistentLines)?
+                .ok_or(Error::Empty)?,
+        );
+        Self {
+            items: s.chars().filter(|c| !c.is_whitespace()).collect_vec(),
+            size: IVec2 {
+                x: width.try_into()?,
+                y: height.try_into()?,
+            },
+        }
+        .pipe(Ok)
+    }
+}
+
+impl FromStr for Grid<u8> {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.trim();
+        let (height, width) = (
+            s.lines().count(),
+            s.lines()
+                .map(str::trim)
+                .map(str::len)
+                .unique()
+                .at_most_one()
+                .map_err(|_| Error::InconsistentLines)?
+                .ok_or(Error::Empty)?,
+        );
+        if s.is_ascii() {
+            Self {
+                items: s
+                    .as_bytes()
+                    .iter()
+                    .copied()
+                    .filter(|b| !b.is_ascii_whitespace())
+                    .collect_vec(),
+                size: IVec2 {
+                    x: width.try_into()?,
+                    y: height.try_into()?,
+                },
+            }
+            .pipe(Ok)
+        } else {
+            Err(Error::NonAscii)
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Positions {
+    current: IVec2,
+    size: IVec2,
+}
+
+impl Iterator for Positions {
+    type Item = IVec2;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            match (self.current, self.size) {
+                (IVec2 { y, .. }, IVec2 { y: h, .. }) if y >= h => break None,
+                (IVec2 { x, .. }, IVec2 { x: w, y: _ }) if x >= w => {
+                    self.current.y += 1;
+                    self.current.x = 0;
+                }
+                (current, _) => {
+                    self.current.x += 1;
+                    break Some(current);
+                }
+            }
+        }
+    }
+}
+
+impl<'a, T> IntoIterator for &'a Grid<T> {
+    type Item = &'a T;
+    type IntoIter = std::slice::Iter<'a, T>;
+
+    #[inline]
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
+impl<T> IntoIterator for Grid<T> {
+    type Item = T;
+
+    type IntoIter = std::vec::IntoIter<T>;
+
+    #[inline]
+    fn into_iter(self) -> Self::IntoIter {
+        self.items.into_iter()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, displaydoc::Display, thiserror::Error)]
+pub enum Error {
+    /// Not all provided lines were the same length
+    InconsistentLines,
+    /// The provided string had no lines
+    Empty,
+    /// Failed to convert between integer types
+    IntegerConversion(#[from] TryFromIntError),
+    /// Attempted to construct a byte grid from non-ascii text
+    NonAscii,
+}

@@ -124,6 +124,13 @@ dependencies = [
 [[package]]
 name = "common"
 version = "0.1.0"
+dependencies = [
+ "displaydoc",
+ "glam",
+ "itertools",
+ "tap",
+ "thiserror",
+]
 
 [[package]]
 name = "condtype"
