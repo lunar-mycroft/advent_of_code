@@ -10,11 +10,20 @@ use crate::{Puzzle, Region};
 pub fn process(puzzle: Puzzle) -> usize {
     puzzle
         .regions()
-        .map(|region| region.area() * region.sides())
+        .map(|region| {
+            region.area()
+                * region
+                    .0
+                    .iter()
+                    .copied()
+                    .map(|pos| region.corners(pos))
+                    .sum::<usize>()
+        })
         .sum()
 }
 
 impl Region {
+    #[expect(unused)]
     fn sides(&self) -> usize {
         let segs: HashMap<(IVec2, i32), HashSet<i32>> = self
             .0
@@ -49,6 +58,24 @@ impl Region {
                     + 1
             })
             .sum()
+    }
+
+    fn corners(&self, pos: IVec2) -> usize {
+        [IVec2::NEG_Y, IVec2::X, IVec2::Y, IVec2::NEG_X]
+            .into_iter()
+            .cycle()
+            .tuple_windows()
+            .take(4)
+            .map(|(a, b)| (pos + a, pos + b, pos + a + b))
+            .map(|(left, right, mid)| {
+                (
+                    self.0.contains(&left),
+                    self.0.contains(&right),
+                    self.0.contains(&mid),
+                )
+            })
+            .filter(|(l_in, r_in, m_in)| (!l_in && !r_in) || (*l_in && *r_in && !m_in))
+            .count()
     }
 }
 
