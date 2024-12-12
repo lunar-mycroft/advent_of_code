@@ -1,34 +1,12 @@
-use glam::IVec2;
-
-use crate::{Puzzle, Region};
+use crate::Puzzle;
 
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
 pub fn process(puzzle: Puzzle) -> usize {
     puzzle
         .regions()
-        .map(|region| region.area() * region.perimiter())
+        .map(|region| region.area * region.perimiter)
         .sum()
-}
-
-impl Region {
-    fn perimiter(&self) -> usize {
-        self.0
-            .iter()
-            .copied()
-            .map(|pos| {
-                [
-                    pos + IVec2::X,
-                    pos + IVec2::Y,
-                    pos - IVec2::X,
-                    pos - IVec2::Y,
-                ]
-                .into_iter()
-                .filter(|v| !self.0.contains(v))
-                .count()
-            })
-            .sum()
-    }
 }
 
 #[cfg(test)]

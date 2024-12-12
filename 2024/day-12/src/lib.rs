@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 
 use glam::IVec2;
+use itertools::Itertools;
 use tap::prelude::*;
 
 use common::grid::Grid;
@@ -14,35 +15,48 @@ pub struct Puzzle {
 }
 
 #[derive(Debug)]
-pub struct Region(HashSet<IVec2>);
+pub struct Region {
+    perimiter: usize,
+    area: usize,
+    corners: usize,
+}
 
 impl Puzzle {
-    fn region(&self, start: IVec2) -> Option<Region> {
-        let (mut visited, mut fringe) = (HashSet::new(), HashSet::new());
+    fn region(&self, start: IVec2) -> Option<(Region, HashSet<IVec2>)> {
         let plant = self.plots.get(start).copied()?;
-        fringe.insert(start);
-        while !fringe.is_empty() {
-            visited.extend(fringe.iter().copied());
-            fringe = fringe
-                .into_iter()
-                .flat_map(|pos| {
-                    [
-                        pos + IVec2::X,
-                        pos + IVec2::Y,
-                        pos - IVec2::X,
-                        pos - IVec2::Y,
-                    ]
-                })
-                .filter(|pos| !visited.contains(pos))
-                .filter(|pos| self.plots.get(*pos).copied() == Some(plant))
-                .collect();
+        let (mut region, mut plots, mut plot_stack) = (
+            Region {
+                perimiter: 4,
+                area: 1,
+                corners: self.corners(start, plant),
+            },
+            HashSet::new(),
+            Vec::new(),
+        );
+        plot_stack.push(start);
+        plots.insert(start);
+        while let Some(pos) = plot_stack.pop() {
+            for neighbor in [
+                pos + IVec2::X,
+                pos + IVec2::Y,
+                pos - IVec2::X,
+                pos - IVec2::Y,
+            ]
+            .into_iter()
+            .filter(|pos| self.plots.get(*pos).copied() == Some(plant))
+            {
+                region.perimiter -= 1;
+                if plots.contains(&neighbor) {
+                    continue;
+                }
+                region.area += 1;
+                region.perimiter += 4;
+                region.corners += self.corners(neighbor, plant);
+                plot_stack.push(neighbor);
+                plots.insert(neighbor);
+            }
         }
-        visited
-            .union(&fringe)
-            .copied()
-            .collect::<HashSet<_>>()
-            .pipe(Region)
-            .pipe(Some)
+        (region, plots).pipe(Some)
     }
 
     fn regions(&self) -> impl Iterator<Item = Region> + '_ {
@@ -53,16 +67,28 @@ impl Puzzle {
             if seen.contains(&pos) {
                 continue;
             }
-            let region = self.region(pos)?;
-            seen.extend(region.0.iter().copied());
+            let (region, plots) = self.region(pos)?;
+            seen.extend(plots.iter().copied());
             break Some(region);
         })
     }
-}
 
-impl Region {
-    fn area(&self) -> usize {
-        self.0.len()
+    fn corners(&self, pos: IVec2, plant: u8) -> usize {
+        [IVec2::NEG_Y, IVec2::X, IVec2::Y, IVec2::NEG_X]
+            .into_iter()
+            .circular_tuple_windows()
+            .map(|(a, b)| {
+                (
+                    self.plots.get(pos + a).copied(),
+                    self.plots.get(pos + b).copied(),
+                    self.plots.get(pos + a + b).copied(),
+                )
+            })
+            .filter(|(left, right, mid)| {
+                (*left != Some(plant) && *right != Some(plant))
+                    || (*left == Some(plant) && *right == Some(plant) && *mid != Some(plant))
+            })
+            .count()
     }
 }
 
