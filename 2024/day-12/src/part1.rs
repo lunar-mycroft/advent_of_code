@@ -1,34 +1,34 @@
-use std::collections::HashSet;
-
 use glam::IVec2;
 
-use crate::Puzzle;
+use crate::{Puzzle, Region};
 
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
 pub fn process(puzzle: Puzzle) -> usize {
     puzzle
         .regions()
-        .map(|region| crate::area(&region) * perimiter(&region))
+        .map(|region| region.area() * region.perimiter())
         .sum()
 }
 
-fn perimiter(region: &HashSet<IVec2>) -> usize {
-    region
-        .iter()
-        .copied()
-        .map(|pos| {
-            [
-                pos + IVec2::X,
-                pos + IVec2::Y,
-                pos - IVec2::X,
-                pos - IVec2::Y,
-            ]
-            .into_iter()
-            .filter(|v| !region.contains(v))
-            .count()
-        })
-        .sum()
+impl Region {
+    fn perimiter(&self) -> usize {
+        self.0
+            .iter()
+            .copied()
+            .map(|pos| {
+                [
+                    pos + IVec2::X,
+                    pos + IVec2::Y,
+                    pos - IVec2::X,
+                    pos - IVec2::Y,
+                ]
+                .into_iter()
+                .filter(|v| !self.0.contains(v))
+                .count()
+            })
+            .sum()
+    }
 }
 
 #[cfg(test)]

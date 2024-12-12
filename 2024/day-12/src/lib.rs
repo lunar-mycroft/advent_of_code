@@ -13,8 +13,11 @@ pub struct Puzzle {
     plots: Grid<u8>,
 }
 
+#[derive(Debug)]
+pub struct Region(HashSet<IVec2>);
+
 impl Puzzle {
-    fn region(&self, start: IVec2) -> Option<HashSet<IVec2>> {
+    fn region(&self, start: IVec2) -> Option<Region> {
         let (mut visited, mut fringe) = (HashSet::new(), HashSet::new());
         let plant = self.plots.get(start).copied()?;
         fringe.insert(start);
@@ -38,10 +41,11 @@ impl Puzzle {
             .union(&fringe)
             .copied()
             .collect::<HashSet<_>>()
+            .pipe(Region)
             .pipe(Some)
     }
 
-    fn regions(&self) -> impl Iterator<Item = HashSet<IVec2>> + '_ {
+    fn regions(&self) -> impl Iterator<Item = Region> + '_ {
         let mut seen = HashSet::new();
         let mut positions = self.plots.positions();
         std::iter::from_fn(move || loop {
@@ -50,14 +54,16 @@ impl Puzzle {
                 continue;
             }
             let region = self.region(pos)?;
-            seen.extend(region.iter().copied());
+            seen.extend(region.0.iter().copied());
             break Some(region);
         })
     }
 }
 
-fn area(region: &HashSet<IVec2>) -> usize {
-    region.len()
+impl Region {
+    fn area(&self) -> usize {
+        self.0.len()
+    }
 }
 
 impl std::str::FromStr for Puzzle {
