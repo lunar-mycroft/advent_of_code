@@ -2,7 +2,6 @@ use std::collections::HashSet;
 
 use glam::IVec2;
 use itertools::Itertools;
-use tap::prelude::*;
 
 use common::grid::Grid;
 
@@ -22,43 +21,6 @@ pub struct Region {
 }
 
 impl Puzzle {
-    fn region(&self, start: IVec2) -> Option<(Region, HashSet<IVec2>)> {
-        let plant = self.plots.get(start).copied()?;
-        let (mut region, mut plots, mut plot_stack) = (
-            Region {
-                perimiter: 4,
-                area: 1,
-                corners: self.corners(start, plant),
-            },
-            HashSet::new(),
-            Vec::new(),
-        );
-        plot_stack.push(start);
-        plots.insert(start);
-        while let Some(pos) = plot_stack.pop() {
-            for neighbor in [
-                pos + IVec2::X,
-                pos + IVec2::Y,
-                pos - IVec2::X,
-                pos - IVec2::Y,
-            ]
-            .into_iter()
-            .filter(|pos| self.plots.get(*pos).copied() == Some(plant))
-            {
-                region.perimiter -= 1;
-                if plots.contains(&neighbor) {
-                    continue;
-                }
-                region.area += 1;
-                region.perimiter += 4;
-                region.corners += self.corners(neighbor, plant);
-                plot_stack.push(neighbor);
-                plots.insert(neighbor);
-            }
-        }
-        (region, plots).pipe(Some)
-    }
-
     fn regions(&self) -> impl Iterator<Item = Region> + '_ {
         let mut seen = HashSet::new();
         let mut positions = self.plots.positions();
@@ -67,7 +29,42 @@ impl Puzzle {
             if seen.contains(&pos) {
                 continue;
             }
-            let (region, plots) = self.region(pos)?;
+            let (region, plots) = {
+                let plant = self.plots.get(pos).copied()?;
+                let (mut region, mut plots, mut plot_stack) = (
+                    Region {
+                        perimiter: 4,
+                        area: 1,
+                        corners: self.corners(pos, plant),
+                    },
+                    HashSet::new(),
+                    Vec::new(),
+                );
+                plot_stack.push(pos);
+                plots.insert(pos);
+                while let Some(pos) = plot_stack.pop() {
+                    for neighbor in [
+                        pos + IVec2::X,
+                        pos + IVec2::Y,
+                        pos - IVec2::X,
+                        pos - IVec2::Y,
+                    ]
+                    .into_iter()
+                    .filter(|pos| self.plots.get(*pos).copied() == Some(plant))
+                    {
+                        region.perimiter -= 1;
+                        if plots.contains(&neighbor) {
+                            continue;
+                        }
+                        region.area += 1;
+                        region.perimiter += 4;
+                        region.corners += self.corners(neighbor, plant);
+                        plot_stack.push(neighbor);
+                        plots.insert(neighbor);
+                    }
+                }
+                (region, plots)
+            };
             seen.extend(plots.iter().copied());
             break Some(region);
         })
