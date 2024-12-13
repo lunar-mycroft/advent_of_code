@@ -8,6 +8,13 @@ fn main() {
     divan::main();
 }
 
+fn parse(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| common::read_input!("part1.txt").pipe(Ok::<_, color_eyre::Report>))
+        .bench_values(|res| res.expect("file to be loaded").parse::<Puzzle>());
+}
+
+
 #[divan::bench]
 fn part1(bencher: divan::Bencher) {
     bencher

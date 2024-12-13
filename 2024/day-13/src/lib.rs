@@ -6,7 +6,7 @@ use tap::prelude::*;
 pub mod part1;
 pub mod part2;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Puzzle {
     machines: Vec<Machine>,
 }
