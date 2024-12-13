@@ -20,7 +20,7 @@ pub struct Machine {
 
 impl Machine {
     #[allow(clippy::cast_precision_loss)]
-    fn moves_to_win(self) -> Option<I64Vec2> {
+    fn moves_to_win_mat(self) -> Option<I64Vec2> {
         #[allow(clippy::cast_possible_truncation)]
         fn to_i64(f: f64) -> Option<i64> {
             let f = (f * 1000.0).round() / 1000.0;
@@ -49,6 +49,18 @@ impl Machine {
                 y: to_i64(x.y)?,
             }
             .pipe(Some)
+        }
+    }
+
+    #[inline]
+    fn moves_to_win_int(self) -> Option<I64Vec2> {
+        let b = (self.prize.y * self.a.x - self.prize.x * self.a.y)
+            / (self.b.y * self.a.x - self.b.x * self.a.y);
+        let a = (self.prize.x - b * self.b.x) / self.a.x;
+        if (self.a * a + self.b * b) == self.prize {
+            (I64Vec2 { x: a, y: b }).pipe(Some)
+        } else {
+            None
         }
     }
 
