@@ -74,45 +74,35 @@ impl std::str::FromStr for Puzzle {
     type Err = color_eyre::Report;
 
     fn from_str(s: &str) -> color_eyre::Result<Self> {
-        Self {
-            machines: s
-                .replace('\r', "")
-                .split("\n\n")
-                .map(str::parse::<Machine>)
-                .try_collect()?,
-        }
-        .pipe(Ok)
-    }
-}
-
-impl std::str::FromStr for Machine {
-    type Err = color_eyre::Report;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        const fn plus_eq(c: char) -> bool {
-            matches!(c, '+' | '=')
-        }
         fn parse_button(s: &str) -> Result<I64Vec2> {
             let (x, y) = s
-                .split_once(": ")
-                .and_then(|(_, s)| s.trim().split_once(", "))
-                .and_then(|(x, y)| (x.split_once(plus_eq)?, y.split_once(plus_eq)?).pipe(Some))
-                .map(|((_, x), (_, y))| (x, y))
-                .ok_or_eyre("Failed to seperate coord")?;
+                .trim()
+                .split(|c: char| !c.is_ascii_digit())
+                .filter(|s| !s.is_empty())
+                .collect_tuple()
+                .ok_or_eyre("Failed to parse line")?;
             I64Vec2 {
                 x: x.parse()?,
                 y: y.parse()?,
             }
             .pipe(Ok)
         }
-        let (line_a, line_b, line_prize) = s
-            .lines()
-            .collect_tuple()
-            .ok_or_eyre("Incorrect number of lines")?;
+
         Self {
-            a: parse_button(line_a)?,
-            b: parse_button(line_b)?,
-            prize: parse_button(line_prize)?,
+            machines: s
+                .lines()
+                .map(str::trim)
+                .filter(|s| !s.is_empty())
+                .tuples()
+                .map(|(a, b, p)| {
+                    Machine {
+                        a: parse_button(a)?,
+                        b: parse_button(b)?,
+                        prize: parse_button(p)?,
+                    }
+                    .pipe(Ok::<_, color_eyre::Report>)
+                })
+                .try_collect()?,
         }
         .pipe(Ok)
     }
