@@ -1,6 +1,6 @@
 day_13_bench      fastest       │ slowest       │ median        │ mean          │ samples │ iters
-├─ part1_integer  159.8 µs      │ 191.7 µs      │ 162.6 µs      │ 165.3 µs      │ 100     │ 10000
-├─ part1_matrix   169.8 µs      │ 205.5 µs      │ 171.4 µs      │ 172.4 µs      │ 100     │ 10000
-├─ part2_integer  160.3 µs      │ 175.3 µs      │ 161.2 µs      │ 161.8 µs      │ 100     │ 10000
-╰─ part2_matrix   171.9 µs      │ 178.6 µs      │ 173.3 µs      │ 173.8 µs      │ 100     │ 10000
+├─ part1_integer  1.499 µs      │ 9.699 µs      │ 1.649 µs      │ 2.066 µs      │ 10000   │ 20000
+├─ part1_matrix   11.29 µs      │ 46.49 µs      │ 11.59 µs      │ 11.92 µs      │ 10000   │ 10000
+├─ part2_integer  1.649 µs      │ 11.87 µs      │ 1.699 µs      │ 1.757 µs      │ 10000   │ 40000
+╰─ part2_matrix   13.09 µs      │ 26.29 µs      │ 13.59 µs      │ 13.6 µs       │ 10000   │ 10000
 

@@ -9,19 +9,22 @@ fn main() {
 }
 
 #[divan::bench]
-fn part1() -> color_eyre::Result<()> {
-    common::read_input!("part1.txt")
-        .parse::<Puzzle>()?
-        .pipe(divan::black_box)
-        .pipe(part1::process);
-    Ok(())
+fn part1(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| {
+            common::read_input!("part1.txt")
+                .parse::<Puzzle>()
+        })
+        .bench_values(|res| res.expect("parsing to suceed").pipe(divan::black_box).pipe(part1::process));
 }
 
 #[divan::bench]
-fn part2() -> color_eyre::Result<()> {
-    common::read_input!("part2.txt")
-        .parse::<Puzzle>()?
-        .pipe(divan::black_box)
-        .pipe(part2::process);
-    Ok(())
+fn part1_integer(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| {
+            common::read_input!("part2.txt")
+                .parse::<Puzzle>()
+                .map(divan::black_box)
+        })
+        .bench_values(|res| res.expect("parsing to suceed").pipe(divan::black_box).pipe(part2::process));
 }
