@@ -27,22 +27,27 @@ pub fn process_int(puzzle: Puzzle) -> i64 {
 #[cfg(test)]
 mod tests {
     use color_eyre::eyre::Result;
+    use tap::prelude::*;
 
     use super::*;
 
     #[test]
     fn test_example() -> Result<()> {
         let input: Puzzle = common::read_input!("example.txt").parse()?;
-        let output = process_mat(input);
-        assert_eq!(output, 480);
+        let output_mat = input.clone().pipe(process_mat);
+        let output_int = process_int(input);
+        assert_eq!(output_mat, 480);
+        assert_eq!(output_int, 480);
         Ok(())
     }
 
     #[test]
     fn test_actual() -> Result<()> {
         let input: Puzzle = common::read_input!("part1.txt").parse()?;
-        let output = process_mat(input);
-        assert_eq!(output, 29_187);
+        let output_mat = input.clone().pipe(process_mat);
+        let output_int = process_int(input);
+        assert_eq!(output_mat, 29_187);
+        assert_eq!(output_int, 29_187);
         Ok(())
     }
 }
