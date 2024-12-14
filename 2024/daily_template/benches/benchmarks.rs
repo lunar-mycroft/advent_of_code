@@ -27,7 +27,7 @@ fn part1(bencher: divan::Bencher) {
 }
 
 #[divan::bench]
-fn part1_integer(bencher: divan::Bencher) {
+fn part2(bencher: divan::Bencher) {
     bencher
         .with_inputs(|| {
             common::read_input!("part2.txt")
