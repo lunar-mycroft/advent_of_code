@@ -15,6 +15,20 @@ pub struct Grid<T> {
 }
 
 impl<T> Grid<T> {
+    pub fn from_value(value: T, size: IVec2) -> Self
+    where
+        T: Clone,
+    {
+        assert!(size.min_element() >= 0, "Height and width must be positive");
+        Self {
+            #[allow(clippy::cast_sign_loss)]
+            items: std::iter::repeat(value)
+                .take((size.x as usize) * (size.y as usize))
+                .collect_vec(),
+            size,
+        }
+    }
+
     #[must_use]
     pub const fn size(&self) -> IVec2 {
         self.size
