@@ -106,7 +106,7 @@ mod tests {
         let size = IVec2 { x: 101, y: 103 };
         let out_hash = process(input.clone(), size);
         let out_grid = process_grid_unique(input.clone(), size);
-        let out_var = process_var(input.clone(), size);
+        let out_var = process_var(input, size);
         assert_eq!(out_hash, 6668);
         assert_eq!(out_grid, 6668);
         assert_eq!(out_var, 6668);
