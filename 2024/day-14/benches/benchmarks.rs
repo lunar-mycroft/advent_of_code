@@ -27,7 +27,7 @@ fn part1(bencher: divan::Bencher) {
 }
 
 #[divan::bench]
-fn part2(bencher: divan::Bencher) {
+fn part2_hashmap(bencher: divan::Bencher) {
     bencher
         .with_inputs(|| {
             common::read_input!("part2.txt")
@@ -37,5 +37,19 @@ fn part2(bencher: divan::Bencher) {
         .bench_values(|res| {
             let puzzle = res.expect("parsing to suceed").pipe(divan::black_box);
             part2::process(puzzle, IVec2::new(101, 103))
+        });
+}
+
+#[divan::bench]
+fn part2_grid_unique(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| {
+            common::read_input!("part2.txt")
+                .parse::<Puzzle>()
+                .map(divan::black_box)
+        })
+        .bench_values(|res| {
+            let puzzle = res.expect("parsing to suceed").pipe(divan::black_box);
+            part2::process_grid_unique(puzzle, IVec2::new(101, 103))
         });
 }
