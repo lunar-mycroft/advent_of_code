@@ -3,14 +3,38 @@ use std::cmp::Ordering;
 use color_eyre::eyre::OptionExt;
 use glam::IVec2;
 use itertools::Itertools;
-use tap::Pipe;
+use tap::{Pipe, TryConv};
 
 pub mod part1;
 pub mod part2;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Puzzle {
     robots: Vec<Robot>,
+}
+
+impl Puzzle {
+    /// give the _approximate_ mean of the robots positions
+    fn mean(&self) -> IVec2 {
+        self.robots.iter().map(|r| r.position).sum::<IVec2>()
+            / self
+                .robots
+                .len()
+                .try_conv::<i32>()
+                .expect("number of robots to be less than i32::MAX")
+    }
+
+    /// gives the __approximate_ mean of the robots positions
+    fn variance(&self) -> IVec2 {
+        let mean = self.mean();
+        self.robots
+            .iter()
+            .map(|r| IVec2 {
+                x: (r.position.x - mean.x).pow(2),
+                y: (r.position.y - mean.y).pow(2),
+            })
+            .sum()
+    }
 }
 
 #[derive(Debug, Clone, Copy)]

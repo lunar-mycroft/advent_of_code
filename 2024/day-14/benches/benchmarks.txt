@@ -1,6 +1,7 @@
 day_14_bench          fastest       │ slowest       │ median        │ mean          │ samples │ iters
-├─ parse              34.69 µs      │ 56.99 µs      │ 38.49 µs      │ 39.68 µs      │ 100     │ 100
-├─ part1              166.3 µs      │ 267.9 µs      │ 168.5 µs      │ 174.8 µs      │ 100     │ 100
-├─ part2_grid_unique  21.23 ms      │ 25.35 ms      │ 21.48 ms      │ 21.67 ms      │ 100     │ 100
-╰─ part2_hashmap      79.41 ms      │ 86.13 ms      │ 80.13 ms      │ 80.43 ms      │ 100     │ 100
+├─ parse              36.49 µs      │ 69.49 µs      │ 39.34 µs      │ 40.77 µs      │ 100     │ 100
+├─ part1              179.3 µs      │ 208.5 µs      │ 181.4 µs      │ 182.8 µs      │ 100     │ 100
+├─ part2_grid_unique  23.49 ms      │ 26.2 ms       │ 23.85 ms      │ 23.97 ms      │ 100     │ 100
+├─ part2_hashmap      81.56 ms      │ 85.67 ms      │ 82.44 ms      │ 82.68 ms      │ 100     │ 100
+╰─ part2_variance     389 µs        │ 516.3 µs      │ 392.2 µs      │ 395.5 µs      │ 100     │ 100
 

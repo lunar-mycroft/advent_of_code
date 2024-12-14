@@ -53,3 +53,17 @@ fn part2_grid_unique(bencher: divan::Bencher) {
             part2::process_grid_unique(puzzle, IVec2::new(101, 103))
         });
 }
+
+#[divan::bench]
+fn part2_variance(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| {
+            common::read_input!("part2.txt")
+                .parse::<Puzzle>()
+                .map(divan::black_box)
+        })
+        .bench_values(|res| {
+            let puzzle = res.expect("parsing to suceed").pipe(divan::black_box);
+            part2::process_var(puzzle, IVec2::new(101, 103))
+        });
+}
