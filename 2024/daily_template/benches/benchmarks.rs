@@ -8,6 +8,7 @@ fn main() {
     divan::main();
 }
 
+#[divan::bench]
 fn parse(bencher: divan::Bencher) {
     bencher
         .with_inputs(|| common::read_input!("part1.txt").pipe(Ok::<_, color_eyre::Report>))
