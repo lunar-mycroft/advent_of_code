@@ -5,6 +5,7 @@ use std::{
 };
 
 use glam::IVec2;
+use image::ImageBuffer;
 use itertools::Itertools;
 use tap::prelude::*;
 
@@ -27,6 +28,34 @@ impl<T> Grid<T> {
                 .collect_vec(),
             size,
         }
+    }
+
+    pub fn from_row_major_ordered(values: impl IntoIterator<Item = T>, size: IVec2) -> Self {
+        let items = values.into_iter().collect_vec();
+        assert_eq!(
+            items.len(),
+            (size.x * size.y).try_conv::<usize>().expect("")
+        );
+        Self { items, size }
+    }
+
+    #[must_use]
+    pub fn pixels<P>(&self, make_pixel: impl Fn(&T) -> P) -> ImageBuffer<P, Vec<P::Subpixel>>
+    where
+        P: image::Pixel,
+    {
+        ImageBuffer::from_fn(
+            self.size.x.try_into().expect(""),
+            self.size.y.try_into().expect(""),
+            |x, y| {
+                self.get(IVec2 {
+                    x: x.try_into().expect(""),
+                    y: y.try_into().expect(""),
+                })
+                .expect("Not to query outside of image")
+                .pipe_ref(&make_pixel)
+            },
+        )
     }
 
     #[must_use]
