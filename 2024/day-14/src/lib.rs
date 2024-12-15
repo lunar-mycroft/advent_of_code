@@ -2,6 +2,8 @@ use std::cmp::Ordering;
 
 use color_eyre::eyre::OptionExt;
 use glam::IVec2;
+use image::{ImageBuffer, Rgb};
+// use image::{ImageBuffer, Rgb};
 use itertools::Itertools;
 use tap::{Pipe, TryConv};
 
@@ -10,7 +12,7 @@ pub mod part2;
 
 #[derive(Debug, Clone)]
 pub struct Puzzle {
-    robots: Vec<Robot>,
+    pub robots: Vec<Robot>,
 }
 
 impl Puzzle {
@@ -35,16 +37,32 @@ impl Puzzle {
             })
             .sum()
     }
+
+    #[must_use]
+    pub fn render(mut self, size: IVec2, t: u16) -> ImageBuffer<Rgb<u8>, Vec<u8>> {
+        for _ in 0..t {
+            self.robots.iter_mut().for_each(|r| r.tick(size));
+        }
+        let mut grid = common::grid::Grid::from_value(0u8, size);
+        for pos in self.robots.iter().map(|r| r.position) {
+            *grid.get_mut(pos).expect("all robots to be in grid") += 1;
+        }
+        grid.pixels(|b| match *b {
+            0 => [0u8, 0, 0].pipe(Rgb),
+            1 => [255, 255, 255].pipe(Rgb),
+            _ => [255, 0, 0].pipe(Rgb),
+        })
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct Robot {
-    position: IVec2,
-    velocity: IVec2,
+    pub position: IVec2,
+    pub velocity: IVec2,
 }
 
 impl Robot {
-    fn tick(&mut self, size: IVec2) {
+    pub fn tick(&mut self, size: IVec2) {
         self.position += self.velocity;
         if self.position.x < 0 {
             self.position.x += size.x;

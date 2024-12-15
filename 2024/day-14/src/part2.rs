@@ -25,7 +25,10 @@ pub fn process_grid_unique(mut puzzle: Puzzle, size: IVec2) -> usize {
     // horrible hack based on reddit comment,
     // wtf does "in the shape of a christmas tree **MEAN**"
     // if they'd _defined_ it I could have checked
-    for i in 0usize.. {
+    for i in 0..(size.x * size.y)
+        .try_conv::<usize>()
+        .expect("area to be positive")
+    {
         puzzle.robots.iter_mut().for_each(|r| r.tick(size));
         if grid_unique(&puzzle, size) {
             return i + 1;
@@ -83,7 +86,8 @@ fn all_unique(puzzle: &Puzzle) -> bool {
     puzzle.robots.iter().map(|r| r.position).all_unique()
 }
 
-fn grid_unique(puzzle: &Puzzle, size: IVec2) -> bool {
+#[must_use]
+pub fn grid_unique(puzzle: &Puzzle, size: IVec2) -> bool {
     let mut grid = Grid::from_value(0u8, size);
     for pos in puzzle.robots.iter().map(|r| r.position) {
         if *grid.get(pos).expect("all robots to be in grid") != 0 {
