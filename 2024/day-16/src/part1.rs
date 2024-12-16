@@ -8,13 +8,14 @@ use tap::prelude::*;
 use crate::Puzzle;
 
 const DIRECTIONS: [IVec2; 4] = [IVec2::X, IVec2::Y, IVec2::NEG_X, IVec2::NEG_Y];
+const D_0: IVec2 = IVec2::X;
 
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
 pub fn process(puzzle: Puzzle) -> i64 {
     let mut costs: HashMap<(IVec2, IVec2), i64> = HashMap::new();
-    costs.insert((puzzle.start, IVec2::NEG_Y), 0);
-    let mut stack = vec![(puzzle.start, IVec2::X, 0)];
+    costs.insert((puzzle.start, D_0), 0);
+    let mut stack = vec![(puzzle.start, D_0, 0)];
 
     while let Some((pos, dir, cost)) = stack.pop() {
         for (new_p, new_d, new_c) in [
@@ -70,11 +71,11 @@ mod tests {
         Ok(())
     }
 
-    // #[test]
+    #[test]
     fn test_actual() -> Result<()> {
         let input: Puzzle = common::read_input!("part1.txt").parse()?;
         let output = process(input);
-        assert_eq!(output, 0);
+        assert_eq!(output, 65436);
         Ok(())
     }
 }
