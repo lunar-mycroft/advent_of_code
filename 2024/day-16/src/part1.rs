@@ -1,9 +1,6 @@
 use std::collections::{hash_map, HashMap};
 
-use color_eyre::eyre::Result;
-use common::grid::Grid;
 use glam::IVec2;
-use tap::prelude::*;
 
 use crate::Puzzle;
 
@@ -61,6 +58,8 @@ fn left(dir: IVec2) -> IVec2 {
 
 #[cfg(test)]
 mod tests {
+    use color_eyre::eyre::Result;
+
     use super::*;
 
     #[test]
@@ -71,7 +70,7 @@ mod tests {
         Ok(())
     }
 
-    // #[test]
+    #[test]
     fn test_actual() -> Result<()> {
         let input: Puzzle = common::read_input!("part1.txt").parse()?;
         let output = process(input);

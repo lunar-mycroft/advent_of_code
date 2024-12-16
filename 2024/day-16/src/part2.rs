@@ -1,14 +1,12 @@
 use std::collections::{hash_map, HashMap, HashSet};
 
 use glam::IVec2;
-use itertools::Itertools;
-use tap::prelude::*;
 
 use crate::Puzzle;
 
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
-pub fn process(mut puzzle: Puzzle) -> usize {
+pub fn process(puzzle: Puzzle) -> usize {
     let mut costs: HashMap<(IVec2, IVec2), u32> = HashMap::new();
     costs.insert((puzzle.start, D_0), 0);
     let mut stack = vec![(puzzle.start, D_0, 0)];
@@ -54,17 +52,17 @@ pub fn process(mut puzzle: Puzzle) -> usize {
         let t1 = (pos, left(dir));
         let t2 = (pos, -left(dir));
         match costs.get(&back).copied() {
-            Some(cost) if cost == current_cost - 1 => {
+            Some(cost) if (cost + 1) == current_cost => {
                 stack.push(back);
             }
             _ => (),
         }
         match costs.get(&t1).copied() {
-            Some(cost) if cost == current_cost - 1000 => stack.push(t1),
+            Some(cost) if (cost + 1000) == current_cost => stack.push(t1),
             _ => (),
         }
         match costs.get(&t2).copied() {
-            Some(cost) if cost == current_cost - 1000 => stack.push(t2),
+            Some(cost) if (cost + 1000) == current_cost => stack.push(t2),
             _ => (),
         }
     }
@@ -97,11 +95,11 @@ mod tests {
         Ok(())
     }
 
-    // #[test]
+    #[test]
     fn test_actual() -> Result<()> {
         let input: Puzzle = common::read_input!("part2.txt").parse()?;
         let output = process(input);
-        assert_eq!(output, 1);
+        assert_eq!(output, 489);
         Ok(())
     }
 }

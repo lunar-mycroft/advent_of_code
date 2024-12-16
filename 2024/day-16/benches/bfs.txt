@@ -1,0 +1,5 @@
+day_16_bench  fastest       │ slowest       │ median        │ mean          │ samples │ iters
+├─ parse      92.09 µs      │ 245.8 µs      │ 94.14 µs      │ 98.17 µs      │ 100     │ 100
+├─ part1      2.128 s       │ 2.512 s       │ 2.26 s        │ 2.269 s       │ 100     │ 100
+╰─ part2      2.08 s        │ 2.552 s       │ 2.214 s       │ 2.219 s       │ 100     │ 100
+
