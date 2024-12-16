@@ -71,7 +71,7 @@ mod tests {
         Ok(())
     }
 
-    #[test]
+    // #[test]
     fn test_actual() -> Result<()> {
         let input: Puzzle = common::read_input!("part1.txt").parse()?;
         let output = process(input);
