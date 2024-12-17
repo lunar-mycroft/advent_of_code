@@ -16,18 +16,40 @@ fn parse(bencher: divan::Bencher) {
 }
 
 #[divan::bench]
-fn part1(bencher: divan::Bencher) {
+fn part1_bfs(bencher: divan::Bencher) {
     bencher
         .with_inputs(|| common::read_input!("part1.txt").parse::<Puzzle>())
         .bench_values(|res| {
             res.expect("parsing to suceed")
                 .pipe(divan::black_box)
-                .pipe(part1::process)
+                .pipe(part1::bfs)
         });
 }
 
 #[divan::bench]
-fn part2(bencher: divan::Bencher) {
+fn part1_dijkstras(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| common::read_input!("part1.txt").parse::<Puzzle>())
+        .bench_values(|res| {
+            res.expect("parsing to suceed")
+                .pipe(divan::black_box)
+                .pipe(part1::dijkstras)
+        });
+}
+
+#[divan::bench]
+fn part1_astar(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| common::read_input!("part1.txt").parse::<Puzzle>())
+        .bench_values(|res| {
+            res.expect("parsing to suceed")
+                .pipe(divan::black_box)
+                .pipe(part1::astar)
+        });
+}
+
+#[divan::bench]
+fn part2_bfs(bencher: divan::Bencher) {
     bencher
         .with_inputs(|| {
             common::read_input!("part2.txt")
@@ -37,6 +59,28 @@ fn part2(bencher: divan::Bencher) {
         .bench_values(|res| {
             res.expect("parsing to suceed")
                 .pipe(divan::black_box)
-                .pipe(part2::process)
+                .pipe(part2::bfs)
+        });
+}
+
+#[divan::bench]
+fn part2_dijkstras(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| common::read_input!("part2.txt").parse::<Puzzle>())
+        .bench_values(|res| {
+            res.expect("parsing to suceed")
+                .pipe(divan::black_box)
+                .pipe(part2::dijkstras)
+        });
+}
+
+#[divan::bench]
+fn part2_astar(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| common::read_input!("part2.txt").parse::<Puzzle>())
+        .bench_values(|res| {
+            res.expect("parsing to suceed")
+                .pipe(divan::black_box)
+                .pipe(part2::astar)
         });
 }

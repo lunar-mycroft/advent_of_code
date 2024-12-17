@@ -1,12 +1,14 @@
+use std::collections::BinaryHeap;
+
 use color_eyre::eyre::OptionExt;
 use common::grid::Grid;
 use glam::IVec2;
-use tap::Pipe;
+use tap::{Pipe, TryConv};
 
 pub mod part1;
 pub mod part2;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Puzzle {
     map: Grid<u8>,
     start: IVec2,
@@ -34,6 +36,125 @@ impl Puzzle {
             }
         }
         costs
+    }
+
+    fn dijkstras(&self) -> Costs {
+        let mut costs = Costs::new(self.map.size());
+        assert!(costs.replace_if_lt(self.start, D_0, 0));
+        let mut stack = BinaryHeap::<Entry>::new();
+        stack.push(Entry {
+            position: self.start,
+            direction: D_0,
+            cost: 0,
+            estimated_cost: 0,
+        });
+        while let Some(Entry {
+            position: pos,
+            direction: dir,
+            cost,
+            ..
+        }) = stack.pop()
+        {
+            for (new_p, new_d, new_c) in [
+                (pos + dir, dir, cost + 1),
+                (pos, dir.perp(), cost + 1000),
+                (pos, -dir.perp(), cost + 1000),
+            ]
+            .into_iter()
+            .filter(|(p, _, _)| self.map[*p] != b'#')
+            {
+                if costs.replace_if_lt(new_p, new_d, new_c) {
+                    stack.push(Entry {
+                        position: new_p,
+                        direction: new_d,
+                        cost: new_c,
+                        estimated_cost: new_c,
+                    });
+                }
+            }
+        }
+        costs
+    }
+
+    fn astar(&self) -> Costs {
+        let mut costs = Costs::new(self.map.size());
+        assert!(costs.replace_if_lt(self.start, D_0, 0));
+        let mut stack = BinaryHeap::<Entry>::new();
+        stack.push(Entry {
+            position: self.start,
+            direction: D_0,
+            cost: 0,
+            estimated_cost: 0,
+        });
+        while let Some(Entry {
+            position: pos,
+            direction: dir,
+            cost,
+            ..
+        }) = stack.pop()
+        {
+            for (new_p, new_d, new_c) in [
+                (pos + dir, dir, cost + 1),
+                (pos, dir.perp(), cost + 1000),
+                (pos, -dir.perp(), cost + 1000),
+            ]
+            .into_iter()
+            .filter(|(p, _, _)| self.map[*p] != b'#')
+            {
+                let heuristic = {
+                    let delta = self.end - new_p;
+                    delta.x.abs() + delta.y.abs()
+                }
+                .try_conv::<u32>()
+                .expect("the conversion to succeed");
+
+                if costs.replace_if_lt(new_p, new_d, new_c) {
+                    stack.push(Entry {
+                        position: new_p,
+                        direction: new_d,
+                        cost: new_c,
+                        estimated_cost: new_c + heuristic,
+                    });
+                }
+            }
+        }
+        costs
+    }
+}
+
+pub struct Entry {
+    position: IVec2,
+    direction: IVec2,
+    cost: u32,
+    estimated_cost: u32,
+}
+
+impl std::cmp::PartialEq for Entry {
+    fn eq(&self, other: &Self) -> bool {
+        self.estimated_cost.eq(&other.estimated_cost) && self.cost.eq(&other.cost)
+    }
+}
+
+impl std::cmp::Eq for Entry {}
+
+impl std::cmp::Ord for Entry {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        use std::cmp::Ordering;
+        let o = match self.estimated_cost.cmp(&other.estimated_cost) {
+            Ordering::Equal => return self.cost.cmp(&other.cost),
+            o => o,
+        };
+        match o {
+            Ordering::Less => Ordering::Greater,
+            Ordering::Equal => Ordering::Equal,
+            Ordering::Greater => Ordering::Less,
+        }
+    }
+}
+
+impl std::cmp::PartialOrd for Entry {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
     }
 }
 

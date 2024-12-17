@@ -1,0 +1,9 @@
+day_16_bench        fastest       │ slowest       │ median        │ mean          │ samples │ iters
+├─ parse            76.39 µs      │ 113.5 µs      │ 83.74 µs      │ 84.08 µs      │ 100     │ 100
+├─ part1_astar      4.704 ms      │ 5.473 ms      │ 4.862 ms      │ 4.917 ms      │ 100     │ 100
+├─ part1_bfs        252.8 ms      │ 310.6 ms      │ 262.5 ms      │ 265 ms        │ 100     │ 100
+├─ part1_dijkstras  4.476 ms      │ 4.961 ms      │ 4.552 ms      │ 4.581 ms      │ 100     │ 100
+├─ part2_astar      5.294 ms      │ 6.288 ms      │ 5.409 ms      │ 5.456 ms      │ 100     │ 100
+├─ part2_bfs        253.2 ms      │ 340.8 ms      │ 267.4 ms      │ 271.4 ms      │ 100     │ 100
+╰─ part2_dijkstras  5.151 ms      │ 7.401 ms      │ 5.52 ms       │ 5.732 ms      │ 100     │ 100
+

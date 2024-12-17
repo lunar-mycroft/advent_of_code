@@ -2,11 +2,7 @@ use std::collections::HashSet;
 
 use crate::Puzzle;
 
-#[must_use]
-#[allow(clippy::needless_pass_by_value)]
-pub fn process(puzzle: Puzzle) -> usize {
-    let costs = puzzle.bfs();
-
+fn count_visited(costs: &crate::Costs, puzzle: &Puzzle) -> usize {
     let end_dir = crate::DIRECTIONS
         .iter()
         .copied()
@@ -42,24 +38,57 @@ pub fn process(puzzle: Puzzle) -> usize {
     seen.len()
 }
 
+#[must_use]
+#[allow(clippy::needless_pass_by_value)]
+pub fn bfs(puzzle: Puzzle) -> usize {
+    let costs = puzzle.bfs();
+    count_visited(&costs, &puzzle)
+}
+
+#[must_use]
+#[allow(clippy::needless_pass_by_value)]
+pub fn dijkstras(puzzle: Puzzle) -> usize {
+    let costs = puzzle.dijkstras();
+
+    count_visited(&costs, &puzzle)
+}
+
+#[must_use]
+#[allow(clippy::needless_pass_by_value)]
+pub fn astar(puzzle: Puzzle) -> usize {
+    let costs = puzzle.astar();
+
+    count_visited(&costs, &puzzle)
+}
+
 #[cfg(test)]
 mod tests {
-    use super::*;
     use color_eyre::eyre::Result;
+    use tap::prelude::*;
+
+    use super::*;
 
     #[test]
     fn test_example() -> Result<()> {
         let input: Puzzle = common::read_input!("example.txt").parse()?;
-        let output = process(input);
-        assert_eq!(output, 45);
+        let b = input.clone().pipe(bfs);
+        let d = input.clone().pipe(dijkstras);
+        let a = input.pipe(astar);
+        assert_eq!(b, 45);
+        assert_eq!(d, 45);
+        assert_eq!(a, 45);
         Ok(())
     }
 
     #[test]
     fn test_actual() -> Result<()> {
         let input: Puzzle = common::read_input!("part2.txt").parse()?;
-        let output = process(input);
-        assert_eq!(output, 489);
+        let b = input.clone().pipe(bfs);
+        let d = input.clone().pipe(dijkstras);
+        let a = input.pipe(astar);
+        assert_eq!(b, 489);
+        assert_eq!(d, 489);
+        assert_eq!(a, 489);
         Ok(())
     }
 }
