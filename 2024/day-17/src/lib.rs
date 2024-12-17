@@ -10,54 +10,59 @@ pub struct Puzzle {
     a: u64,
     b: u64,
     c: u64,
-    program_counter: usize,
     program: Vec<u8>,
 }
 
-impl Iterator for Puzzle {
+#[derive(Debug)]
+pub struct Cpu<'p> {
+    a: u64,
+    b: u64,
+    c: u64,
+    ip: usize,
+    program: &'p [u8],
+}
+
+impl Iterator for Cpu<'_> {
     type Item = u8;
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            assert_eq!(self.program_counter % 2, 0);
-            match self
-                .program
-                .get(self.program_counter..=self.program_counter + 1)
-            {
+            assert_eq!(self.ip % 2, 0);
+            match self.program.get(self.ip..=self.ip + 1) {
                 Some([0, x]) => {
                     self.a /= 1 << self.combo(*x);
-                    self.program_counter += 2;
+                    self.ip += 2;
                 }
                 Some([1, x]) => {
                     self.b ^= u64::from(*x);
-                    self.program_counter += 2;
+                    self.ip += 2;
                 }
                 Some([2, x]) => {
                     self.b = self.combo(*x) % 8;
-                    self.program_counter += 2;
+                    self.ip += 2;
                 }
                 Some([3, x]) => {
                     if self.a != 0 {
-                        self.program_counter = usize::from(*x);
+                        self.ip = usize::from(*x);
                     } else {
-                        self.program_counter += 2;
+                        self.ip += 2;
                     }
                 }
                 Some([4, _]) => {
                     self.b ^= self.c;
-                    self.program_counter += 2;
+                    self.ip += 2;
                 }
                 Some([5, x]) => {
-                    self.program_counter += 2;
+                    self.ip += 2;
                     break Some((self.combo(*x) % 8) as u8);
                 }
                 Some([6, x]) => {
                     self.b = self.a / (1 << self.combo(*x));
-                    self.program_counter += 2;
+                    self.ip += 2;
                 }
                 Some([7, x]) => {
                     self.c = self.a / (1 << self.combo(*x));
-                    self.program_counter += 2;
+                    self.ip += 2;
                 }
                 None | Some([_]) => break None,
                 _ => unreachable!(),
@@ -66,16 +71,40 @@ impl Iterator for Puzzle {
     }
 }
 
-impl Puzzle {
+impl Cpu<'_> {
     #[cfg(test)]
     fn run(&mut self) -> Vec<u8> {
-        let mut out = Vec::new();
-        for n in self.by_ref() {
-            out.push(n);
+        let mut out = vec![];
+        for d in self.by_ref() {
+            out.push(d);
         }
         out
     }
+}
 
+impl Puzzle {
+    fn iter(&self) -> Cpu<'_> {
+        self.into_iter()
+    }
+}
+
+impl<'p> IntoIterator for &'p Puzzle {
+    type Item = u8;
+
+    type IntoIter = Cpu<'p>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Cpu {
+            a: self.a,
+            b: self.b,
+            c: self.c,
+            ip: 0,
+            program: &self.program,
+        }
+    }
+}
+
+impl Cpu<'_> {
     fn combo(&self, x: u8) -> u64 {
         match x {
             x @ 0..=3 => x.into(),
@@ -110,7 +139,6 @@ impl std::str::FromStr for Puzzle {
             a: reg_a.parse()?,
             b: reg_b.parse()?,
             c: reg_c.parse()?,
-            program_counter: 0,
             program: instructions.split(',').map(str::parse).try_collect()?,
         }
         .pipe(Ok)

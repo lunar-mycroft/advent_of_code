@@ -10,7 +10,7 @@ pub fn process(puzzle: Puzzle) -> u64 {
     let mut factors = vec![0u64; puzzle.program.len()];
     *factors.last_mut().expect("Non empty") = 1;
     loop {
-        let mut cpu = puzzle.clone();
+        let mut cpu = puzzle.iter();
         let a = factors
             .iter()
             .copied()
@@ -44,13 +44,12 @@ mod tests {
             a: 117_440,
             b: 0,
             c: 0,
-            program_counter: 0,
             program: vec![0, 3, 5, 4, 3, 0],
         };
         assert!(!input
-            .clone()
-            .zip(input.program)
-            .any(|(actual, expected)| actual != expected));
+            .into_iter()
+            .zip(&input.program)
+            .any(|(actual, expected)| actual != *expected));
     }
 
     #[test]

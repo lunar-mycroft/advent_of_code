@@ -5,7 +5,11 @@ use crate::Puzzle;
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
 pub fn process(puzzle: Puzzle) -> String {
-    puzzle.take(1_000_000).map(|n| n.to_string()).join(",")
+    puzzle
+        .iter()
+        .take(1_000_000)
+        .map(|n| n.to_string())
+        .join(",")
 }
 
 #[cfg(test)]
@@ -16,54 +20,62 @@ mod tests {
 
     #[test]
     fn test_small() {
-        let mut p = Puzzle {
-            a: 0,
-            b: 0,
-            c: 9,
-            program_counter: 0,
-            program: vec![2, 6],
-        };
-        assert_eq!(p.run(), vec![]);
-        assert_eq!(p.b, 1);
+        {
+            let p = Puzzle {
+                a: 0,
+                b: 0,
+                c: 9,
+                program: vec![2, 6],
+            };
+            let mut cpu = p.iter();
 
-        let mut p = Puzzle {
-            a: 10,
-            b: 0,
-            c: 0,
-            program_counter: 0,
-            program: vec![5, 0, 5, 1, 5, 4],
-        };
-        assert_eq!(p.run(), vec![0, 1, 2]);
+            assert_eq!(cpu.run(), vec![]);
+            assert_eq!(cpu.b, 1);
+        }
+        {
+            let p = Puzzle {
+                a: 10,
+                b: 0,
+                c: 0,
+                program: vec![5, 0, 5, 1, 5, 4],
+            };
+            let mut cpu = p.iter();
 
-        let mut p = Puzzle {
-            a: 2024,
-            b: 0,
-            c: 0,
-            program_counter: 0,
-            program: vec![0, 1, 5, 4, 3, 0],
-        };
-        assert_eq!(p.run(), vec![4, 2, 5, 6, 7, 7, 7, 7, 3, 1, 0]);
-        assert_eq!(p.a, 0);
-
-        let mut p = Puzzle {
-            a: 0,
-            b: 29,
-            c: 0,
-            program_counter: 0,
-            program: vec![1, 7],
-        };
-        assert_eq!(p.run(), vec![]);
-        assert_eq!(p.b, 26);
-
-        let mut p = Puzzle {
-            a: 0,
-            b: 2024,
-            c: 43690,
-            program_counter: 0,
-            program: vec![4, 0],
-        };
-        assert_eq!(p.run(), vec![]);
-        assert_eq!(p.b, 44354);
+            assert_eq!(cpu.run(), vec![0, 1, 2]);
+        }
+        {
+            let p = Puzzle {
+                a: 2024,
+                b: 0,
+                c: 0,
+                program: vec![0, 1, 5, 4, 3, 0],
+            };
+            let mut cpu = p.iter();
+            assert_eq!(cpu.run(), vec![4, 2, 5, 6, 7, 7, 7, 7, 3, 1, 0]);
+            assert_eq!(cpu.a, 0);
+        }
+        {
+            let p = Puzzle {
+                a: 0,
+                b: 29,
+                c: 0,
+                program: vec![1, 7],
+            };
+            let mut cpu = p.iter();
+            assert_eq!(cpu.run(), vec![]);
+            assert_eq!(cpu.b, 26);
+        }
+        {
+            let p = Puzzle {
+                a: 0,
+                b: 2024,
+                c: 43690,
+                program: vec![4, 0],
+            };
+            let mut cpu = p.iter();
+            assert_eq!(cpu.run(), vec![]);
+            assert_eq!(cpu.b, 44354);
+        }
     }
 
     #[test]
