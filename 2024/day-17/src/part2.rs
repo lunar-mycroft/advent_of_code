@@ -5,18 +5,20 @@ use crate::Puzzle;
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
 pub fn process(puzzle: Puzzle) -> u64 {
+    // can only claim partial credit for this.  I noticed that the was a function of
+    // the least significant bits of a, but didn't realize that the bits involved could overlap
     let mut factors = vec![0u64; puzzle.program.len()];
     *factors.last_mut().expect("Non empty") = 1;
     loop {
-        let mut p = puzzle.clone();
+        let mut cpu = puzzle.clone();
         let a = factors
             .iter()
             .copied()
             .enumerate()
-            .map(|(i, f)| f << ((i * 3) as u64))
+            .map(|(p, f)| f << ((p * 3) as u64))
             .sum::<u64>();
-        p.a = a;
-        let output = p.collect_vec();
+        cpu.a = a;
+        let output = cpu.collect_vec();
         if output == puzzle.program {
             break a;
         }
