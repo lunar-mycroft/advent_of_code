@@ -1,4 +1,3 @@
-use color_eyre::eyre::Result;
 use tap::prelude::*;
 
 use crate::Puzzle;
@@ -11,6 +10,8 @@ pub fn process(puzzle: Puzzle) -> String {
 
 #[cfg(test)]
 mod tests {
+    use color_eyre::eyre::Result;
+
     use super::*;
 
     #[test]
