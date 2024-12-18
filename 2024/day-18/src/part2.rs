@@ -38,22 +38,27 @@ pub fn process_astar_rev(puzzle: Puzzle) -> IVec2 {
 #[cfg(test)]
 mod tests {
     use color_eyre::eyre::Result;
+    use tap::prelude::*;
 
     use super::*;
 
     #[test]
     fn test_example() -> Result<()> {
         let input: Puzzle = common::read_input!("example.txt").parse()?;
-        let output = process_astar(input);
-        assert_eq!(output, IVec2::new(6, 1));
+        let astar = input.clone().pipe(process_astar);
+        let rev = input.clone().pipe(process_astar_rev);
+        assert_eq!(astar, IVec2::new(6, 1));
+        assert_eq!(rev, IVec2::new(6, 1));
         Ok(())
     }
 
     #[test]
     fn test_actual() -> Result<()> {
         let input: Puzzle = common::read_input!("part2.txt").parse()?;
-        let output = process_astar(input);
-        assert_eq!(output, IVec2::new(45, 16));
+        let astar = input.clone().pipe(process_astar);
+        let rev = input.clone().pipe(process_astar_rev);
+        assert_eq!(astar, IVec2::new(45, 16));
+        assert_eq!(rev, IVec2::new(45, 16));
         Ok(())
     }
 }
