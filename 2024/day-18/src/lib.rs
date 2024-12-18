@@ -67,6 +67,10 @@ pub fn init_tracing() -> color_eyre::Result<()> {
     Ok(())
 }
 
+fn reachable(map: &Grid<Option<usize>>, cutoff: usize) -> bool {
+    astar(map, cutoff) != usize::MAX
+}
+
 fn astar(map: &Grid<Option<usize>>, cutoff: usize) -> usize {
     let goal = map.size() - IVec2::ONE;
     let mut costs = Grid::from_value(usize::MAX, map.size());

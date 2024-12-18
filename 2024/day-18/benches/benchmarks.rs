@@ -55,3 +55,18 @@ fn part2_astar_rev(bencher: divan::Bencher) {
                 .pipe(part2::process_astar_rev)
         });
 }
+
+#[divan::bench]
+fn part2_astar_binary(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| {
+            common::read_input!("part2.txt")
+                .parse::<Puzzle>()
+                .map(divan::black_box)
+        })
+        .bench_values(|res| {
+            res.expect("parsing to suceed")
+                .pipe(divan::black_box)
+                .pipe(part2::process_astar_binary)
+        });
+}
