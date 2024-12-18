@@ -13,6 +13,17 @@ pub struct Puzzle {
     bytes: Vec<IVec2>,
 }
 
+impl Puzzle {
+    fn map(&self) -> Grid<Option<usize>> {
+        let size = IVec2::ONE * if self.bytes.len() < 1_024 { 7 } else { 71 };
+        let mut grid = Grid::from_value(None, size);
+        for (idx, byte) in self.bytes.iter().copied().enumerate() {
+            grid[byte] = Some(idx);
+        }
+        grid
+    }
+}
+
 impl std::str::FromStr for Puzzle {
     type Err = color_eyre::Report;
 
@@ -56,8 +67,9 @@ pub fn init_tracing() -> color_eyre::Result<()> {
     Ok(())
 }
 
-fn astar(map: &Grid<bool>, size: IVec2) -> usize {
-    let mut costs = Grid::from_value(usize::MAX, size);
+fn astar(map: &Grid<Option<usize>>, cutoff: usize) -> usize {
+    let goal = map.size() - IVec2::ONE;
+    let mut costs = Grid::from_value(usize::MAX, map.size());
     costs[IVec2::ZERO] = 0;
     let mut stack = BinaryHeap::<Entry>::new();
     stack.push(Entry {
@@ -75,10 +87,14 @@ fn astar(map: &Grid<bool>, size: IVec2) -> usize {
             .into_iter()
             .map(|d| pos + d)
             // .filter(|pos| grid.get(pos).is_some())
-            .filter(|pos| map.get(*pos).copied().is_some_and(|corrupt| !corrupt))
+            .filter(|pos| match map.get(*pos).copied() {
+                Some(Some(idx)) => idx >= cutoff,
+                Some(None) => true,
+                _ => false,
+            })
         {
             let heuristic = {
-                let delta = (size - IVec2::ONE) - new_p;
+                let delta = goal - new_p;
                 delta.x.abs() + delta.y.abs()
             }
             .try_conv::<usize>()
@@ -92,14 +108,14 @@ fn astar(map: &Grid<bool>, size: IVec2) -> usize {
                     cost: cost + 1,
                     estimated_cost: cost + heuristic + 1,
                 });
-                if new_p == (size - IVec2::ONE) {
+                if new_p == goal {
                     break;
                 }
             }
         }
     }
 
-    costs[size - IVec2::ONE]
+    costs[goal]
 }
 
 struct Entry {

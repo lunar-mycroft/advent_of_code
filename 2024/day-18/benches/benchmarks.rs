@@ -27,7 +27,7 @@ fn part1(bencher: divan::Bencher) {
 }
 
 #[divan::bench]
-fn part2(bencher: divan::Bencher) {
+fn part2_astar(bencher: divan::Bencher) {
     bencher
         .with_inputs(|| {
             common::read_input!("part2.txt")
@@ -37,6 +37,21 @@ fn part2(bencher: divan::Bencher) {
         .bench_values(|res| {
             res.expect("parsing to suceed")
                 .pipe(divan::black_box)
-                .pipe(part2::process)
+                .pipe(part2::process_astar)
+        });
+}
+
+#[divan::bench]
+fn part2_astar_rev(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| {
+            common::read_input!("part2.txt")
+                .parse::<Puzzle>()
+                .map(divan::black_box)
+        })
+        .bench_values(|res| {
+            res.expect("parsing to suceed")
+                .pipe(divan::black_box)
+                .pipe(part2::process_astar_rev)
         });
 }
