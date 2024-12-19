@@ -622,6 +622,7 @@ dependencies = [
  "displaydoc",
  "divan",
  "glam",
+ "image",
  "indexmap",
  "itertools",
  "rayon",

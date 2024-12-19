@@ -71,6 +71,14 @@ fn reachable(map: &Grid<Option<usize>>, cutoff: usize) -> bool {
     astar(map, cutoff) != usize::MAX
 }
 
+fn is_passable_on(map: &Grid<Option<usize>>, pos: IVec2, t: usize) -> bool {
+    match map.get(pos).copied() {
+        Some(Some(idx)) => idx >= t,
+        Some(None) => true,
+        _ => false,
+    }
+}
+
 fn astar(map: &Grid<Option<usize>>, cutoff: usize) -> usize {
     let goal = map.size() - IVec2::ONE;
     let mut costs = Grid::from_value(usize::MAX, map.size());
@@ -91,11 +99,7 @@ fn astar(map: &Grid<Option<usize>>, cutoff: usize) -> usize {
             .into_iter()
             .map(|d| pos + d)
             // .filter(|pos| grid.get(pos).is_some())
-            .filter(|pos| match map.get(*pos).copied() {
-                Some(Some(idx)) => idx >= cutoff,
-                Some(None) => true,
-                _ => false,
-            })
+            .filter(|pos| is_passable_on(map, *pos, cutoff))
         {
             let heuristic = {
                 let delta = goal - new_p;

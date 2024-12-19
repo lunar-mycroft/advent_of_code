@@ -16,6 +16,17 @@ pub struct Grid<T> {
 }
 
 impl<T> Grid<T> {
+    pub fn from_positions(op: impl FnMut(IVec2) -> T, size: IVec2) -> Self {
+        Self {
+            items: Positions {
+                current: IVec2::ZERO,
+                size,
+            }
+            .map(op)
+            .collect_vec(),
+            size,
+        }
+    }
     pub fn from_value(value: T, size: IVec2) -> Self
     where
         T: Clone,

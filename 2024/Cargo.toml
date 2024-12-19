@@ -54,10 +54,10 @@ single_match_else = { level = "allow", priority = 127}
 manual_let_else = { level = "allow", priority = 127}
 unused_async = { level = "warn", priority = 127 }
 
-[profile.release]
-opt-level = "z"
-lto = true
-codegen-units = 1
-panic = "abort"
-strip = "symbols"
+# [profile.release]
+# opt-level = "z"
+# lto = true
+# codegen-units = 1
+# panic = "abort"
+# strip = "symbols"
 

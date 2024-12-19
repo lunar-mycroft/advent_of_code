@@ -19,6 +19,7 @@ tracing-subscriber.workspace = true
 tracing-error.workspace = true
 
 common.workspace = true
+image.workspace = true
 
 
 [dev-dependencies]
