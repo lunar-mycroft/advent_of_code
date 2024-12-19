@@ -7,7 +7,7 @@ use tap::Pipe;
 pub mod part1;
 pub mod part2;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Puzzle {
     towels: Vec<String>,
     goals: Vec<String>,
