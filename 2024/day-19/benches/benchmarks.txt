@@ -1,10 +1,11 @@
 day_19_bench                  fastest       │ slowest       │ median        │ mean          │ samples │ iters
-├─ parse                      47.89 µs      │ 130.9 µs      │ 81.49 µs      │ 81.27 µs      │ 100     │ 100
-├─ part1                      10.74 ms      │ 12.69 ms      │ 10.92 ms      │ 11.01 ms      │ 100     │ 100
-├─ part2                      27.62 ms      │ 33.78 ms      │ 28.31 ms      │ 28.62 ms      │ 100     │ 100
-├─ part2_array_trie           254.9 µs      │ 463.5 µs      │ 303.3 µs      │ 304.2 µs      │ 100     │ 100
-├─ part2_hash_trie_loop       1.383 ms      │ 1.666 ms      │ 1.434 ms      │ 1.455 ms      │ 100     │ 100
-├─ part2_hash_trie_on_stack   1.343 ms      │ 1.64 ms       │ 1.383 ms      │ 1.387 ms      │ 100     │ 100
-├─ part2_hash_trie_recursive  1.439 ms      │ 1.694 ms      │ 1.478 ms      │ 1.488 ms      │ 100     │ 100
-╰─ part2_vec_cache            24.54 ms      │ 28.53 ms      │ 25 ms         │ 25.2 ms       │ 100     │ 100
+├─ parse                      58.99 µs      │ 158.1 µs      │ 81.14 µs      │ 84.08 µs      │ 100     │ 100
+├─ part1                      10.68 ms      │ 16.43 ms      │ 10.96 ms      │ 11.17 ms      │ 100     │ 100
+├─ part2                      27.77 ms      │ 30.79 ms      │ 28.26 ms      │ 28.33 ms      │ 100     │ 100
+├─ part2_array_trie_big       285.9 µs      │ 373.8 µs      │ 312.4 µs      │ 317.4 µs      │ 100     │ 100
+├─ part2_array_trie_small     201.5 µs      │ 287.8 µs      │ 222.7 µs      │ 223.7 µs      │ 100     │ 100
+├─ part2_hash_trie_loop       1.378 ms      │ 1.506 ms      │ 1.424 ms      │ 1.427 ms      │ 100     │ 100
+├─ part2_hash_trie_on_stack   1.345 ms      │ 1.425 ms      │ 1.372 ms      │ 1.373 ms      │ 100     │ 100
+├─ part2_hash_trie_recursive  1.448 ms      │ 1.607 ms      │ 1.484 ms      │ 1.489 ms      │ 100     │ 100
+╰─ part2_vec_cache            24.82 ms      │ 30.82 ms      │ 25.28 ms      │ 25.77 ms      │ 100     │ 100
 

@@ -102,7 +102,7 @@ fn part2_hash_trie_on_stack(bencher: divan::Bencher) {
 }
 
 #[divan::bench]
-fn part2_array_trie(bencher: divan::Bencher) {
+fn part2_array_trie_big(bencher: divan::Bencher) {
     bencher
         .with_inputs(|| {
             common::read_input!("part2.txt")
@@ -113,5 +113,20 @@ fn part2_array_trie(bencher: divan::Bencher) {
             res.expect("parsing to suceed")
                 .pipe(divan::black_box)
                 .pipe_ref(array_trie::process_big)
+        });
+}
+
+#[divan::bench]
+fn part2_array_trie_small(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| {
+            common::read_input!("part2.txt")
+                .parse::<Puzzle>()
+                .map(divan::black_box)
+        })
+        .bench_values(|res| {
+            res.expect("parsing to suceed")
+                .pipe(divan::black_box)
+                .pipe_ref(array_trie::process_small)
         });
 }
