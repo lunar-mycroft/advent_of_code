@@ -1,5 +1,7 @@
-day_19_bench  fastest       │ slowest       │ median        │ mean          │ samples │ iters
-├─ parse      62.79 µs      │ 165.2 µs      │ 88.99 µs      │ 91.55 µs      │ 100     │ 100
-├─ part1      10.77 ms      │ 15.78 ms      │ 10.93 ms      │ 11.19 ms      │ 100     │ 100
-╰─ part2      27.69 ms      │ 32.51 ms      │ 28.62 ms      │ 29.05 ms      │ 100     │ 100
+day_19_bench        fastest       │ slowest       │ median        │ mean          │ samples │ iters
+├─ parse            57.89 µs      │ 160.5 µs      │ 91.89 µs      │ 93.62 µs      │ 100     │ 100
+├─ part1            10.78 ms      │ 14.45 ms      │ 11.12 ms      │ 11.31 ms      │ 100     │ 100
+├─ part2            27.63 ms      │ 38.19 ms      │ 28.77 ms      │ 29.6 ms       │ 100     │ 100
+├─ part2_hash_trie  1.468 ms      │ 2.074 ms      │ 1.523 ms      │ 1.579 ms      │ 100     │ 100
+╰─ part2_vec_cache  24.85 ms      │ 32.38 ms      │ 26.38 ms      │ 26.91 ms      │ 100     │ 100
 

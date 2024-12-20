@@ -55,3 +55,18 @@ fn part2_vec_cache(bencher: divan::Bencher) {
                 .pipe(part2::process_vec_cache)
         });
 }
+
+#[divan::bench]
+fn part2_hash_trie(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| {
+            common::read_input!("part2.txt")
+                .parse::<Puzzle>()
+                .map(divan::black_box)
+        })
+        .bench_values(|res| {
+            res.expect("parsing to suceed")
+                .pipe(divan::black_box)
+                .pipe(hash_trie::process)
+        });
+}

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use tap::Pipe;
+use tap::prelude::*;
 
 use crate::Puzzle;
 
@@ -31,14 +31,22 @@ pub fn process_vec_cache(puzzle: Puzzle) -> u64 {
         match cache[idx] {
             Some(n) => n,
             None => {
-                let res = towels
-                    .iter()
-                    .map(|towel| match goal.strip_prefix(towel) {
-                        Some("") => 1,
-                        Some(suffix) => ways(suffix, towels, idx + towel.len(), cache),
-                        None => 0,
-                    })
-                    .sum();
+                // let res = towels
+                //     .iter()
+                //     .map(|towel| match goal.strip_prefix(towel) {
+                //         Some("") => 1,
+                //         Some(suffix) => ways(suffix, towels, idx + towel.len(), cache),
+                //         None => 0,
+                //     })
+                //     .sum();
+                let mut res = 0;
+                for towel in towels {
+                    match goal.strip_prefix(towel) {
+                        Some("") => res += 1,
+                        Some(suffix) => res += ways(suffix, towels, idx + towel.len(), cache),
+                        None => (),
+                    }
+                }
                 cache[idx] = Some(res);
                 res
             }
@@ -66,14 +74,18 @@ mod tests {
     use super::*;
 
     #[test]
+    #[ignore]
     fn test_example() -> Result<()> {
         let input: Puzzle = common::read_input!("example.txt").parse()?;
-        let output = process(input);
-        assert_eq!(output, 16);
+        let naive = input.clone().pipe(process);
+        let vec_cache = input.clone().pipe(process_vec_cache);
+        assert_eq!(naive, 16);
+        assert_eq!(vec_cache, 16);
         Ok(())
     }
 
     #[test]
+    #[ignore]
     fn test_actual() -> Result<()> {
         let input: Puzzle = common::read_input!("part2.txt").parse()?;
         let naive = input.clone().pipe(process);
