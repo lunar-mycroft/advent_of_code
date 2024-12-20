@@ -221,9 +221,9 @@ mod tests {
     #[case("bbr", 2)]
     #[case("gbbr", 4)]
     #[case("rrbgbr", 6)]
-    // #[case("bwurrg", 1)]
+    #[case("bwurrg", 1)]
     #[case("brgr", 2)]
-    // #[case("brwrr", 2)]
+    #[case("brwrr", 2)]
     fn test_ways(#[case] goal: &str, #[case] expected: u64) {
         let trie: Trie = TOWELS.iter().copied().collect();
         assert_eq!(

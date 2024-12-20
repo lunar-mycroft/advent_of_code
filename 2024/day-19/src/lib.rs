@@ -4,6 +4,7 @@ use color_eyre::eyre::OptionExt;
 use itertools::Itertools;
 use tap::Pipe;
 
+pub mod array_trie;
 pub mod hash_trie;
 pub mod part1;
 pub mod part2;

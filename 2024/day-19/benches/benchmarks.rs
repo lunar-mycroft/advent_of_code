@@ -100,3 +100,18 @@ fn part2_hash_trie_on_stack(bencher: divan::Bencher) {
                 .pipe_ref(hash_trie::process_loop_on_stack)
         });
 }
+
+#[divan::bench]
+fn part2_array_trie(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| {
+            common::read_input!("part2.txt")
+                .parse::<Puzzle>()
+                .map(divan::black_box)
+        })
+        .bench_values(|res| {
+            res.expect("parsing to suceed")
+                .pipe(divan::black_box)
+                .pipe_ref(array_trie::process_big)
+        });
+}
