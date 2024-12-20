@@ -28,6 +28,51 @@ pub fn process_no_parse(s: &str) -> Result<u64> {
         .pipe(Ok)
 }
 
+pub fn process_partial_inline(s: &str) -> Result<u64> {
+    let (towels, goals) = s
+        .split_once("\n\n")
+        .ok_or_eyre("Couldn't seperate blocks")?;
+    let trie: TrieSmall = towels.split(", ").collect();
+    let mut sum = 0;
+    for goal in goals.lines() {
+        sum += trie.ways(goal.trim());
+    }
+    Ok(sum)
+}
+
+pub fn process_fully_inline(s: &str) -> Result<u64> {
+    let (towels, goals) = s
+        .split_once("\n\n")
+        .ok_or_eyre("Couldn't seperate blocks")?;
+    let trie: TrieSmall = towels.split(", ").collect();
+    let mut sum = 0;
+    for goal in goals.lines() {
+        let this = &trie;
+        let goal = goal.trim();
+        let size = goal.len();
+        let mut cache = [0; 80];
+        cache[0] = 1;
+        for start in 0..size {
+            if cache[start] == 0 {
+                continue;
+            }
+            let mut i = 0;
+
+            for end in start..size {
+                let hashed = goal.as_bytes()[end].pipe(TrieSmall::hash_fn);
+                i = this.0[i].next[hashed];
+                if i == 0 {
+                    break;
+                }
+
+                cache[end + 1] += this.0[i].towels() * cache[start];
+            }
+        }
+        sum += cache[size];
+    }
+    Ok(sum)
+}
+
 struct TrieBig(Vec<NodeBig>);
 
 #[derive(Default, Debug)]
@@ -51,20 +96,15 @@ impl TrieBig {
             if cache[start] == 0 {
                 continue;
             }
-            // Walk trie from root to leaf.
             let mut i = 0;
 
             for end in start..size {
-                // Get next link.
                 let hashed = goal.as_bytes()[end].pipe(Self::hash_fn);
                 i = self.0[i].next[hashed];
-
-                // This is not a valid prefix, stop the search.
                 if i == 0 {
                     break;
                 }
 
-                // Add the number of possible cache this prefix can be reached.
                 cache[end + 1] += if self.0[i].towel { cache[start] } else { 0 };
             }
         }
@@ -94,20 +134,16 @@ impl TrieSmall {
             if cache[start] == 0 {
                 continue;
             }
-            // Walk trie from root to leaf.
             let mut i = 0;
 
             for end in start..size {
-                // Get next link.
                 let hashed = goal.as_bytes()[end].pipe(Self::hash_fn);
                 i = self.0[i].next[hashed];
 
-                // This is not a valid prefix, stop the search.
                 if i == 0 {
                     break;
                 }
 
-                // Add the number of possible cache this prefix can be reached.
                 cache[end + 1] += self.0[i].towels() * cache[start];
             }
         }
@@ -202,9 +238,13 @@ mod tests {
         let big = process_big(&puzzle);
         let small = process_small(&puzzle);
         let no_parse = process_no_parse(&input)?;
+        let partial_inline = process_partial_inline(&input)?;
+        let fully_inline = process_fully_inline(&input)?;
         assert_eq!(big, 16);
         assert_eq!(small, 16);
         assert_eq!(no_parse, 16);
+        assert_eq!(partial_inline, 16);
+        assert_eq!(fully_inline, 16);
         Ok(())
     }
 
@@ -215,9 +255,13 @@ mod tests {
         let big = process_big(&puzzle);
         let small = process_small(&puzzle);
         let no_parse = process_no_parse(&input)?;
+        let partial_inline = process_partial_inline(&input)?;
+        let fully_inline = process_fully_inline(&input)?;
         assert_eq!(big, 571_894_474_468_161);
         assert_eq!(small, 571_894_474_468_161);
         assert_eq!(no_parse, 571_894_474_468_161);
+        assert_eq!(partial_inline, 571_894_474_468_161);
+        assert_eq!(fully_inline, 571_894_474_468_161);
         Ok(())
     }
 }

@@ -142,3 +142,27 @@ fn part2_array_trie_no_parse(bencher: divan::Bencher) {
                 .expect("to compute an answer");
         });
 }
+
+#[divan::bench(sample_size = 1000)]
+fn part2_array_trie_inline_partial(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| common::read_input!("part2.txt").pipe(Ok::<_, color_eyre::Report>))
+        .bench_values(|res| {
+            res.expect("parsing to suceed")
+                .pipe(divan::black_box)
+                .pipe_deref(array_trie::process_partial_inline)
+                .expect("to compute an answer");
+        });
+}
+
+#[divan::bench(sample_size = 1000)]
+fn part2_array_trie_inline_full(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| common::read_input!("part2.txt").pipe(Ok::<_, color_eyre::Report>))
+        .bench_values(|res| {
+            res.expect("parsing to suceed")
+                .pipe(divan::black_box)
+                .pipe_deref(array_trie::process_fully_inline)
+                .expect("to compute an answer");
+        });
+}

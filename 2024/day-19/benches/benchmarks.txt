@@ -1,12 +1,14 @@
-day_19_bench                  fastest       │ slowest       │ median        │ mean          │ samples │ iters
-├─ parse                      38.99 µs      │ 121 µs        │ 58.64 µs      │ 60.71 µs      │ 100     │ 100
-├─ part1                      10.79 ms      │ 13.35 ms      │ 11.17 ms      │ 11.26 ms      │ 100     │ 100
-├─ part2                      27.91 ms      │ 33.07 ms      │ 28.7 ms       │ 29.03 ms      │ 100     │ 100
-├─ part2_array_trie_big       274.1 µs      │ 321.8 µs      │ 285.9 µs      │ 287.8 µs      │ 100     │ 100000
-├─ part2_array_trie_no_parse  207.4 µs      │ 250.7 µs      │ 215.4 µs      │ 216 µs        │ 100     │ 100000
-├─ part2_array_trie_small     209.7 µs      │ 256.1 µs      │ 216.2 µs      │ 219 µs        │ 100     │ 100000
-├─ part2_hash_trie_loop       1.38 ms       │ 1.803 ms      │ 1.411 ms      │ 1.427 ms      │ 100     │ 100
-├─ part2_hash_trie_on_stack   1.337 ms      │ 1.733 ms      │ 1.372 ms      │ 1.4 ms        │ 100     │ 100
-├─ part2_hash_trie_recursive  1.443 ms      │ 2.093 ms      │ 1.474 ms      │ 1.523 ms      │ 100     │ 100
-╰─ part2_vec_cache            25.25 ms      │ 34.06 ms      │ 26.31 ms      │ 26.75 ms      │ 100     │ 100
+day_19_bench                        fastest       │ slowest       │ median        │ mean          │ samples │ iters
+├─ parse                            40.49 µs      │ 79.29 µs      │ 53.29 µs      │ 54.93 µs      │ 100     │ 100
+├─ part1                            10.85 ms      │ 16.06 ms      │ 11.08 ms      │ 11.65 ms      │ 100     │ 100
+├─ part2                            28.06 ms      │ 41.8 ms       │ 29.4 ms       │ 29.93 ms      │ 100     │ 100
+├─ part2_array_trie_big             275.8 µs      │ 327.1 µs      │ 289.1 µs      │ 290 µs        │ 100     │ 100000
+├─ part2_array_trie_inline_full     210.3 µs      │ 230.2 µs      │ 216.3 µs      │ 216.8 µs      │ 100     │ 100000
+├─ part2_array_trie_inline_partial  207 µs        │ 244.2 µs      │ 217.2 µs      │ 218.2 µs      │ 100     │ 100000
+├─ part2_array_trie_no_parse        204.8 µs      │ 226.5 µs      │ 210.7 µs      │ 211.7 µs      │ 100     │ 100000
+├─ part2_array_trie_small           213.3 µs      │ 234.6 µs      │ 218.3 µs      │ 219.5 µs      │ 100     │ 100000
+├─ part2_hash_trie_loop             1.357 ms      │ 1.68 ms       │ 1.39 ms       │ 1.417 ms      │ 100     │ 100
+├─ part2_hash_trie_on_stack         1.348 ms      │ 1.747 ms      │ 1.372 ms      │ 1.437 ms      │ 100     │ 100
+├─ part2_hash_trie_recursive        1.454 ms      │ 2.848 ms      │ 1.491 ms      │ 1.595 ms      │ 100     │ 100
+╰─ part2_vec_cache                  24.5 ms       │ 31.33 ms      │ 24.87 ms      │ 25.37 ms      │ 100     │ 100
 
