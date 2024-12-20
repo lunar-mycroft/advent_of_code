@@ -101,7 +101,7 @@ fn part2_hash_trie_on_stack(bencher: divan::Bencher) {
         });
 }
 
-#[divan::bench]
+#[divan::bench(sample_size = 1000)]
 fn part2_array_trie_big(bencher: divan::Bencher) {
     bencher
         .with_inputs(|| {
@@ -116,7 +116,7 @@ fn part2_array_trie_big(bencher: divan::Bencher) {
         });
 }
 
-#[divan::bench]
+#[divan::bench(sample_size = 1000)]
 fn part2_array_trie_small(bencher: divan::Bencher) {
     bencher
         .with_inputs(|| {
@@ -128,5 +128,17 @@ fn part2_array_trie_small(bencher: divan::Bencher) {
             res.expect("parsing to suceed")
                 .pipe(divan::black_box)
                 .pipe_ref(array_trie::process_small)
+        });
+}
+
+#[divan::bench(sample_size = 1000)]
+fn part2_array_trie_no_parse(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| common::read_input!("part2.txt").pipe(Ok::<_, color_eyre::Report>))
+        .bench_values(|res| {
+            res.expect("parsing to suceed")
+                .pipe(divan::black_box)
+                .pipe_deref(array_trie::process_no_parse)
+                .expect("to compute an answer");
         });
 }

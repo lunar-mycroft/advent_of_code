@@ -1,5 +1,6 @@
 use std::ops::Deref;
 
+use color_eyre::{eyre::OptionExt, Result};
 use tap::prelude::*;
 
 use crate::Puzzle;
@@ -12,6 +13,19 @@ pub fn process_big(puzzle: &Puzzle) -> u64 {
 pub fn process_small(puzzle: &Puzzle) -> u64 {
     let trie: TrieSmall = puzzle.towels.iter().map(String::deref).collect();
     puzzle.goals.iter().map(|goal| trie.ways(goal)).sum()
+}
+
+pub fn process_no_parse(s: &str) -> Result<u64> {
+    let (towels, goals) = s
+        .split_once("\n\n")
+        .ok_or_eyre("Couldn't seperate blocks")?;
+    let trie: TrieSmall = towels.split(", ").collect();
+    goals
+        .lines()
+        .map(str::trim)
+        .map(|goal| trie.ways(goal))
+        .sum::<u64>()
+        .pipe(Ok)
 }
 
 struct TrieBig(Vec<NodeBig>);
@@ -161,7 +175,6 @@ impl<'a> FromIterator<&'a str> for TrieSmall {
 
 #[cfg(test)]
 mod tests {
-    use color_eyre::Result;
     use rstest::rstest;
 
     use super::*;
@@ -184,21 +197,27 @@ mod tests {
 
     #[test]
     fn test_example() -> Result<()> {
-        let input: Puzzle = common::read_input!("example.txt").parse()?;
-        let big = process_big(&input);
-        let small = process_small(&input);
+        let input = common::read_input!("example.txt");
+        let puzzle: Puzzle = common::read_input!("example.txt").parse()?;
+        let big = process_big(&puzzle);
+        let small = process_small(&puzzle);
+        let no_parse = process_no_parse(&input)?;
         assert_eq!(big, 16);
         assert_eq!(small, 16);
+        assert_eq!(no_parse, 16);
         Ok(())
     }
 
     #[test]
     fn test_actual() -> Result<()> {
-        let input: Puzzle = common::read_input!("part2.txt").parse()?;
-        let big = process_big(&input);
-        let small = process_small(&input);
+        let input = common::read_input!("part2.txt");
+        let puzzle: Puzzle = common::read_input!("part2.txt").parse()?;
+        let big = process_big(&puzzle);
+        let small = process_small(&puzzle);
+        let no_parse = process_no_parse(&input)?;
         assert_eq!(big, 571_894_474_468_161);
         assert_eq!(small, 571_894_474_468_161);
+        assert_eq!(no_parse, 571_894_474_468_161);
         Ok(())
     }
 }

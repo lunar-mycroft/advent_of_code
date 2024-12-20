@@ -38,7 +38,6 @@ impl std::str::FromStr for Puzzle {
     type Err = color_eyre::Report;
 
     fn from_str(s: &str) -> color_eyre::Result<Self> {
-        let s = s.replace('\r', "");
         let (patterns, designs) = s
             .split_once("\n\n")
             .ok_or_eyre("Couldn't seperate blocks")?;

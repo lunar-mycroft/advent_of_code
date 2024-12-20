@@ -10,5 +10,6 @@ macro_rules! read_input {
                 .join("inputs")
                 .join($filename),
         )?
+        .replace('\r', "")
     };
 }
