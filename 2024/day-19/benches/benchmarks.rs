@@ -57,7 +57,7 @@ fn part2_vec_cache(bencher: divan::Bencher) {
 }
 
 #[divan::bench]
-fn part2_hash_trie(bencher: divan::Bencher) {
+fn part2_hash_trie_recursive(bencher: divan::Bencher) {
     bencher
         .with_inputs(|| {
             common::read_input!("part2.txt")
@@ -67,6 +67,36 @@ fn part2_hash_trie(bencher: divan::Bencher) {
         .bench_values(|res| {
             res.expect("parsing to suceed")
                 .pipe(divan::black_box)
-                .pipe(hash_trie::process)
+                .pipe_ref(hash_trie::process_recursive)
+        });
+}
+
+#[divan::bench]
+fn part2_hash_trie_loop(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| {
+            common::read_input!("part2.txt")
+                .parse::<Puzzle>()
+                .map(divan::black_box)
+        })
+        .bench_values(|res| {
+            res.expect("parsing to suceed")
+                .pipe(divan::black_box)
+                .pipe_ref(hash_trie::process_loop)
+        });
+}
+
+#[divan::bench]
+fn part2_hash_trie_on_stack(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| {
+            common::read_input!("part2.txt")
+                .parse::<Puzzle>()
+                .map(divan::black_box)
+        })
+        .bench_values(|res| {
+            res.expect("parsing to suceed")
+                .pipe(divan::black_box)
+                .pipe_ref(hash_trie::process_loop_on_stack)
         });
 }
