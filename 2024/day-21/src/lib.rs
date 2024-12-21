@@ -8,7 +8,12 @@ use tap::Pipe;
 pub mod part1;
 pub mod part2;
 
-#[derive(Debug)]
+mod generalized;
+mod idiomatic;
+mod initial;
+mod no_hash;
+
+#[derive(Debug, Clone)]
 pub struct Puzzle {
     codes: Vec<(usize, String)>,
 }
@@ -67,6 +72,32 @@ fn step(source: char, target: char, pad: &HashMap<char, IVec2>) -> Option<String
     .chain(once('A'))
     .collect::<String>()
     .pipe(Some)
+}
+
+#[derive(Debug, Clone)]
+struct Counter(HashMap<String, usize>);
+
+impl Counter {
+    fn update(&mut self, other: Counter) {
+        for (key, value) in other.0 {
+            *self.0.entry(key).or_insert(0) += value;
+        }
+    }
+
+    fn total_len(&self) -> usize {
+        self.0.iter().map(|(k, v)| k.len() * v).sum::<usize>()
+    }
+}
+
+impl FromIterator<String> for Counter {
+    fn from_iter<T: IntoIterator<Item = String>>(iter: T) -> Self {
+        iter.into_iter()
+            .fold(HashMap::new(), |mut map, s| {
+                *map.entry(s).or_insert(0) += 1;
+                map
+            })
+            .pipe(Self)
+    }
 }
 
 pub fn init_tracing() -> color_eyre::Result<()> {
