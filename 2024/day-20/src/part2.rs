@@ -5,13 +5,15 @@ use tap::prelude::*;
 use crate::Puzzle;
 
 #[must_use]
-#[allow(clippy::needless_pass_by_value, clippy::cast_sign_loss)]
+#[allow(
+    clippy::needless_pass_by_value,
+    clippy::cast_sign_loss,
+    clippy::cast_possible_truncation
+)]
 pub fn process(puzzle: Puzzle) -> usize {
-    let costs = puzzle.astar();
     let offsets = (-20i32..=20)
         .cartesian_product(-20i32..=20)
         .filter_map(|(x, y)| {
-            // if (x.abs() + y.abs()) <= 20 && (x.abs() + y.abs()) > 0 {
             if (0..=20).contains(&(x.abs() + y.abs())) {
                 IVec2::new(x, y).pipe(Some)
             } else {
@@ -19,9 +21,10 @@ pub fn process(puzzle: Puzzle) -> usize {
             }
         })
         .collect_vec();
-    puzzle
-        .map
-        .positions()
+    let (costs, route) = puzzle.follow_route();
+    debug_assert_eq!(costs.get(puzzle.end), Some((route.len() - 1) as u32));
+    route
+        .into_iter()
         .flat_map(|pos| offsets.iter().copied().map(move |o| (pos, pos + o)))
         .filter_map(|(b, e)| (costs.get(b)?, costs.get(e)?, (b - e).abs()).pipe(Some))
         .map(|(b, e, d)| (b, e, (d.x + d.y) as u32))

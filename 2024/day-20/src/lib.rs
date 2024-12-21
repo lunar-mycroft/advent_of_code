@@ -2,6 +2,7 @@ use std::collections::BinaryHeap;
 
 use color_eyre::eyre::OptionExt;
 use glam::IVec2;
+use itertools::Itertools;
 use tap::prelude::*;
 
 use common::grid::Grid;
@@ -59,6 +60,34 @@ impl Puzzle {
             }
         }
         costs
+    }
+
+    fn follow_route(&self) -> (Costs, Vec<IVec2>) {
+        let (mut pos, mut dir, mut i, mut costs, mut route) = (
+            self.start,
+            [IVec2::X, IVec2::Y, -IVec2::X, -IVec2::Y]
+                .into_iter()
+                .find(|dir| self.map.get(*dir + self.start).copied() == Some(b'.'))
+                .expect("To be able to start"),
+            0,
+            self.map.size().pipe(Costs::new),
+            Vec::new(),
+        );
+        assert!(costs.replace_if_lt(pos, i));
+        route.push(pos);
+        while pos != self.end {
+            (dir, pos) = [dir, dir.perp(), -dir.perp()]
+                .into_iter()
+                .map(|d| (d, d + pos))
+                .filter(|(_, new_p)| self.map.get(*new_p).is_some_and(|t| *t != b'#'))
+                .exactly_one()
+                .map_err(|_| ())
+                .expect("To find exactly one successor");
+            i += 1;
+            assert!(costs.replace_if_lt(pos, i));
+            route.push(pos);
+        }
+        (costs, route)
     }
 }
 

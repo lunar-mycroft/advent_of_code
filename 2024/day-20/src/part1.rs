@@ -1,4 +1,5 @@
 use glam::IVec2;
+use rayon::prelude::*;
 use tap::prelude::*;
 
 use crate::Puzzle;
@@ -6,10 +7,9 @@ use crate::Puzzle;
 #[must_use]
 #[allow(clippy::needless_pass_by_value, clippy::cast_sign_loss)]
 pub fn process(puzzle: Puzzle) -> usize {
-    let costs = puzzle.astar();
-    puzzle
-        .map
-        .positions()
+    let (costs, route) = puzzle.follow_route();
+    route
+        .into_par_iter()
         .flat_map(|pos| {
             [
                 (pos, pos + IVec2::X),
@@ -42,7 +42,6 @@ mod tests {
     use super::*;
 
     #[test]
-    #[ignore]
     fn test_example() -> Result<()> {
         let input: Puzzle = common::read_input!("example.txt").parse()?;
         let output = process(input);
