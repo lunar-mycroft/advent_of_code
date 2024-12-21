@@ -16,7 +16,7 @@ pub fn part1(puzzle: Puzzle) -> usize {
             .filter_map(move |end| {
                 let old = start;
                 start = end;
-                crate::step(old, end, pad)
+                step(old, end, pad)
             })
             .collect()
     }
@@ -79,16 +79,13 @@ pub fn part2(puzzle: Puzzle) -> usize {
         }
     }
 
-    pub(crate) fn routes<'a>(
-        path: &'a str,
-        pad: &'a HashMap<char, IVec2>,
-    ) -> HashMap<String, usize> {
+    fn routes<'a>(path: &'a str, pad: &'a HashMap<char, IVec2>) -> HashMap<String, usize> {
         let mut start = 'A';
         path.chars()
             .filter_map(move |end| {
                 let old = start;
                 start = end;
-                crate::step(old, end, pad)
+                step(old, end, pad)
             })
             .pipe(counter)
     }
@@ -165,7 +162,7 @@ pub fn part2(puzzle: Puzzle) -> usize {
         .sum()
 }
 
-fn step(source: char, target: char, pad: &HashMap<char, IVec2>) -> Option<String> {
+pub(crate) fn step(source: char, target: char, pad: &HashMap<char, IVec2>) -> Option<String> {
     let (source, target) = (*pad.get(&source)?, *pad.get(&target)?);
     let delta = target - source;
     let vertical = match delta.y {

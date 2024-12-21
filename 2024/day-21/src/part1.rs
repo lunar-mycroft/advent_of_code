@@ -10,7 +10,7 @@ pub(crate) fn routes<'a>(path: &'a str, pad: &'a HashMap<char, IVec2>) -> String
         .filter_map(move |end| {
             let old = start;
             start = end;
-            crate::step(old, end, pad)
+            crate::initial::step(old, end, pad)
         })
         .collect()
 }

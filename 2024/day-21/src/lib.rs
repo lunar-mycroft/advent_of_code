@@ -1,17 +1,14 @@
-use std::collections::HashMap;
-
 use color_eyre::eyre::ensure;
-use glam::IVec2;
 use itertools::Itertools;
 use tap::Pipe;
 
 pub mod part1;
 pub mod part2;
 
-mod generalized;
-mod idiomatic;
-mod initial;
-mod no_hash;
+pub mod generalized;
+pub mod idiomatic;
+pub mod initial;
+pub mod no_hash;
 
 #[derive(Debug, Clone)]
 pub struct Puzzle {
@@ -39,66 +36,31 @@ impl std::str::FromStr for Puzzle {
     }
 }
 
-fn step(source: char, target: char, pad: &HashMap<char, IVec2>) -> Option<String> {
-    use std::iter::{once, repeat_n};
-    let (source, target) = (*pad.get(&source)?, *pad.get(&target)?);
-    let delta = target - source;
-    let vertical = match delta.y {
-        ..0 => repeat_n('^', usize::try_from(-delta.y).ok()?),
-        0 => repeat_n('!', 0),
-        1.. => repeat_n('v', usize::try_from(delta.y).ok()?),
-    };
-    let horizontal = match delta.x {
-        ..0 => repeat_n('<', usize::try_from(-delta.x).ok()?),
-        0 => repeat_n('!', 0),
-        1.. => repeat_n('>', usize::try_from(delta.x).ok()?),
-    };
-    match (
-        delta.x,
-        pad.values().contains(&IVec2 {
-            x: source.x,
-            y: target.y,
-        }),
-        pad.values().contains(&IVec2 {
-            x: target.x,
-            y: source.y,
-        }),
-    ) {
-        (1.., true, _) => vertical.chain(horizontal),
-        (_, _, true) => horizontal.chain(vertical),
-        (_, true, _) => vertical.chain(horizontal),
-        _ => unreachable!(),
-    }
-    .chain(once('A'))
-    .collect::<String>()
-    .pipe(Some)
-}
+// #[derive(Debug, Clone)]
+// struct Counter(HashMap<String, usize>);
 
-#[derive(Debug, Clone)]
-struct Counter(HashMap<String, usize>);
+// impl Counter {
+//     fn update(&mut self, other: Counter) {
+//         for (key, value) in other.0 {
+//             *self.0.entry(key).or_insert(0) += value;
+//         }
+//     }
 
-impl Counter {
-    fn update(&mut self, other: Counter) {
-        for (key, value) in other.0 {
-            *self.0.entry(key).or_insert(0) += value;
-        }
-    }
+//     fn total_len(&self) -> usize {
+//         self.0.iter().map(|(k, v)| k.len() * v).sum::<usize>()
+//     }
+// }
 
-    fn total_len(&self) -> usize {
-        self.0.iter().map(|(k, v)| k.len() * v).sum::<usize>()
-    }
-}
-
-impl FromIterator<String> for Counter {
-    fn from_iter<T: IntoIterator<Item = String>>(iter: T) -> Self {
-        iter.into_iter()
-            .fold(HashMap::new(), |mut map, s| {
-                *map.entry(s).or_insert(0) += 1;
-                map
-            })
-            .pipe(Self)
-    }
-}
+// impl FromIterator<String> for Counter {
+//     fn from_iter<T: IntoIterator<Item = String>>(iter: T) -> Self {
+//         iter.into_iter()
+//             .fold(HashMap::new(), |mut map, s| {
+//                 *map.entry(s).or_insert(0) += 1;
+//                 map
+//             })
+//             .pipe(Self)
+//     }
+// }
 
 pub fn init_tracing() -> color_eyre::Result<()> {
     use tracing_subscriber::{layer::SubscriberExt, EnvFilter};
