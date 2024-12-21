@@ -35,55 +35,38 @@ impl std::str::FromStr for Puzzle {
 }
 
 fn step(source: char, target: char, pad: &HashMap<char, IVec2>) -> Option<String> {
+    use std::iter::{once, repeat_n};
     let (source, target) = (*pad.get(&source)?, *pad.get(&target)?);
     let delta = target - source;
     let vertical = match delta.y {
-        ..0 => std::iter::repeat_n('^', usize::try_from(-delta.y).ok()?),
-        0 => std::iter::repeat_n('!', 0),
-        1.. => std::iter::repeat_n('v', usize::try_from(delta.y).ok()?),
+        ..0 => repeat_n('^', usize::try_from(-delta.y).ok()?),
+        0 => repeat_n('!', 0),
+        1.. => repeat_n('v', usize::try_from(delta.y).ok()?),
     };
     let horizontal = match delta.x {
-        ..0 => std::iter::repeat_n('<', usize::try_from(-delta.x).ok()?),
-        0 => std::iter::repeat_n('!', 0),
-        1.. => std::iter::repeat_n('>', usize::try_from(delta.x).ok()?),
+        ..0 => repeat_n('<', usize::try_from(-delta.x).ok()?),
+        0 => repeat_n('!', 0),
+        1.. => repeat_n('>', usize::try_from(delta.x).ok()?),
     };
-    if delta.x > 0
-        && pad.values().contains(&IVec2 {
+    match (
+        delta.x,
+        pad.values().contains(&IVec2 {
             x: source.x,
             y: target.y,
-        })
-    {
-        let s = vertical
-            .chain(horizontal)
-            .chain(std::iter::once('A'))
-            .collect();
-        // println!("a {s}");
-        return Some(s);
+        }),
+        pad.values().contains(&IVec2 {
+            x: target.x,
+            y: source.y,
+        }),
+    ) {
+        (1.., true, _) => vertical.chain(horizontal),
+        (_, _, true) => horizontal.chain(vertical),
+        (_, true, _) => vertical.chain(horizontal),
+        _ => unreachable!(),
     }
-    if pad.values().contains(&IVec2 {
-        x: target.x,
-        y: source.y,
-    }) {
-        let s = horizontal
-            .chain(vertical)
-            .chain(std::iter::once('A'))
-            .collect();
-        // println!("b: {s}");
-        return Some(s);
-    }
-    if pad.values().contains(&IVec2 {
-        x: source.x,
-        y: target.y,
-    }) {
-        // println!("c");
-        return Some(
-            vertical
-                .chain(horizontal)
-                .chain(std::iter::once('A'))
-                .collect(),
-        );
-    }
-    unreachable!()
+    .chain(once('A'))
+    .collect::<String>()
+    .pipe(Some)
 }
 
 pub fn init_tracing() -> color_eyre::Result<()> {
