@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, iter::repeat_n};
 
 use common::grid::Grid;
 use glam::IVec2;
@@ -45,7 +45,7 @@ pub fn process(puzzle: &Puzzle, layers: u8) -> usize {
     let num_routes = puzzle
         .codes
         .iter()
-        .map(|(_, code)| crate::part1::routes(code, &num_pad))
+        .map(|(_, code)| routes(code, &num_pad).collect::<String>())
         .collect_vec();
     let mut robot_routes = num_routes
         .into_iter()
@@ -57,7 +57,7 @@ pub fn process(puzzle: &Puzzle, layers: u8) -> usize {
         for route_counter in &robot_routes {
             let mut new_route = HashMap::new();
             for (sub_route, n) in route_counter {
-                let mut new_counts = routes(sub_route, &dir_pad);
+                let mut new_counts = routes(sub_route, &dir_pad).pipe(counter);
                 new_counts.values_mut().for_each(|v| *v *= n);
                 update_map(&mut new_route, new_counts);
             }
@@ -80,15 +80,13 @@ fn update_map(lhs: &mut HashMap<String, usize>, rhs: HashMap<String, usize>) {
     }
 }
 
-fn routes<'a>(path: &'a str, pad: &'a HashMap<char, IVec2>) -> HashMap<String, usize> {
+fn routes<'a>(path: &'a str, pad: &'a HashMap<char, IVec2>) -> impl Iterator<Item = String> + 'a {
     let mut start = 'A';
-    path.chars()
-        .filter_map(move |end| {
-            let old = start;
-            start = end;
-            step(old, end, pad)
-        })
-        .pipe(counter)
+    path.chars().filter_map(move |end| {
+        let old = start;
+        start = end;
+        step(old, end, pad)
+    })
 }
 
 fn counter(it: impl IntoIterator<Item = String>) -> HashMap<String, usize> {
