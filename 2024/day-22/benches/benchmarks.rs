@@ -52,7 +52,7 @@ fn part2_one_pass(bencher: divan::Bencher) {
         .bench_values(|res| {
             res.expect("parsing to suceed")
                 .pipe(divan::black_box)
-                .pipe_ref(part2::process_one_pass)
+                .pipe_ref(part2::one_pass)
         });
 }
 
@@ -67,6 +67,21 @@ fn part2_int_key(bencher: divan::Bencher) {
         .bench_values(|res| {
             res.expect("parsing to suceed")
                 .pipe(divan::black_box)
-                .pipe_ref(part2::process_int_key)
+                .pipe_ref(part2::u32_key)
+        });
+}
+
+#[divan::bench]
+fn part2_fxhash(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| {
+            common::read_input!("part2.txt")
+                .parse::<Puzzle>()
+                .map(divan::black_box)
+        })
+        .bench_values(|res| {
+            res.expect("parsing to suceed")
+                .pipe(divan::black_box)
+                .pipe_ref(part2::fxhash_cache)
         });
 }

@@ -1,7 +1,8 @@
 day_22_bench       fastest       │ slowest       │ median        │ mean          │ samples │ iters
-├─ parse           30.69 µs      │ 47.19 µs      │ 31.19 µs      │ 31.65 µs      │ 100     │ 100
-├─ part1           5.268 ms      │ 5.601 ms      │ 5.314 ms      │ 5.334 ms      │ 100     │ 100
-├─ part2           486.3 ms      │ 730.6 ms      │ 552.7 ms      │ 559.1 ms      │ 100     │ 100
-├─ part2_int_key   98.37 ms      │ 128.5 ms      │ 106.3 ms      │ 107.9 ms      │ 100     │ 100
-╰─ part2_one_pass  128.8 ms      │ 182.9 ms      │ 138.3 ms      │ 140.5 ms      │ 100     │ 100
+├─ parse           32.59 µs      │ 51.89 µs      │ 33.29 µs      │ 33.83 µs      │ 100     │ 100
+├─ part1           5.235 ms      │ 5.615 ms      │ 5.31 ms       │ 5.336 ms      │ 100     │ 100
+├─ part2           456.8 ms      │ 676.2 ms      │ 515.7 ms      │ 522.8 ms      │ 100     │ 100
+├─ part2_fxhash    433.5 ms      │ 501.1 ms      │ 458 ms        │ 458 ms        │ 100     │ 100
+├─ part2_int_key   96.63 ms      │ 139.8 ms      │ 103.7 ms      │ 105 ms        │ 100     │ 100
+╰─ part2_one_pass  122.3 ms      │ 159.7 ms      │ 131 ms        │ 131.9 ms      │ 100     │ 100
 

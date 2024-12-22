@@ -34,7 +34,7 @@ pub fn initial(puzzle: &Puzzle) -> u64 {
 }
 
 #[must_use]
-pub fn process_one_pass(puzzle: &Puzzle) -> u64 {
+pub fn one_pass(puzzle: &Puzzle) -> u64 {
     let mut cache: HashMap<(i8, i8, i8, i8), Entry> = HashMap::new();
     for (idx, seed) in puzzle.numbers.iter().copied().enumerate() {
         for (a, b, c, d, e) in Rng(seed).take(2001).map(price).tuple_windows() {
@@ -53,8 +53,29 @@ pub fn process_one_pass(puzzle: &Puzzle) -> u64 {
 }
 
 #[must_use]
-pub fn process_int_key(puzzle: &Puzzle) -> u64 {
+pub fn u32_key(puzzle: &Puzzle) -> u64 {
     let mut cache: HashMap<u32, Entry> = HashMap::new();
+    for (idx, seed) in puzzle.numbers.iter().copied().enumerate() {
+        for (a, b, c, d, e) in Rng(seed).take(2001).map(price).tuple_windows() {
+            cache
+                .entry([b - a, c - b, c - d, e - d].pipe(int_key))
+                .or_default()
+                .note_at(idx, e);
+        }
+    }
+
+    cache
+        .into_values()
+        .map(|entry| entry.total_price)
+        .max()
+        .unwrap_or(0)
+}
+
+#[must_use]
+pub fn fxhash_cache(puzzle: &Puzzle) -> u64 {
+    use fxhash::FxHasher32;
+    type Cache = HashMap<u32, Entry, std::hash::BuildHasherDefault<FxHasher32>>;
+    let mut cache: Cache = Cache::default();
     for (idx, seed) in puzzle.numbers.iter().copied().enumerate() {
         for (a, b, c, d, e) in Rng(seed).take(2001).map(price).tuple_windows() {
             cache
@@ -135,8 +156,9 @@ mod tests {
     fn finds_solution(#[case] input_path: &str, #[case] expected: u64) -> Result<()> {
         let input: Puzzle = common::read_input!(input_path).parse()?;
         // assert_eq!(initial(&input), expected);
-        assert_eq!(process_one_pass(&input), expected);
-        assert_eq!(process_int_key(&input), expected);
+        assert_eq!(one_pass(&input), expected);
+        assert_eq!(u32_key(&input), expected);
+        assert_eq!(fxhash_cache(&input), expected);
         Ok(())
     }
 }
