@@ -20,15 +20,18 @@ impl std::str::FromStr for Puzzle {
     }
 }
 
-const fn next_num(n: u32) -> u32 {
-    let n = prune((n * 64) ^ n);
-    let n = prune((n / 32) ^ n);
-    prune((n << 11) ^ n) // not multiplying by 2048 directly because it can overflow
-}
+#[derive(Debug)]
+struct Rng(u32);
 
-#[inline]
-const fn prune(n: u32) -> u32 {
-    n % 16_777_216
+impl Iterator for Rng {
+    type Item = u32;
+    fn next(&mut self) -> Option<Self::Item> {
+        let val = self.0;
+        self.0 = ((self.0 << 6) ^ self.0) & 0xff_ffff;
+        self.0 = ((self.0 >> 5) ^ self.0) & 0xff_ffff;
+        self.0 = ((self.0 << 11) ^ self.0) & 0xff_ffff;
+        Some(val)
+    }
 }
 
 pub fn init_tracing() -> color_eyre::Result<()> {
@@ -61,6 +64,6 @@ mod tests {
     #[case(123, 15_887_950)]
     #[case(15_887_950, 16_495_136)]
     fn test_next(#[case] before: u32, #[case] after: u32) {
-        assert_eq!(next_num(before), after);
+        assert_eq!(Rng(before).nth(1), Some(after));
     }
 }

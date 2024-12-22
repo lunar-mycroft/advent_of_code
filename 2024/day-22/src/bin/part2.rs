@@ -1,10 +1,10 @@
-use day_22::{init_tracing, part2::process};
+use day_22::{init_tracing, part2::initial};
 
 fn main() -> color_eyre::Result<()> {
     color_eyre::install()?;
     init_tracing()?;
     let puzzle = common::read_input!("part1.txt").parse()?;
-    let output = process(puzzle);
+    let output = initial(&puzzle);
     println!("{output}");
     Ok(())
 }

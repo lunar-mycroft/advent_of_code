@@ -1,4 +1,4 @@
-use crate::{next_num, Puzzle};
+use crate::{Puzzle, Rng};
 
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
@@ -7,16 +7,14 @@ pub fn process(puzzle: Puzzle) -> u64 {
         .numbers
         .iter()
         .copied()
-        .map(|seed| nth_num(seed, 2000))
+        .filter_map(nth::<2000>)
         .map(u64::from)
         .sum()
 }
 
-fn nth_num(mut seed: u32, n: u16) -> u32 {
-    for _ in 0..n {
-        seed = next_num(seed);
-    }
-    seed
+#[inline]
+fn nth<const N: usize>(seed: u32) -> Option<u32> {
+    Rng(seed).nth(N)
 }
 
 #[cfg(test)]
@@ -29,7 +27,7 @@ mod tests {
     #[rstest]
     #[case(1, 8_685_429)]
     fn test_nth(#[case] seed: u32, #[case] value: u32) {
-        assert_eq!(nth_num(seed, 2000), value);
+        assert_eq!(nth::<2000>(seed), Some(value));
     }
 
     #[rstest]

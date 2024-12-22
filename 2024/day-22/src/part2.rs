@@ -2,18 +2,18 @@ use std::collections::{HashMap, HashSet};
 
 use itertools::Itertools;
 use rayon::prelude::*;
+use tap::prelude::*;
 
-use crate::{next_num, Puzzle};
+use crate::{Puzzle, Rng};
 
 #[must_use]
-#[allow(clippy::needless_pass_by_value)]
-pub fn process(puzzle: Puzzle) -> u64 {
+pub fn initial(puzzle: &Puzzle) -> u64 {
     let all_sequences = puzzle
         .numbers
         .par_iter()
         .flat_map_iter(|n| sequences(*n))
         .collect::<HashSet<_>>();
-    let all_buy_prices = puzzle.numbers.into_iter().map(buy_prices).collect_vec();
+    let all_buy_prices = puzzle.numbers.iter().copied().map(buy_prices).collect_vec();
     all_sequences
         .into_par_iter()
         .map(|seq| {
@@ -33,8 +33,73 @@ pub fn process(puzzle: Puzzle) -> u64 {
         .unwrap_or(0)
 }
 
+#[must_use]
+pub fn process_one_pass(puzzle: &Puzzle) -> u64 {
+    let mut cache: HashMap<(i8, i8, i8, i8), Entry> = HashMap::new();
+    for (idx, seed) in puzzle.numbers.iter().copied().enumerate() {
+        for (a, b, c, d, e) in Rng(seed).take(2001).map(price).tuple_windows() {
+            cache
+                .entry((b - a, c - b, d - c, e - d))
+                .or_default()
+                .note_at(idx, e);
+        }
+    }
+
+    cache
+        .into_values()
+        .map(|entry| entry.total_price)
+        .max()
+        .unwrap_or(0)
+}
+
+#[must_use]
+pub fn process_int_key(puzzle: &Puzzle) -> u64 {
+    let mut cache: HashMap<u32, Entry> = HashMap::new();
+    for (idx, seed) in puzzle.numbers.iter().copied().enumerate() {
+        for (a, b, c, d, e) in Rng(seed).take(2001).map(price).tuple_windows() {
+            cache
+                .entry([b - a, c - b, c - d, e - d].pipe(int_key))
+                .or_default()
+                .note_at(idx, e);
+        }
+    }
+
+    cache
+        .into_values()
+        .map(|entry| entry.total_price)
+        .max()
+        .unwrap_or(0)
+}
+
+#[inline]
+fn int_key(deltas: [i8; 4]) -> u32 {
+    deltas.map(|b| b.to_ne_bytes()[0]).pipe(u32::from_ne_bytes)
+}
+
+#[derive(Debug, Default)]
+struct Entry {
+    total_price: u64,
+    highest_seen: Option<usize>,
+}
+
+impl Entry {
+    fn note_at(&mut self, idx: usize, price: i8) {
+        match self.highest_seen {
+            None => {
+                self.highest_seen = Some(idx);
+                self.total_price += u64::try_from(price).expect("prices to be positve");
+            }
+            Some(seen) if seen < idx => {
+                self.highest_seen = Some(idx);
+                self.total_price += u64::try_from(price).expect("prices to be positve");
+            }
+            _ => (),
+        }
+    }
+}
+
 fn buy_prices(seed: u32) -> HashMap<(i8, i8, i8, i8), i8> {
-    rng(seed).take(2001).map(price).tuple_windows().fold(
+    Rng(seed).take(2001).map(price).tuple_windows().fold(
         HashMap::new(),
         |mut map, (a, b, c, d, e)| {
             let seq = (b - a, c - b, d - c, e - d);
@@ -45,20 +110,12 @@ fn buy_prices(seed: u32) -> HashMap<(i8, i8, i8, i8), i8> {
 }
 
 fn sequences(seed: u32) -> impl Iterator<Item = (i8, i8, i8, i8)> {
-    rng(seed)
+    Rng(seed)
         .take(610)
         .map(price)
         .tuple_windows()
         .map(|(first, second)| (second - first))
         .tuple_windows()
-}
-
-fn rng(mut seed: u32) -> impl Iterator<Item = u32> {
-    std::iter::from_fn(move || {
-        let res = seed;
-        seed = next_num(seed);
-        Some(res)
-    })
 }
 
 fn price(seed: u32) -> i8 {
@@ -73,18 +130,13 @@ mod tests {
     use super::*;
 
     #[rstest]
-    #[case(1, 8_685_429)]
-    fn test_nth(#[case] seed: u32, #[case] value: u32) {
-        assert_eq!(rng(seed).nth(2000), Some(value));
-    }
-
-    #[rstest]
     #[case::example("example.txt", 23)]
     #[case::actual("part2.txt", 1501)]
     fn finds_solution(#[case] input_path: &str, #[case] expected: u64) -> Result<()> {
         let input: Puzzle = common::read_input!(input_path).parse()?;
-        let output = process(input);
-        assert_eq!(output, expected);
+        // assert_eq!(initial(&input), expected);
+        assert_eq!(process_one_pass(&input), expected);
+        assert_eq!(process_int_key(&input), expected);
         Ok(())
     }
 }
