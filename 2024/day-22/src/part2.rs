@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 use itertools::Itertools;
 use rayon::prelude::*;
@@ -78,7 +78,7 @@ pub fn u32_key(puzzle: &Puzzle) -> u64 {
     for (idx, seed) in puzzle.numbers.iter().copied().enumerate() {
         for (a, b, c, d, e) in Rng(seed).take(2001).map(price).tuple_windows() {
             cache
-                .entry([b - a, c - b, c - d, e - d].pipe(int_key))
+                .entry([b - a, c - b, c - d, e - d].pipe(u32_window))
                 .or_default()
                 .note_at(idx, e);
         }
@@ -99,7 +99,7 @@ pub fn fxhash_cache(puzzle: &Puzzle) -> u64 {
     for (idx, seed) in puzzle.numbers.iter().copied().enumerate() {
         for (a, b, c, d, e) in Rng(seed).take(2001).map(price).tuple_windows() {
             cache
-                .entry([b - a, c - b, c - d, e - d].pipe(int_key))
+                .entry([b - a, c - b, c - d, e - d].pipe(u32_window))
                 .or_default()
                 .note_at(idx, e);
         }
@@ -119,7 +119,27 @@ pub fn pre_alloc(puzzle: &Puzzle) -> u64 {
     for (idx, seed) in puzzle.numbers.iter().copied().enumerate() {
         for (a, b, c, d, e) in Rng(seed).take(2001).map(price).tuple_windows() {
             cache
-                .entry([b - a, c - b, c - d, e - d].pipe(int_key))
+                .entry([b - a, c - b, c - d, e - d].pipe(u32_window))
+                .or_default()
+                .note_at(idx, e);
+        }
+    }
+
+    cache
+        .into_values()
+        .map(|entry| entry.total_price)
+        .max()
+        .unwrap_or(0)
+}
+
+#[must_use]
+pub fn btree(puzzle: &Puzzle) -> u64 {
+    // there are 40,951 total possible windows, so pre-allocate all of them
+    let mut cache: BTreeMap<u32, Entry> = BTreeMap::new();
+    for (idx, seed) in puzzle.numbers.iter().copied().enumerate() {
+        for (a, b, c, d, e) in Rng(seed).take(2001).map(price).tuple_windows() {
+            cache
+                .entry([b - a, c - b, c - d, e - d].pipe(u32_window))
                 .or_default()
                 .note_at(idx, e);
         }
@@ -133,11 +153,11 @@ pub fn pre_alloc(puzzle: &Puzzle) -> u64 {
 }
 
 #[inline]
-fn int_key(deltas: [i8; 4]) -> u32 {
+fn u32_window(deltas: [i8; 4]) -> u32 {
     deltas.map(|b| b.to_ne_bytes()[0]).pipe(u32::from_ne_bytes)
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, Copy)]
 struct Entry {
     total_price: u64,
     highest_seen: Option<usize>,
@@ -180,6 +200,7 @@ mod tests {
         // assert_eq!(u32_key(&input), expected);
         // assert_eq!(fxhash_cache(&input), expected);
         assert_eq!(pre_alloc(&input), expected);
+        assert_eq!(btree(&input), expected);
         Ok(())
     }
 }
