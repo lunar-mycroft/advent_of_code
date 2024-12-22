@@ -6,7 +6,7 @@ pub mod part2;
 
 #[derive(Debug)]
 pub struct Puzzle {
-    numbers: Vec<u64>,
+    numbers: Vec<u32>,
 }
 
 impl std::str::FromStr for Puzzle {
@@ -20,14 +20,14 @@ impl std::str::FromStr for Puzzle {
     }
 }
 
-const fn next_num(n: u64) -> u64 {
+const fn next_num(n: u32) -> u32 {
     let n = prune((n * 64) ^ n);
     let n = prune((n / 32) ^ n);
-    prune((n * 2048) ^ n)
+    prune((n << 11) ^ n) // not multiplying by 2048 directly because it can overflow
 }
 
 #[inline]
-const fn prune(n: u64) -> u64 {
+const fn prune(n: u32) -> u32 {
     n % 16_777_216
 }
 
@@ -60,7 +60,7 @@ mod tests {
     #[rstest]
     #[case(123, 15_887_950)]
     #[case(15_887_950, 16_495_136)]
-    fn test_next(#[case] before: u64, #[case] after: u64) {
+    fn test_next(#[case] before: u32, #[case] after: u32) {
         assert_eq!(next_num(before), after);
     }
 }

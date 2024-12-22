@@ -33,7 +33,7 @@ pub fn process(puzzle: Puzzle) -> u64 {
         .unwrap_or(0)
 }
 
-fn buy_prices(seed: u64) -> HashMap<(i8, i8, i8, i8), i8> {
+fn buy_prices(seed: u32) -> HashMap<(i8, i8, i8, i8), i8> {
     rng(seed).take(2001).map(price).tuple_windows().fold(
         HashMap::new(),
         |mut map, (a, b, c, d, e)| {
@@ -44,7 +44,7 @@ fn buy_prices(seed: u64) -> HashMap<(i8, i8, i8, i8), i8> {
     )
 }
 
-fn sequences(seed: u64) -> impl Iterator<Item = (i8, i8, i8, i8)> {
+fn sequences(seed: u32) -> impl Iterator<Item = (i8, i8, i8, i8)> {
     rng(seed)
         .take(610)
         .map(price)
@@ -53,7 +53,7 @@ fn sequences(seed: u64) -> impl Iterator<Item = (i8, i8, i8, i8)> {
         .tuple_windows()
 }
 
-fn rng(mut seed: u64) -> impl Iterator<Item = u64> {
+fn rng(mut seed: u32) -> impl Iterator<Item = u32> {
     std::iter::from_fn(move || {
         let res = seed;
         seed = next_num(seed);
@@ -61,7 +61,7 @@ fn rng(mut seed: u64) -> impl Iterator<Item = u64> {
     })
 }
 
-fn price(seed: u64) -> i8 {
+fn price(seed: u32) -> i8 {
     i8::try_from(seed % 10).expect("10 < i32::MAX")
 }
 
@@ -74,7 +74,7 @@ mod tests {
 
     #[rstest]
     #[case(1, 8_685_429)]
-    fn test_nth(#[case] seed: u64, #[case] value: u64) {
+    fn test_nth(#[case] seed: u32, #[case] value: u32) {
         assert_eq!(rng(seed).nth(2000), Some(value));
     }
 

@@ -8,10 +8,11 @@ pub fn process(puzzle: Puzzle) -> u64 {
         .iter()
         .copied()
         .map(|seed| nth_num(seed, 2000))
+        .map(u64::from)
         .sum()
 }
 
-fn nth_num(mut seed: u64, n: u16) -> u64 {
+fn nth_num(mut seed: u32, n: u16) -> u32 {
     for _ in 0..n {
         seed = next_num(seed);
     }
@@ -27,7 +28,7 @@ mod tests {
 
     #[rstest]
     #[case(1, 8_685_429)]
-    fn test_nth(#[case] seed: u64, #[case] value: u64) {
+    fn test_nth(#[case] seed: u32, #[case] value: u32) {
         assert_eq!(nth_num(seed, 2000), value);
     }
 
