@@ -21,7 +21,7 @@ pub fn initial(puzzle: &Puzzle) -> u64 {
 
     fn sequences(seed: u32) -> impl Iterator<Item = (i8, i8, i8, i8)> {
         Rng(seed)
-            .take(610)
+            .take(610) // the sequences seem to repeat?
             .map(price)
             .tuple_windows()
             .map(|(first, second)| (second - first))
@@ -152,6 +152,36 @@ pub fn btree(puzzle: &Puzzle) -> u64 {
         .unwrap_or(0)
 }
 
+#[must_use]
+pub fn continuous_windows(puzzle: &Puzzle) -> u64 {
+    #[inline]
+    const fn pane(num: u32, prev: u32) -> u32 {
+        (num % 10 + 9) - (prev % 10)
+    }
+    // there are 40,951 total possible windows, so pre-allocate all of them
+    let mut cache: HashMap<u32, Entry> = HashMap::new();
+    for (idx, seed) in puzzle.numbers.iter().copied().enumerate() {
+        let mut rng = Rng(seed);
+        let mut prev = rng.next().expect("rng not to end") % 10;
+        let mut window = 0u32;
+        for num in rng.by_ref().take(4) {
+            window = (window << 5) | pane(num, prev);
+            prev = num;
+        }
+        for num in rng.take(1997) {
+            cache.entry(window).or_default().note_at(idx, price(prev));
+            window = ((window << 5) | pane(num, prev)) & 0x000f_ffff;
+            prev = num;
+        }
+    }
+
+    cache
+        .into_values()
+        .map(|entry| entry.total_price)
+        .max()
+        .unwrap_or(0)
+}
+
 #[inline]
 fn u32_window(deltas: [i8; 4]) -> u32 {
     deltas.map(|b| b.to_ne_bytes()[0]).pipe(u32::from_ne_bytes)
@@ -199,8 +229,9 @@ mod tests {
         // assert_eq!(one_pass(&input), expected);
         // assert_eq!(u32_key(&input), expected);
         // assert_eq!(fxhash_cache(&input), expected);
-        assert_eq!(pre_alloc(&input), expected);
-        assert_eq!(btree(&input), expected);
+        // assert_eq!(pre_alloc(&input), expected);
+        // assert_eq!(btree(&input), expected);
+        assert_eq!(continuous_windows(&input), expected);
         Ok(())
     }
 }
