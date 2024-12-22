@@ -1,19 +1,12 @@
-use color_eyre::eyre::ensure;
 use itertools::Itertools;
-use tap::Pipe;
+use tap::prelude::*;
 
 pub mod part1;
 pub mod part2;
 
-pub mod generalized;
-pub mod idiomatic;
-pub mod initial;
-pub mod no_hash;
-// todo: https://www.reddit.com/r/adventofcode/comments/1hj2odw/2024_day_21_solutions/m34pm7v/
-
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Puzzle {
-    codes: Vec<(usize, String)>,
+    numbers: Vec<u64>,
 }
 
 impl std::str::FromStr for Puzzle {
@@ -21,20 +14,21 @@ impl std::str::FromStr for Puzzle {
 
     fn from_str(s: &str) -> color_eyre::Result<Self> {
         Self {
-            codes: s
-                .trim()
-                .lines()
-                .map(str::trim)
-                .filter(|s| !s.is_empty())
-                .map(|line| {
-                    ensure!(line.is_ascii(), "Line not ascii");
-                    ensure!(line.len() == 4, "Line wrong length");
-                    (line[..3].parse()?, line.to_owned()).pipe(Ok::<_, color_eyre::Report>)
-                })
-                .try_collect()?,
+            numbers: s.lines().map(str::trim).map(str::parse).try_collect()?,
         }
         .pipe(Ok)
     }
+}
+
+const fn next_num(n: u64) -> u64 {
+    let n = prune((n * 64) ^ n);
+    let n = prune((n / 32) ^ n);
+    prune((n * 2048) ^ n)
+}
+
+#[inline]
+const fn prune(n: u64) -> u64 {
+    n % 16_777_216
 }
 
 pub fn init_tracing() -> color_eyre::Result<()> {
@@ -44,7 +38,7 @@ pub fn init_tracing() -> color_eyre::Result<()> {
         .map(String::leak)
         .map(|s| s as &str)
         .or_else(|err| match err {
-            std::env::VarError::NotPresent => Ok("day_21=debug"),
+            std::env::VarError::NotPresent => Ok("day_22=debug"),
             err @ std::env::VarError::NotUnicode(_) => Err(err),
         })?
         .parse()?;
@@ -55,4 +49,18 @@ pub fn init_tracing() -> color_eyre::Result<()> {
         .with(tracing_error::ErrorLayer::default());
     tracing::subscriber::set_global_default(subscriber)?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use rstest::rstest;
+
+    use super::*;
+
+    #[rstest]
+    #[case(123, 15_887_950)]
+    #[case(15_887_950, 16_495_136)]
+    fn test_next(#[case] before: u64, #[case] after: u64) {
+        assert_eq!(next_num(before), after);
+    }
 }

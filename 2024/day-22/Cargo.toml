@@ -1,0 +1,33 @@
+[package]
+name = "day-22"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+color-eyre.workspace = true
+displaydoc.workspace = true
+divan.workspace = true
+glam.workspace = true
+indexmap.workspace = true
+itertools.workspace = true
+regex.workspace = true
+rayon.workspace = true
+tap.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+tracing-error.workspace = true
+
+common.workspace = true
+
+[dev-dependencies]
+divan.workspace = true
+rstest.workspace = true
+
+[lints]
+workspace = true
+
+[[bench]]
+name = "day-22-bench"
+path = "benches/benchmarks.rs"
+harness = false
