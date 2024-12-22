@@ -223,7 +223,6 @@ pub fn mul_windows(puzzle: &Puzzle) -> u64 {
         debug_assert!(out < 20);
         out
     }
-    // there are 40,951 total possible windows, so pre-allocate all of them
     let mut cache = vec![None::<Entry>; 160_000];
     for (idx, seed) in puzzle.numbers.iter().copied().enumerate() {
         let mut rng = Rng(seed);
@@ -248,6 +247,42 @@ pub fn mul_windows(puzzle: &Puzzle) -> u64 {
         .map(|entry| entry.total_price)
         .max()
         .unwrap_or(0)
+}
+
+#[must_use]
+pub fn small_cache(puzzle: &Puzzle) -> u64 {
+    #[inline]
+    const fn pane(num: u32, prev: u32) -> u32 {
+        let out = (num % 10 + 9) - (prev % 10);
+        debug_assert!(out < 20);
+        out
+    }
+
+    let mut cache = vec![None::<SmallEntry>; 160_000];
+    for (idx, seed) in puzzle.numbers.iter().copied().enumerate() {
+        let mut rng = Rng(seed);
+        let mut prev = rng.next().expect("rng not to end") % 10;
+        let mut window = 0u32;
+        for num in rng.by_ref().take(4) {
+            window = (window * 20) + pane(num, prev);
+            prev = num;
+        }
+        for num in rng.take(1997) {
+            cache[window as usize]
+                .get_or_insert_default()
+                .note_at(idx, price(prev));
+            window = ((window * 20) + pane(num, prev)) % 160_000;
+            prev = num;
+        }
+    }
+
+    cache
+        .into_iter()
+        .flatten()
+        .map(|entry| entry.total_price)
+        .max()
+        .unwrap_or(0)
+        .into()
 }
 
 #[inline]
@@ -277,6 +312,36 @@ impl Entry {
     }
 }
 
+#[derive(Debug, Default, Clone, Copy)]
+struct SmallEntry {
+    total_price: u16,
+    highest_seen: Option<u16>,
+}
+
+impl SmallEntry {
+    #[allow(
+        clippy::cast_possible_truncation,
+        clippy::cast_sign_loss,
+        reason = "known not to overflow"
+    )]
+    fn note_at(&mut self, idx: usize, price: i8) {
+        debug_assert!(price >= 0);
+        let idx = idx as u16;
+        let price = price as u16;
+        match self.highest_seen {
+            None => {
+                self.highest_seen = Some(idx);
+                self.total_price += price;
+            }
+            Some(seen) if seen < idx => {
+                self.highest_seen = Some(idx);
+                self.total_price += price;
+            }
+            _ => (),
+        }
+    }
+}
+
 fn price(seed: u32) -> i8 {
     i8::try_from(seed % 10).expect("10 < i32::MAX")
 }
@@ -293,15 +358,16 @@ mod tests {
     #[case::actual("part2.txt", 1501)]
     fn finds_solution(#[case] input_path: &str, #[case] expected: u64) -> Result<()> {
         let input: Puzzle = common::read_input!(input_path).parse()?;
-        // assert_eq!(initial(&input), expected);
-        // assert_eq!(one_pass(&input), expected);
-        // assert_eq!(u32_key(&input), expected);
-        // assert_eq!(fxhash_cache(&input), expected);
-        // assert_eq!(pre_alloc(&input), expected);
-        // assert_eq!(btree(&input), expected);
-        // assert_eq!(continuous_windows(&input), expected);
-        // assert_eq!(vec_cache(&input), expected);
+        assert_eq!(initial(&input), expected);
+        assert_eq!(one_pass(&input), expected);
+        assert_eq!(u32_key(&input), expected);
+        assert_eq!(fxhash_cache(&input), expected);
+        assert_eq!(pre_alloc(&input), expected);
+        assert_eq!(btree(&input), expected);
+        assert_eq!(continuous_windows(&input), expected);
+        assert_eq!(vec_cache(&input), expected);
         assert_eq!(mul_windows(&input), expected);
+        assert_eq!(small_cache(&input), expected);
         Ok(())
     }
 }

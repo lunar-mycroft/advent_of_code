@@ -1,13 +1,14 @@
 day_22_bench                 fastest       │ slowest       │ median        │ mean          │ samples │ iters
-├─ parse                     31.29 µs      │ 54.19 µs      │ 31.69 µs      │ 32.52 µs      │ 100     │ 100
-├─ part1                     5.111 ms      │ 5.472 ms      │ 5.155 ms      │ 5.16 ms       │ 100     │ 100
-├─ part2                     445.8 ms      │ 540.2 ms      │ 463.8 ms      │ 468.8 ms      │ 100     │ 100
-├─ part2_btree               209.3 ms      │ 240.6 ms      │ 213.4 ms      │ 214.1 ms      │ 100     │ 100
-├─ part2_continuous_windows  50.26 ms      │ 59.13 ms      │ 51.45 ms      │ 51.89 ms      │ 100     │ 100
-├─ part2_fxhash              417 ms        │ 484 ms        │ 425.2 ms      │ 427.5 ms      │ 100     │ 100
-├─ part2_int_key             93.55 ms      │ 101.3 ms      │ 96.15 ms      │ 96.28 ms      │ 100     │ 100
-├─ part2_mul_vec             13.81 ms      │ 17.46 ms      │ 14.46 ms      │ 14.6 ms       │ 100     │ 100
-├─ part2_one_pass            119.2 ms      │ 150.6 ms      │ 120.7 ms      │ 121.9 ms      │ 100     │ 100
-├─ part2_prealloc            93.23 ms      │ 95.37 ms      │ 94.1 ms       │ 94.12 ms      │ 100     │ 100
-╰─ part2_vec_cache           17.42 ms      │ 19.2 ms       │ 18.07 ms      │ 18.28 ms      │ 100     │ 100
+├─ parse                     30.39 µs      │ 49.99 µs      │ 30.99 µs      │ 31.98 µs      │ 100     │ 100
+├─ part1                     5.11 ms       │ 5.23 ms       │ 5.117 ms      │ 5.125 ms      │ 100     │ 100
+├─ part2                     444.7 ms      │ 545.5 ms      │ 452.4 ms      │ 459.7 ms      │ 100     │ 100
+├─ part2_btree               214.3 ms      │ 257 ms        │ 217.5 ms      │ 219.4 ms      │ 100     │ 100
+├─ part2_continuous_windows  50.28 ms      │ 54.87 ms      │ 51.06 ms      │ 51.16 ms      │ 100     │ 100
+├─ part2_fxhash              424.5 ms      │ 446.9 ms      │ 428.5 ms      │ 428.5 ms      │ 100     │ 100
+├─ part2_int_key             92.79 ms      │ 97.32 ms      │ 93.87 ms      │ 94.01 ms      │ 100     │ 100
+├─ part2_mul_vec             13.74 ms      │ 20.44 ms      │ 14.64 ms      │ 14.83 ms      │ 100     │ 100
+├─ part2_one_pass            121.1 ms      │ 127 ms        │ 122.4 ms      │ 122.7 ms      │ 100     │ 100
+├─ part2_prealloc            93.6 ms       │ 97.72 ms      │ 94.82 ms      │ 95.01 ms      │ 100     │ 100
+├─ part2_small_cache         10.58 ms      │ 13.98 ms      │ 10.75 ms      │ 10.81 ms      │ 100     │ 100
+╰─ part2_vec_cache           17.65 ms      │ 20.07 ms      │ 18.37 ms      │ 18.54 ms      │ 100     │ 100
 
