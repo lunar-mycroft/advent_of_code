@@ -1,10 +1,10 @@
 day_22_bench       fastest       │ slowest       │ median        │ mean          │ samples │ iters
-├─ parse           31.79 µs      │ 60.19 µs      │ 50.24 µs      │ 43.47 µs      │ 100     │ 100
-├─ part1           5.294 ms      │ 5.581 ms      │ 5.374 ms      │ 5.388 ms      │ 100     │ 100
-├─ part2           466.8 ms      │ 753.9 ms      │ 565.2 ms      │ 571.4 ms      │ 100     │ 100
-├─ part2_btree     69.38 ms      │ 99.27 ms      │ 79.94 ms      │ 80.88 ms      │ 100     │ 100
-├─ part2_fxhash    429.8 ms      │ 559.5 ms      │ 457 ms        │ 459.6 ms      │ 100     │ 100
-├─ part2_int_key   65.07 ms      │ 90.86 ms      │ 70.64 ms      │ 71.82 ms      │ 100     │ 100
-├─ part2_one_pass  97.08 ms      │ 169.2 ms      │ 109.2 ms      │ 112.6 ms      │ 100     │ 100
-╰─ part2_prealloc  64.1 ms       │ 89.03 ms      │ 69.08 ms      │ 70.79 ms      │ 100     │ 100
+├─ parse           30.49 µs      │ 63.49 µs      │ 30.94 µs      │ 31.88 µs      │ 100     │ 100
+├─ part1           5.285 ms      │ 5.922 ms      │ 5.339 ms      │ 5.382 ms      │ 100     │ 100
+├─ part2           463.6 ms      │ 637.5 ms      │ 521.5 ms      │ 526 ms        │ 100     │ 100
+├─ part2_btree     191.2 ms      │ 234.1 ms      │ 199.6 ms      │ 200.9 ms      │ 100     │ 100
+├─ part2_fxhash    419.7 ms      │ 478.8 ms      │ 451.9 ms      │ 448.6 ms      │ 100     │ 100
+├─ part2_int_key   66.23 ms      │ 113.3 ms      │ 76.57 ms      │ 79.32 ms      │ 100     │ 100
+├─ part2_one_pass  100.5 ms      │ 137.6 ms      │ 111.1 ms      │ 113.5 ms      │ 100     │ 100
+╰─ part2_prealloc  64.78 ms      │ 91.38 ms      │ 68.55 ms      │ 70.99 ms      │ 100     │ 100
 

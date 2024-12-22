@@ -112,6 +112,6 @@ fn part2_btree(bencher: divan::Bencher) {
         .bench_values(|res| {
             res.expect("parsing to suceed")
                 .pipe(divan::black_box)
-                .pipe_ref(part2::pre_alloc)
+                .pipe_ref(part2::btree)
         });
 }
