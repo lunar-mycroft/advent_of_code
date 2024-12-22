@@ -159,7 +159,7 @@ pub fn continuous_windows(puzzle: &Puzzle) -> u64 {
         (num % 10 + 9) - (prev % 10)
     }
     // there are 40,951 total possible windows, so pre-allocate all of them
-    let mut cache: HashMap<u32, Entry> = HashMap::new();
+    let mut cache: HashMap<u32, Entry> = HashMap::with_capacity(40_951);
     for (idx, seed) in puzzle.numbers.iter().copied().enumerate() {
         let mut rng = Rng(seed);
         let mut prev = rng.next().expect("rng not to end") % 10;
@@ -177,6 +177,74 @@ pub fn continuous_windows(puzzle: &Puzzle) -> u64 {
 
     cache
         .into_values()
+        .map(|entry| entry.total_price)
+        .max()
+        .unwrap_or(0)
+}
+
+#[must_use]
+pub fn vec_cache(puzzle: &Puzzle) -> u64 {
+    #[inline]
+    const fn pane(num: u32, prev: u32) -> u32 {
+        (num % 10 + 9) - (prev % 10)
+    }
+    // there are 40,951 total possible windows, so pre-allocate all of them
+    let mut cache = vec![None::<Entry>; 0xfffff];
+    for (idx, seed) in puzzle.numbers.iter().copied().enumerate() {
+        let mut rng = Rng(seed);
+        let mut prev = rng.next().expect("rng not to end") % 10;
+        let mut window = 0u32;
+        for num in rng.by_ref().take(4) {
+            window = (window << 5) | pane(num, prev);
+            prev = num;
+        }
+        for num in rng.take(1997) {
+            cache[window as usize]
+                .get_or_insert_default()
+                .note_at(idx, price(prev));
+            window = ((window << 5) | pane(num, prev)) & 0x000f_ffff;
+            prev = num;
+        }
+    }
+
+    cache
+        .into_iter()
+        .flatten()
+        .map(|entry| entry.total_price)
+        .max()
+        .unwrap_or(0)
+}
+
+#[must_use]
+pub fn mul_windows(puzzle: &Puzzle) -> u64 {
+    #[inline]
+    const fn pane(num: u32, prev: u32) -> u32 {
+        let out = (num % 10 + 9) - (prev % 10);
+        debug_assert!(out < 20);
+        out
+    }
+    // there are 40,951 total possible windows, so pre-allocate all of them
+    let mut cache = vec![None::<Entry>; 160_000];
+    for (idx, seed) in puzzle.numbers.iter().copied().enumerate() {
+        let mut rng = Rng(seed);
+        let mut prev = rng.next().expect("rng not to end") % 10;
+        let mut window = 0u32;
+        for num in rng.by_ref().take(4) {
+            window = (window * 20) + pane(num, prev);
+            prev = num;
+        }
+        for num in rng.take(1997) {
+            cache[window as usize]
+                .get_or_insert_default()
+                .note_at(idx, price(prev));
+            window = ((window * 20) + pane(num, prev)) % 160_000;
+            prev = num;
+        }
+    }
+
+    cache
+        .into_iter()
+        .flatten()
         .map(|entry| entry.total_price)
         .max()
         .unwrap_or(0)
@@ -231,7 +299,9 @@ mod tests {
         // assert_eq!(fxhash_cache(&input), expected);
         // assert_eq!(pre_alloc(&input), expected);
         // assert_eq!(btree(&input), expected);
-        assert_eq!(continuous_windows(&input), expected);
+        // assert_eq!(continuous_windows(&input), expected);
+        // assert_eq!(vec_cache(&input), expected);
+        assert_eq!(mul_windows(&input), expected);
         Ok(())
     }
 }
