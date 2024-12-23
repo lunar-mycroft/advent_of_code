@@ -150,10 +150,30 @@ pub fn array(puzzle: &IntGraph) -> String {
         .join(",")
 }
 
+pub fn array_preparsed((edges, nodes): &(crate::array::EdgeMap, crate::array::NodeSet)) -> String {
+    crate::array::cliques(edges, nodes)
+        .max_by_key(Vec::len)
+        .unwrap_or_default()
+        .into_iter()
+        .map(|n| {
+            let (a, b) = (
+                u32::from(n / 26 + u16::from(b'a')),
+                u32::from(n % 26 + u16::from(b'a')),
+            );
+            format!(
+                "{}{}",
+                char::from_u32(a).expect("known valid byte"),
+                char::from_u32(b).expect("known valid byte")
+            )
+        })
+        .join(",")
+}
+
 #[cfg(test)]
 mod tests {
     use color_eyre::eyre::Result;
     use rstest::rstest;
+    use tap::prelude::*;
 
     use super::*;
 
@@ -168,6 +188,10 @@ mod tests {
         assert_eq!(fx_hash(&string), expected);
         assert_eq!(int_graph(&int), expected);
         assert_eq!(array(&int), expected);
+        assert_eq!(
+            crate::array::parse(&int).pipe_ref(array_preparsed),
+            expected
+        );
         assert_eq!(bron_kerbosh(&string), expected);
         Ok(())
     }

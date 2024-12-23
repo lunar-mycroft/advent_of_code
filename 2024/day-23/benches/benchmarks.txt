@@ -1,19 +1,22 @@
-day_23_bench        fastest       │ slowest       │ median        │ mean          │ samples │ iters
-├─ parse                          │               │               │               │         │
-│  ├─ int_repr      72.89 µs      │ 130.5 µs      │ 74.19 µs      │ 76.64 µs      │ 100     │ 100
-│  ╰─ string_repr   275.4 µs      │ 598.9 µs      │ 308.6 µs      │ 318.4 µs      │ 100     │ 100
-├─ part_1                         │               │               │               │         │
-│  ├─ array         288.9 µs      │ 518.3 µs      │ 306.9 µs      │ 313.9 µs      │ 100     │ 100
-│  ├─ common        4.33 ms       │ 7.296 ms      │ 4.442 ms      │ 4.599 ms      │ 100     │ 100
-│  ├─ edge_set      4.362 ms      │ 5.571 ms      │ 4.667 ms      │ 4.712 ms      │ 100     │ 100
-│  ├─ initial       4.163 ms      │ 5.356 ms      │ 4.343 ms      │ 4.406 ms      │ 100     │ 100
-│  ├─ int_graph     327.1 µs      │ 456.8 µs      │ 342.8 µs      │ 352.6 µs      │ 100     │ 100
-│  ╰─ pre_filter    777.6 µs      │ 1.257 ms      │ 846.5 µs      │ 865.4 µs      │ 100     │ 100
-╰─ part_2                         │               │               │               │         │
-   ├─ array         157.7 µs      │ 401.1 µs      │ 160.5 µs      │ 165.2 µs      │ 100     │ 100
-   ├─ bron_kerbosh  123.6 ms      │ 142.5 ms      │ 125.7 ms      │ 126.3 ms      │ 100     │ 100
-   ├─ common        2.647 ms      │ 3.395 ms      │ 2.74 ms       │ 2.785 ms      │ 100     │ 100
-   ├─ fx_hash       1.267 ms      │ 1.936 ms      │ 1.326 ms      │ 1.345 ms      │ 100     │ 100
-   ├─ initial       2.982 ms      │ 3.639 ms      │ 3.048 ms      │ 3.098 ms      │ 100     │ 100
-   ╰─ int_graph     674.2 µs      │ 883.9 µs      │ 688.8 µs      │ 699 µs        │ 100     │ 100
+day_23_bench            fastest       │ slowest       │ median        │ mean          │ samples │ iters
+├─ parse                              │               │               │               │         │
+│  ├─ int_repr          74.99 µs      │ 160.3 µs      │ 76.49 µs      │ 79.6 µs       │ 100     │ 100
+│  ├─ string_repr       281.9 µs      │ 588.1 µs      │ 298.9 µs      │ 310.2 µs      │ 100     │ 100
+│  ╰─ to_array          22.99 µs      │ 327.2 µs      │ 123.7 µs      │ 104.1 µs      │ 100     │ 100
+├─ part_1                             │               │               │               │         │
+│  ├─ array             232.2 µs      │ 499.4 µs      │ 279.7 µs      │ 299.1 µs      │ 100     │ 100
+│  ├─ array_pre_parsed  144.6 µs      │ 242.8 µs      │ 146.2 µs      │ 149.5 µs      │ 100     │ 100
+│  ├─ common            4.298 ms      │ 5.929 ms      │ 4.473 ms      │ 4.551 ms      │ 100     │ 100
+│  ├─ edge_set          4.53 ms       │ 6.875 ms      │ 4.985 ms      │ 5.078 ms      │ 100     │ 100
+│  ├─ initial           4.283 ms      │ 5.347 ms      │ 4.437 ms      │ 4.519 ms      │ 100     │ 100
+│  ├─ int_graph         330.4 µs      │ 513.7 µs      │ 335.6 µs      │ 346.4 µs      │ 100     │ 100
+│  ╰─ pre_filter        775.5 µs      │ 1.379 ms      │ 878.8 µs      │ 889 µs        │ 100     │ 100
+╰─ part_2                             │               │               │               │         │
+   ├─ array             157.3 µs      │ 330.7 µs      │ 159.8 µs      │ 166.6 µs      │ 100     │ 100
+   ├─ array_pre_parsed  139 µs        │ 281.7 µs      │ 140.8 µs      │ 143.5 µs      │ 100     │ 100
+   ├─ bron_kerbosh      124.7 ms      │ 148.8 ms      │ 127.6 ms      │ 129.6 ms      │ 100     │ 100
+   ├─ common            2.694 ms      │ 3.273 ms      │ 2.739 ms      │ 2.785 ms      │ 100     │ 100
+   ├─ fx_hash           1.29 ms       │ 1.7 ms        │ 1.324 ms      │ 1.356 ms      │ 100     │ 100
+   ├─ initial           2.994 ms      │ 4.265 ms      │ 3.077 ms      │ 3.172 ms      │ 100     │ 100
+   ╰─ int_graph         669.3 µs      │ 983.9 µs      │ 688.4 µs      │ 699.4 µs      │ 100     │ 100
 

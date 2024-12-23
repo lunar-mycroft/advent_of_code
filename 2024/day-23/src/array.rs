@@ -2,7 +2,13 @@ use std::borrow::Cow;
 
 use tap::Pipe;
 
-pub(crate) fn parse(input: &crate::int::Graph) -> (EdgeMap, NodeSet<'static>) {
+#[derive(Debug)]
+pub struct NodeSet<'a>(Cow<'a, [bool]>);
+
+#[derive(Debug)]
+pub struct EdgeMap(Vec<bool>);
+
+pub fn parse(input: &crate::int::Graph) -> (EdgeMap, NodeSet<'static>) {
     let (mut nodes, mut edges) = (vec![false; 676], vec![false; 456_976]);
     for edge in input.all_edges() {
         let (from, to) = ((edge.from as usize), (edge.to as usize));
@@ -31,12 +37,6 @@ pub(crate) fn cliques(edges: &EdgeMap, nodes: &NodeSet) -> impl Iterator<Item = 
     }
     res.into_iter()
 }
-
-#[derive(Debug)]
-pub struct NodeSet<'a>(Cow<'a, [bool]>);
-
-#[derive(Debug)]
-pub struct EdgeMap(Vec<bool>);
 
 impl EdgeMap {
     pub(crate) fn get(&self, from: u16) -> NodeSet<'_> {
