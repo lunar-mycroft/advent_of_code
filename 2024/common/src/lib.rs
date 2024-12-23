@@ -2,6 +2,13 @@ pub mod grid;
 pub mod min_heap;
 pub mod position_map;
 
+/*
+TODO:
+- bitset (set of usizes where each item is stored as a bit)
+- counter
+- threading library
+*/
+
 #[macro_export]
 macro_rules! read_input {
     ($filename:expr) => {
