@@ -80,6 +80,27 @@ pub fn edge_set(puzzle: &Puzzle) -> usize {
         .count()
 }
 
+#[must_use]
+pub fn pre_filter(puzzle: &Puzzle) -> usize {
+    let connected_to = puzzle.connections();
+    connected_to
+        .iter()
+        .filter(|(key, _)| key.starts_with('t'))
+        .flat_map(|(key, connections)| {
+            connections
+                .iter()
+                .combinations(2)
+                .filter(|pair| connected_to[pair[0]].contains(pair[1]))
+                .map(|pair| {
+                    let mut arr = [*key, *pair[0], *pair[1]];
+                    arr.sort_unstable();
+                    arr
+                })
+        })
+        .unique()
+        .count()
+}
+
 #[cfg(test)]
 mod tests {
     use color_eyre::eyre::Result;
@@ -95,6 +116,7 @@ mod tests {
         assert_eq!(initial(&input), expected);
         assert_eq!(common_methods(&input), expected);
         assert_eq!(edge_set(&input), expected);
+        assert_eq!(pre_filter(&input), expected);
         Ok(())
     }
 }
