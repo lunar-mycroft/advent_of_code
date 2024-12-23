@@ -9,7 +9,11 @@ pub mod generalized;
 pub mod idiomatic;
 pub mod initial;
 pub mod no_hash;
-// todo: https://www.reddit.com/r/adventofcode/comments/1hj2odw/2024_day_21_solutions/m34pm7v/
+/*
+TODO:
+https://www.reddit.com/r/adventofcode/comments/1hj2odw/2024_day_21_solutions/m34pm7v/
+https://www.reddit.com/r/adventofcode/comments/1hj2odw/2024_day_21_solutions/m3ha5mr/
+*/
 
 #[derive(Debug, Clone)]
 pub struct Puzzle {
