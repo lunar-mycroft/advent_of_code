@@ -84,6 +84,16 @@ mod part_2 {
                     .pipe_ref(part2::common_methods)
             });
     }
+    #[divan::bench]
+    fn bron_kerbosh(bencher: divan::Bencher) {
+        bencher
+            .with_inputs(|| common::read_input!("part2.txt").parse::<Puzzle>())
+            .bench_values(|res| {
+                res.expect("parsing to suceed")
+                    .pipe(divan::black_box)
+                    .pipe_ref(part2::bron_kerbosh)
+            });
+    }
 }
 
 #[divan::bench]

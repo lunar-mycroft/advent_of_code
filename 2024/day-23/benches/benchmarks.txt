@@ -1,11 +1,12 @@
-day_23_bench      fastest       │ slowest       │ median        │ mean          │ samples │ iters
-├─ parse          262.7 µs      │ 397.9 µs      │ 292.9 µs      │ 292.3 µs      │ 100     │ 100
-├─ part_1                       │               │               │               │         │
-│  ├─ common      4.197 ms      │ 4.631 ms      │ 4.318 ms      │ 4.329 ms      │ 100     │ 100
-│  ├─ edge_set    4.399 ms      │ 4.755 ms      │ 4.522 ms      │ 4.532 ms      │ 100     │ 100
-│  ├─ initial     4.247 ms      │ 4.852 ms      │ 4.345 ms      │ 4.357 ms      │ 100     │ 100
-│  ╰─ pre_filter  776.1 µs      │ 1.394 ms      │ 895.2 µs      │ 913.4 µs      │ 100     │ 100
-╰─ part_2                       │               │               │               │         │
-   ├─ common      2.686 ms      │ 3.224 ms      │ 2.778 ms      │ 2.815 ms      │ 100     │ 100
-   ╰─ initial     2.993 ms      │ 4.532 ms      │ 3.09 ms       │ 3.158 ms      │ 100     │ 100
+day_23_bench        fastest       │ slowest       │ median        │ mean          │ samples │ iters
+├─ parse            248.6 µs      │ 344.8 µs      │ 264.6 µs      │ 267.3 µs      │ 100     │ 100
+├─ part_1                         │               │               │               │         │
+│  ├─ common        4.474 ms      │ 7.296 ms      │ 4.68 ms       │ 4.907 ms      │ 100     │ 100
+│  ├─ edge_set      4.784 ms      │ 6.62 ms       │ 4.959 ms      │ 5.021 ms      │ 100     │ 100
+│  ├─ initial       4.517 ms      │ 7.045 ms      │ 4.698 ms      │ 4.775 ms      │ 100     │ 100
+│  ╰─ pre_filter    799.5 µs      │ 1.674 ms      │ 935.2 µs      │ 981.9 µs      │ 100     │ 100
+╰─ part_2                         │               │               │               │         │
+   ├─ bron_kerbosh  122.6 ms      │ 131.1 ms      │ 124.6 ms      │ 125 ms        │ 100     │ 100
+   ├─ common        2.685 ms      │ 3.21 ms       │ 2.754 ms      │ 2.777 ms      │ 100     │ 100
+   ╰─ initial       2.946 ms      │ 4.166 ms      │ 3.036 ms      │ 3.059 ms      │ 100     │ 100
 

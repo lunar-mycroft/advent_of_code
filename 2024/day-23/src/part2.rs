@@ -50,6 +50,56 @@ pub fn common_methods(puzzle: &Puzzle) -> String {
         .join(",")
 }
 
+#[must_use]
+pub fn bron_kerbosh(puzzle: &Puzzle) -> String {
+    fn bk_impl<'a>(
+        g: &HashMap<&'a str, HashSet<&'a str>>,
+        r: &mut HashSet<&'a str>,
+        mut p: HashSet<&'a str>,
+        mut x: HashSet<&'a str>,
+        cliques: &mut Vec<HashSet<&'a str>>,
+    ) {
+        if p.is_empty() {
+            if x.is_empty() {
+                cliques.push(r.clone());
+            }
+            return;
+        }
+        while let Some(node) = p.iter().copied().next() {
+            let neighbors = &g[node];
+            r.insert(node);
+            bk_impl(
+                g,
+                r,
+                p.intersection(neighbors).copied().collect(),
+                x.intersection(neighbors).copied().collect(),
+                cliques,
+            );
+            r.remove(node);
+            p.remove(node);
+            x.insert(node);
+        }
+    }
+
+    let mut cliques = Vec::new();
+    let connections = puzzle.connections();
+    bk_impl(
+        &connections,
+        &mut HashSet::new(),
+        puzzle.nodes().collect(),
+        HashSet::new(),
+        &mut cliques,
+    );
+    cliques
+        .iter()
+        .max_by_key(|c| c.len())
+        .cloned()
+        .unwrap_or_default()
+        .into_iter()
+        .sorted_unstable()
+        .join(",")
+}
+
 #[cfg(test)]
 mod tests {
     use color_eyre::eyre::Result;
@@ -64,6 +114,7 @@ mod tests {
         let input: Puzzle = common::read_input!(input_path).parse()?;
         assert_eq!(initial(&input), expected);
         assert_eq!(common_methods(&input), expected);
+        assert_eq!(bron_kerbosh(&input), expected);
         Ok(())
     }
 }
