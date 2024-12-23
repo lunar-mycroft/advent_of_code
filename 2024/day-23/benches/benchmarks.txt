@@ -1,5 +1,9 @@
-day_23_bench  fastest       │ slowest       │ median        │ mean          │ samples │ iters
-├─ parse      254.5 µs      │ 332.6 µs      │ 279.2 µs      │ 285.5 µs      │ 100     │ 100
-├─ part1      4.189 ms      │ 4.405 ms      │ 4.271 ms      │ 4.275 ms      │ 100     │ 100
-╰─ part2      3.065 ms      │ 3.313 ms      │ 3.153 ms      │ 3.158 ms      │ 100     │ 100
+day_23_bench   fastest       │ slowest       │ median        │ mean          │ samples │ iters
+├─ parse       260.6 µs      │ 416.8 µs      │ 306.1 µs      │ 311.5 µs      │ 100     │ 100
+├─ part_1                    │               │               │               │         │
+│  ├─ common   4.227 ms      │ 5.176 ms      │ 4.288 ms      │ 4.322 ms      │ 100     │ 100
+│  ╰─ initial  4.183 ms      │ 4.766 ms      │ 4.273 ms      │ 4.289 ms      │ 100     │ 100
+╰─ part_2                    │               │               │               │         │
+   ├─ common   2.773 ms      │ 3.219 ms      │ 2.844 ms      │ 2.855 ms      │ 100     │ 100
+   ╰─ initial  3.003 ms      │ 4.21 ms       │ 3.106 ms      │ 3.144 ms      │ 100     │ 100
 

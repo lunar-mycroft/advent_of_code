@@ -1,3 +1,5 @@
+use std::collections::{HashMap, HashSet};
+
 use itertools::Itertools;
 use tap::prelude::*;
 
@@ -6,7 +8,41 @@ pub mod part2;
 
 #[derive(Debug)]
 pub struct Puzzle {
-    connections: Vec<Connection>,
+    edges: Vec<Edge>,
+}
+
+impl Puzzle {
+    fn nodes(&self) -> impl Iterator<Item = &str> {
+        self.edges
+            .iter()
+            .flat_map(|conn| [conn.from.as_str(), conn.to.as_str()])
+            .unique()
+    }
+
+    fn connections(&self) -> HashMap<&str, HashSet<&str>> {
+        self.edges
+            .iter()
+            .fold(HashMap::<&str, HashSet<&str>>::new(), |mut map, conn| {
+                map.entry(&conn.from).or_default().insert(&conn.to);
+                map.entry(&conn.to).or_default().insert(&conn.from);
+                map
+            })
+    }
+
+    fn cliques(&self) -> impl Iterator<Item = Vec<&str>> {
+        let connections = self.connections();
+        let mut cliques: Vec<Vec<&str>> = Vec::new();
+        for pc in self.nodes().sorted_unstable() {
+            let conns = &connections[pc];
+            for set in &mut cliques {
+                if set.iter().copied().all(|other| conns.contains(other)) {
+                    set.push(pc);
+                }
+            }
+            cliques.push([pc].into());
+        }
+        cliques.into_iter()
+    }
 }
 
 impl std::str::FromStr for Puzzle {
@@ -17,18 +53,18 @@ impl std::str::FromStr for Puzzle {
             .map(str::trim)
             .filter(|s| !s.is_empty())
             .filter_map(|line| line.split_once('-'))
-            .map(|(a, b)| Connection {
+            .map(|(a, b)| Edge {
                 from: a.to_owned(),
                 to: b.to_owned(),
             })
             .collect_vec()
-            .pipe(|connections| Self { connections })
+            .pipe(|connections| Self { edges: connections })
             .pipe(Ok)
     }
 }
 
 #[derive(Debug)]
-struct Connection {
+struct Edge {
     from: String,
     to: String,
 }

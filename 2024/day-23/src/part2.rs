@@ -5,18 +5,17 @@ use itertools::Itertools;
 use crate::Puzzle;
 
 #[must_use]
-#[allow(clippy::needless_pass_by_value)]
-pub fn process(puzzle: &Puzzle) -> String {
+pub fn initial(puzzle: &Puzzle) -> String {
     let nodes: Vec<_> = puzzle
-        .connections
+        .edges
         .iter()
         .flat_map(|conn| [conn.from.as_str(), conn.to.as_str()])
         .unique()
         .sorted_unstable()
         .collect_vec();
-    let connectioned_to: HashMap<_, _> =
+    let connected_to: HashMap<_, _> =
         puzzle
-            .connections
+            .edges
             .iter()
             .fold(HashMap::<&str, HashSet<&str>>::new(), |mut map, conn| {
                 map.entry(&conn.from).or_default().insert(&conn.to);
@@ -25,7 +24,7 @@ pub fn process(puzzle: &Puzzle) -> String {
             });
     let mut sets: Vec<HashSet<&str>> = Vec::new();
     for pc in nodes {
-        let conns = &connectioned_to[pc];
+        let conns = &connected_to[pc];
         for set in &mut sets {
             if set.iter().copied().all(|other| conns.contains(other)) {
                 set.insert(pc);
@@ -41,6 +40,16 @@ pub fn process(puzzle: &Puzzle) -> String {
         .join(",")
 }
 
+#[must_use]
+pub fn common_methods(puzzle: &Puzzle) -> String {
+    puzzle
+        .cliques()
+        .max_by_key(Vec::len)
+        .unwrap_or_default()
+        .into_iter()
+        .join(",")
+}
+
 #[cfg(test)]
 mod tests {
     use color_eyre::eyre::Result;
@@ -53,8 +62,8 @@ mod tests {
     #[case::example("part2.txt", "cl,ei,fd,hc,ib,kq,kv,ky,rv,vf,wk,yx,zf")]
     fn finds_solution(#[case] input_path: &str, #[case] expected: &str) -> Result<()> {
         let input: Puzzle = common::read_input!(input_path).parse()?;
-        let output = process(&input);
-        assert_eq!(output, expected);
+        assert_eq!(initial(&input), expected);
+        assert_eq!(common_methods(&input), expected);
         Ok(())
     }
 }
