@@ -1,12 +1,13 @@
 day_23_bench        fastest       │ slowest       │ median        │ mean          │ samples │ iters
-├─ parse            248.6 µs      │ 344.8 µs      │ 264.6 µs      │ 267.3 µs      │ 100     │ 100
+├─ parse            263 µs        │ 499.3 µs      │ 292.5 µs      │ 296.1 µs      │ 100     │ 100
 ├─ part_1                         │               │               │               │         │
-│  ├─ common        4.474 ms      │ 7.296 ms      │ 4.68 ms       │ 4.907 ms      │ 100     │ 100
-│  ├─ edge_set      4.784 ms      │ 6.62 ms       │ 4.959 ms      │ 5.021 ms      │ 100     │ 100
-│  ├─ initial       4.517 ms      │ 7.045 ms      │ 4.698 ms      │ 4.775 ms      │ 100     │ 100
-│  ╰─ pre_filter    799.5 µs      │ 1.674 ms      │ 935.2 µs      │ 981.9 µs      │ 100     │ 100
+│  ├─ common        4.301 ms      │ 7.783 ms      │ 4.439 ms      │ 4.681 ms      │ 100     │ 100
+│  ├─ edge_set      4.357 ms      │ 6.006 ms      │ 4.545 ms      │ 4.579 ms      │ 100     │ 100
+│  ├─ initial       4.323 ms      │ 4.6 ms        │ 4.391 ms      │ 4.4 ms        │ 100     │ 100
+│  ╰─ pre_filter    787 µs        │ 1.07 ms       │ 889.7 µs      │ 902.7 µs      │ 100     │ 100
 ╰─ part_2                         │               │               │               │         │
-   ├─ bron_kerbosh  122.6 ms      │ 131.1 ms      │ 124.6 ms      │ 125 ms        │ 100     │ 100
-   ├─ common        2.685 ms      │ 3.21 ms       │ 2.754 ms      │ 2.777 ms      │ 100     │ 100
-   ╰─ initial       2.946 ms      │ 4.166 ms      │ 3.036 ms      │ 3.059 ms      │ 100     │ 100
+   ├─ bron_kerbosh  120.6 ms      │ 141.8 ms      │ 122.8 ms      │ 124 ms        │ 100     │ 100
+   ├─ common        2.714 ms      │ 3.251 ms      │ 2.782 ms      │ 2.81 ms       │ 100     │ 100
+   ├─ fx_hash       1.296 ms      │ 1.703 ms      │ 1.326 ms      │ 1.349 ms      │ 100     │ 100
+   ╰─ initial       2.995 ms      │ 3.972 ms      │ 3.075 ms      │ 3.111 ms      │ 100     │ 100
 

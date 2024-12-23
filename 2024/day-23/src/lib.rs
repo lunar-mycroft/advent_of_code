@@ -1,5 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
+use fxhash::{FxHashMap, FxHashSet};
 use itertools::Itertools;
 use tap::prelude::*;
 
@@ -19,6 +20,15 @@ impl Puzzle {
             .unique()
     }
 
+    fn nodes_fx(&self) -> impl Iterator<Item = &str> {
+        let mut set = FxHashSet::default();
+        for edge in &self.edges {
+            set.insert(edge.from.as_str());
+            set.insert(edge.to.as_str());
+        }
+        set.into_iter()
+    }
+
     fn all_edges(&self) -> impl Iterator<Item = EdgeRef<'_>> {
         self.edges
             .iter()
@@ -36,10 +46,36 @@ impl Puzzle {
             })
     }
 
+    fn connections_fx(&self) -> FxHashMap<&str, FxHashSet<&str>> {
+        self.edges.iter().fold(
+            FxHashMap::<&str, FxHashSet<&str>>::default(),
+            |mut map, conn| {
+                map.entry(&conn.from).or_default().insert(&conn.to);
+                map.entry(&conn.to).or_default().insert(&conn.from);
+                map
+            },
+        )
+    }
+
     fn cliques(&self) -> impl Iterator<Item = Vec<&str>> {
         let connections = self.connections();
         let mut cliques: Vec<Vec<&str>> = Vec::new();
         for pc in self.nodes().sorted_unstable() {
+            let conns = &connections[pc];
+            for set in &mut cliques {
+                if set.iter().copied().all(|other| conns.contains(other)) {
+                    set.push(pc);
+                }
+            }
+            cliques.push([pc].into());
+        }
+        cliques.into_iter()
+    }
+
+    fn cliques_fx(&self) -> impl Iterator<Item = Vec<&str>> {
+        let connections = self.connections_fx();
+        let mut cliques: Vec<Vec<&str>> = Vec::new();
+        for pc in self.nodes_fx().sorted_unstable() {
             let conns = &connections[pc];
             for set in &mut cliques {
                 if set.iter().copied().all(|other| conns.contains(other)) {

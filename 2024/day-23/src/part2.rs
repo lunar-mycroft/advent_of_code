@@ -100,6 +100,31 @@ pub fn bron_kerbosh(puzzle: &Puzzle) -> String {
         .join(",")
 }
 
+#[must_use]
+pub fn fx_hash(puzzle: &Puzzle) -> String {
+    puzzle
+        .cliques_fx()
+        .max_by_key(Vec::len)
+        .unwrap_or_default()
+        .into_iter()
+        .join(",")
+}
+
+// #[must_use]
+// pub fn counter(puzzle: &Puzzle) -> String {
+//     let counter = puzzle.edges.iter().fold(HashMap::new(), |mut map, edge| {
+//         *map.entry(edge.to.as_str()).or_insert(0usize) += 1;
+//         map
+//     });
+//     let max_count = *counter.values().max().expect("there to be values");
+//     counter
+//         .into_iter()
+//         .filter(|(_, n)| *n == max_count)
+//         .map(|(s, _)| s)
+//         .sorted_unstable()
+//         .join(",")
+// }
+
 #[cfg(test)]
 mod tests {
     use color_eyre::eyre::Result;
@@ -114,7 +139,9 @@ mod tests {
         let input: Puzzle = common::read_input!(input_path).parse()?;
         assert_eq!(initial(&input), expected);
         assert_eq!(common_methods(&input), expected);
+        assert_eq!(fx_hash(&input), expected);
         assert_eq!(bron_kerbosh(&input), expected);
+        // assert_eq!(counter(&input), expected);
         Ok(())
     }
 }
