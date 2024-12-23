@@ -124,14 +124,14 @@ pub fn int_graph(puzzle: &IntGraph) -> usize {
 
 #[must_use]
 pub fn array(puzzle: &IntGraph) -> usize {
-    let (connected_to, _) = crate::array::parse(puzzle);
-    connected_to
+    let (edges, _) = crate::array::parse(puzzle);
+    edges
         .prefixed_by(b't')
         .flat_map(|(key, connections)| {
             connections
                 .iter()
                 .combinations(2)
-                .filter(|pair| connected_to.get(pair[0]).contains(pair[1]))
+                .filter(|pair| edges.get(pair[0]).contains(pair[1]))
                 .map(move |pair| {
                     let mut arr = [key, pair[0], pair[1]];
                     arr.sort_unstable();

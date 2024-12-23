@@ -110,7 +110,7 @@ pub fn fx_hash(puzzle: &StringGraph) -> String {
         .join(",")
 }
 
-pub fn array(puzzle: &IntGraph) -> String {
+pub fn int_graph(puzzle: &IntGraph) -> String {
     puzzle
         .cliques()
         .max_by_key(Vec::len)
@@ -130,7 +130,7 @@ pub fn array(puzzle: &IntGraph) -> String {
         .join(",")
 }
 
-pub fn int_graph(puzzle: &IntGraph) -> String {
+pub fn array(puzzle: &IntGraph) -> String {
     let (edges, nodes) = crate::array::parse(puzzle);
     crate::array::cliques(&edges, &nodes)
         .max_by_key(Vec::len)
