@@ -19,6 +19,13 @@ impl Puzzle {
             .unique()
     }
 
+    fn all_edges(&self) -> impl Iterator<Item = EdgeRef<'_>> {
+        self.edges
+            .iter()
+            .map(EdgeRef::from)
+            .chain(self.edges.iter().map(EdgeRef::from).map(EdgeRef::reversed))
+    }
+
     fn connections(&self) -> HashMap<&str, HashSet<&str>> {
         self.edges
             .iter()
@@ -67,6 +74,30 @@ impl std::str::FromStr for Puzzle {
 struct Edge {
     from: String,
     to: String,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone, Copy)]
+struct EdgeRef<'a> {
+    from: &'a str,
+    to: &'a str,
+}
+
+impl EdgeRef<'_> {
+    const fn reversed(self) -> Self {
+        Self {
+            from: self.to,
+            to: self.from,
+        }
+    }
+}
+
+impl<'a> From<&'a Edge> for EdgeRef<'a> {
+    fn from(value: &'a Edge) -> Self {
+        Self {
+            from: &value.from,
+            to: &value.to,
+        }
+    }
 }
 
 pub fn init_tracing() -> color_eyre::Result<()> {

@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use itertools::Itertools;
 
-use crate::Puzzle;
+use crate::{EdgeRef, Puzzle};
 
 #[must_use]
 pub fn initial(puzzle: &Puzzle) -> usize {
@@ -54,6 +54,32 @@ pub fn common_methods(puzzle: &Puzzle) -> usize {
         .count()
 }
 
+#[must_use]
+pub fn edge_set(puzzle: &Puzzle) -> usize {
+    let edges: HashSet<_> = puzzle.all_edges().collect();
+    puzzle
+        .connections()
+        .iter()
+        .flat_map(|(key, connections)| {
+            connections
+                .iter()
+                .combinations(2)
+                .map(|pair| EdgeRef {
+                    from: pair[0],
+                    to: pair[1],
+                })
+                .filter(|edge| edges.contains(edge))
+                .map(|pair| {
+                    let mut arr = [*key, pair.from, pair.to];
+                    arr.sort_unstable();
+                    arr
+                })
+                .filter(|trip| trip.iter().copied().any(|pc| pc.starts_with('t')))
+        })
+        .unique()
+        .count()
+}
+
 #[cfg(test)]
 mod tests {
     use color_eyre::eyre::Result;
@@ -68,6 +94,7 @@ mod tests {
         let input: Puzzle = common::read_input!(input_path).parse()?;
         assert_eq!(initial(&input), expected);
         assert_eq!(common_methods(&input), expected);
+        assert_eq!(edge_set(&input), expected);
         Ok(())
     }
 }
