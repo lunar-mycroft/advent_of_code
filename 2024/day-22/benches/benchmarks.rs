@@ -175,3 +175,18 @@ fn part2_small_cache(bencher: divan::Bencher) {
                 .pipe_ref(part2::small_cache)
         });
 }
+
+#[divan::bench]
+fn part2_rayon(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| {
+            common::read_input!("part2.txt")
+                .parse::<Puzzle>()
+                .map(divan::black_box)
+        })
+        .bench_values(|res| {
+            res.expect("parsing to suceed")
+                .pipe(divan::black_box)
+                .pipe_ref(part2::small_cache_rayon)
+        });
+}

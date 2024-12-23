@@ -152,12 +152,15 @@ pub fn btree(puzzle: &Puzzle) -> u64 {
         .unwrap_or(0)
 }
 
+#[inline]
+const fn pane(num: u32, prev: u32) -> u32 {
+    let out = (num % 10 + 9) - (prev % 10);
+    debug_assert!(out < 20);
+    out
+}
+
 #[must_use]
 pub fn continuous_windows(puzzle: &Puzzle) -> u64 {
-    #[inline]
-    const fn pane(num: u32, prev: u32) -> u32 {
-        (num % 10 + 9) - (prev % 10)
-    }
     // there are 40,951 total possible windows, so pre-allocate all of them
     let mut cache: HashMap<u32, Entry> = HashMap::with_capacity(40_951);
     for (idx, seed) in puzzle.numbers.iter().copied().enumerate() {
@@ -217,12 +220,6 @@ pub fn vec_cache(puzzle: &Puzzle) -> u64 {
 
 #[must_use]
 pub fn mul_windows(puzzle: &Puzzle) -> u64 {
-    #[inline]
-    const fn pane(num: u32, prev: u32) -> u32 {
-        let out = (num % 10 + 9) - (prev % 10);
-        debug_assert!(out < 20);
-        out
-    }
     let mut cache = vec![None::<Entry>; 160_000];
     for (idx, seed) in puzzle.numbers.iter().copied().enumerate() {
         let mut rng = Rng(seed);
@@ -251,13 +248,6 @@ pub fn mul_windows(puzzle: &Puzzle) -> u64 {
 
 #[must_use]
 pub fn small_cache(puzzle: &Puzzle) -> u64 {
-    #[inline]
-    const fn pane(num: u32, prev: u32) -> u32 {
-        let out = (num % 10 + 9) - (prev % 10);
-        debug_assert!(out < 20);
-        out
-    }
-
     let mut cache = vec![None::<SmallEntry>; 160_000];
     for (idx, seed) in puzzle.numbers.iter().copied().enumerate() {
         let mut rng = Rng(seed);
@@ -280,6 +270,49 @@ pub fn small_cache(puzzle: &Puzzle) -> u64 {
         .into_iter()
         .flatten()
         .map(|entry| entry.total_price)
+        .max()
+        .unwrap_or(0)
+        .into()
+}
+
+#[must_use]
+#[allow(clippy::cast_sign_loss)]
+pub fn small_cache_rayon(puzzle: &Puzzle) -> u64 {
+    puzzle
+        .numbers
+        .par_iter()
+        .copied()
+        .map(|seed| {
+            let mut seen = vec![false; 160_000];
+            let mut cache = vec![0u16; 160_000];
+            let mut rng = Rng(seed);
+            let mut prev = rng.next().expect("rng not to end") % 10;
+            let mut window = 0u32;
+            for num in rng.by_ref().take(4) {
+                window = (window * 20) + pane(num, prev);
+                prev = num;
+            }
+            for num in rng.take(1997) {
+                let idx = window as usize;
+                if !seen[idx] {
+                    cache[idx] += price(prev) as u16;
+                    seen[idx] = true;
+                }
+                window = ((window * 20) + pane(num, prev)) % 160_000;
+                prev = num;
+            }
+            cache
+        })
+        .reduce(
+            || vec![0u16; 160_000],
+            |mut acc, profits| {
+                for idx in 0..160_000 {
+                    acc[idx] += profits[idx];
+                }
+                acc
+            },
+        )
+        .into_iter()
         .max()
         .unwrap_or(0)
         .into()
@@ -368,6 +401,7 @@ mod tests {
         assert_eq!(vec_cache(&input), expected);
         assert_eq!(mul_windows(&input), expected);
         assert_eq!(small_cache(&input), expected);
+        assert_eq!(small_cache_rayon(&input), expected);
         Ok(())
     }
 }
