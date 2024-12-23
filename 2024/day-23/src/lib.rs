@@ -1,5 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
+use color_eyre::eyre::bail;
 use fxhash::{FxHashMap, FxHashSet};
 use itertools::Itertools;
 use tap::prelude::*;
@@ -8,11 +9,16 @@ pub mod part1;
 pub mod part2;
 
 #[derive(Debug)]
-pub struct Puzzle {
-    edges: Vec<Edge>,
+pub struct StringGraph {
+    edges: Vec<StringEdge>,
 }
 
-impl Puzzle {
+#[derive(Debug)]
+pub struct IntGraph {
+    edges: Vec<IntEdge>,
+}
+
+impl StringGraph {
     fn nodes(&self) -> impl Iterator<Item = &str> {
         self.edges
             .iter()
@@ -88,7 +94,44 @@ impl Puzzle {
     }
 }
 
-impl std::str::FromStr for Puzzle {
+impl IntGraph {
+    fn nodes(&self) -> impl Iterator<Item = u16> {
+        let mut set = FxHashSet::default();
+        for edge in &self.edges {
+            set.insert(edge.from);
+            set.insert(edge.to);
+        }
+        set.into_iter()
+    }
+
+    fn connections(&self) -> FxHashMap<u16, FxHashSet<u16>> {
+        self.edges.iter().fold(
+            FxHashMap::<u16, FxHashSet<u16>>::default(),
+            |mut map, conn| {
+                map.entry(conn.from).or_default().insert(conn.to);
+                map.entry(conn.to).or_default().insert(conn.from);
+                map
+            },
+        )
+    }
+
+    fn cliques(&self) -> impl Iterator<Item = Vec<u16>> + '_ {
+        let connections = self.connections();
+        let mut cliques: Vec<Vec<u16>> = Vec::new();
+        for pc in self.nodes().sorted_unstable() {
+            let conns = &connections[&pc];
+            for set in &mut cliques {
+                if set.iter().copied().all(|other| conns.contains(&other)) {
+                    set.push(pc);
+                }
+            }
+            cliques.push([pc].into());
+        }
+        cliques.into_iter()
+    }
+}
+
+impl std::str::FromStr for StringGraph {
     type Err = color_eyre::Report;
 
     fn from_str(s: &str) -> color_eyre::Result<Self> {
@@ -96,7 +139,7 @@ impl std::str::FromStr for Puzzle {
             .map(str::trim)
             .filter(|s| !s.is_empty())
             .filter_map(|line| line.split_once('-'))
-            .map(|(a, b)| Edge {
+            .map(|(a, b)| StringEdge {
                 from: a.to_owned(),
                 to: b.to_owned(),
             })
@@ -106,8 +149,38 @@ impl std::str::FromStr for Puzzle {
     }
 }
 
+impl std::str::FromStr for IntGraph {
+    type Err = color_eyre::Report;
+
+    fn from_str(s: &str) -> color_eyre::Result<Self> {
+        fn to_u16(s: &str) -> color_eyre::Result<u16> {
+            match s.as_bytes() {
+                [a, b] if a.is_ascii_lowercase() && b.is_ascii_lowercase() => {
+                    Ok(u16::from(a - b'a') * 26 + u16::from(b - b'a'))
+                }
+                [_, _] => bail!("Invalid character in {s:?}"),
+                _ => bail!("Incorrect length of {s:?}"),
+            }
+        }
+        s.lines()
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+            .filter_map(|line| line.split_once('-'))
+            .map(|(a, b)| {
+                IntEdge {
+                    from: to_u16(a)?,
+                    to: to_u16(b)?,
+                }
+                .pipe(Ok::<_, color_eyre::Report>)
+            })
+            .try_collect::<_, Vec<_>, _>()?
+            .pipe(|connections| Self { edges: connections })
+            .pipe(Ok)
+    }
+}
+
 #[derive(Debug)]
-struct Edge {
+struct StringEdge {
     from: String,
     to: String,
 }
@@ -127,13 +200,19 @@ impl EdgeRef<'_> {
     }
 }
 
-impl<'a> From<&'a Edge> for EdgeRef<'a> {
-    fn from(value: &'a Edge) -> Self {
+impl<'a> From<&'a StringEdge> for EdgeRef<'a> {
+    fn from(value: &'a StringEdge) -> Self {
         Self {
             from: &value.from,
             to: &value.to,
         }
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+struct IntEdge {
+    from: u16,
+    to: u16,
 }
 
 pub fn init_tracing() -> color_eyre::Result<()> {

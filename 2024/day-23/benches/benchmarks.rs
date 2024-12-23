@@ -16,7 +16,7 @@ mod part_1 {
     #[divan::bench]
     fn initial(bencher: divan::Bencher) {
         bencher
-            .with_inputs(|| common::read_input!("part1.txt").parse::<Puzzle>())
+            .with_inputs(|| common::read_input!("part1.txt").parse::<StringGraph>())
             .bench_values(|res| {
                 res.expect("parsing to suceed")
                     .pipe(divan::black_box)
@@ -27,7 +27,7 @@ mod part_1 {
     #[divan::bench]
     fn common(bencher: divan::Bencher) {
         bencher
-            .with_inputs(|| common::read_input!("part1.txt").parse::<Puzzle>())
+            .with_inputs(|| common::read_input!("part1.txt").parse::<StringGraph>())
             .bench_values(|res| {
                 res.expect("parsing to suceed")
                     .pipe(divan::black_box)
@@ -38,7 +38,7 @@ mod part_1 {
     #[divan::bench]
     fn edge_set(bencher: divan::Bencher) {
         bencher
-            .with_inputs(|| common::read_input!("part1.txt").parse::<Puzzle>())
+            .with_inputs(|| common::read_input!("part1.txt").parse::<StringGraph>())
             .bench_values(|res| {
                 res.expect("parsing to suceed")
                     .pipe(divan::black_box)
@@ -49,11 +49,22 @@ mod part_1 {
     #[divan::bench]
     fn pre_filter(bencher: divan::Bencher) {
         bencher
-            .with_inputs(|| common::read_input!("part1.txt").parse::<Puzzle>())
+            .with_inputs(|| common::read_input!("part1.txt").parse::<StringGraph>())
             .bench_values(|res| {
                 res.expect("parsing to suceed")
                     .pipe(divan::black_box)
                     .pipe_ref(part1::pre_filter)
+            });
+    }
+
+    #[divan::bench]
+    fn int_graph(bencher: divan::Bencher) {
+        bencher
+            .with_inputs(|| common::read_input!("part1.txt").parse::<IntGraph>())
+            .bench_values(|res| {
+                res.expect("parsing to suceed")
+                    .pipe(divan::black_box)
+                    .pipe_ref(part1::int_graph)
             });
     }
 }
@@ -66,7 +77,7 @@ mod part_2 {
     #[divan::bench]
     fn initial(bencher: divan::Bencher) {
         bencher
-            .with_inputs(|| common::read_input!("part2.txt").parse::<Puzzle>())
+            .with_inputs(|| common::read_input!("part2.txt").parse::<StringGraph>())
             .bench_values(|res| {
                 res.expect("parsing to suceed")
                     .pipe(divan::black_box)
@@ -77,7 +88,7 @@ mod part_2 {
     #[divan::bench]
     fn common(bencher: divan::Bencher) {
         bencher
-            .with_inputs(|| common::read_input!("part2.txt").parse::<Puzzle>())
+            .with_inputs(|| common::read_input!("part2.txt").parse::<StringGraph>())
             .bench_values(|res| {
                 res.expect("parsing to suceed")
                     .pipe(divan::black_box)
@@ -88,7 +99,7 @@ mod part_2 {
     #[divan::bench]
     fn bron_kerbosh(bencher: divan::Bencher) {
         bencher
-            .with_inputs(|| common::read_input!("part2.txt").parse::<Puzzle>())
+            .with_inputs(|| common::read_input!("part2.txt").parse::<StringGraph>())
             .bench_values(|res| {
                 res.expect("parsing to suceed")
                     .pipe(divan::black_box)
@@ -99,18 +110,41 @@ mod part_2 {
     #[divan::bench]
     fn fx_hash(bencher: divan::Bencher) {
         bencher
-            .with_inputs(|| common::read_input!("part2.txt").parse::<Puzzle>())
+            .with_inputs(|| common::read_input!("part2.txt").parse::<StringGraph>())
             .bench_values(|res| {
                 res.expect("parsing to suceed")
                     .pipe(divan::black_box)
                     .pipe_ref(part2::fx_hash)
             });
     }
+
+    #[divan::bench]
+    fn int_graph(bencher: divan::Bencher) {
+        bencher
+            .with_inputs(|| common::read_input!("part2.txt").parse::<IntGraph>())
+            .bench_values(|res| {
+                res.expect("parsing to suceed")
+                    .pipe(divan::black_box)
+                    .pipe_ref(part2::int_graph)
+            });
+    }
 }
 
-#[divan::bench]
-fn parse(bencher: divan::Bencher) {
-    bencher
-        .with_inputs(|| common::read_input!("part1.txt").pipe(Ok::<_, color_eyre::Report>))
-        .bench_values(|res| res.expect("file to be loaded").parse::<Puzzle>());
+#[allow(clippy::wildcard_imports)]
+#[divan::bench_group]
+mod parse {
+    use super::*;
+
+    #[divan::bench]
+    fn string_repr(bencher: divan::Bencher) {
+        bencher
+            .with_inputs(|| common::read_input!("part1.txt").pipe(Ok::<_, color_eyre::Report>))
+            .bench_values(|res| res.expect("file to be loaded").parse::<StringGraph>());
+    }
+    #[divan::bench]
+    fn int_repr(bencher: divan::Bencher) {
+        bencher
+            .with_inputs(|| common::read_input!("part1.txt").pipe(Ok::<_, color_eyre::Report>))
+            .bench_values(|res| res.expect("file to be loaded").parse::<IntGraph>());
+    }
 }

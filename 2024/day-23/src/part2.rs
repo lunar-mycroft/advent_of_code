@@ -2,10 +2,10 @@ use std::collections::{HashMap, HashSet};
 
 use itertools::Itertools;
 
-use crate::Puzzle;
+use crate::{IntGraph, StringGraph};
 
 #[must_use]
-pub fn initial(puzzle: &Puzzle) -> String {
+pub fn initial(puzzle: &StringGraph) -> String {
     let nodes: Vec<_> = puzzle
         .edges
         .iter()
@@ -41,7 +41,7 @@ pub fn initial(puzzle: &Puzzle) -> String {
 }
 
 #[must_use]
-pub fn common_methods(puzzle: &Puzzle) -> String {
+pub fn common_methods(puzzle: &StringGraph) -> String {
     puzzle
         .cliques()
         .max_by_key(Vec::len)
@@ -51,7 +51,7 @@ pub fn common_methods(puzzle: &Puzzle) -> String {
 }
 
 #[must_use]
-pub fn bron_kerbosh(puzzle: &Puzzle) -> String {
+pub fn bron_kerbosh(puzzle: &StringGraph) -> String {
     fn bk_impl<'a>(
         g: &HashMap<&'a str, HashSet<&'a str>>,
         r: &mut HashSet<&'a str>,
@@ -101,7 +101,7 @@ pub fn bron_kerbosh(puzzle: &Puzzle) -> String {
 }
 
 #[must_use]
-pub fn fx_hash(puzzle: &Puzzle) -> String {
+pub fn fx_hash(puzzle: &StringGraph) -> String {
     puzzle
         .cliques_fx()
         .max_by_key(Vec::len)
@@ -110,20 +110,25 @@ pub fn fx_hash(puzzle: &Puzzle) -> String {
         .join(",")
 }
 
-// #[must_use]
-// pub fn counter(puzzle: &Puzzle) -> String {
-//     let counter = puzzle.edges.iter().fold(HashMap::new(), |mut map, edge| {
-//         *map.entry(edge.to.as_str()).or_insert(0usize) += 1;
-//         map
-//     });
-//     let max_count = *counter.values().max().expect("there to be values");
-//     counter
-//         .into_iter()
-//         .filter(|(_, n)| *n == max_count)
-//         .map(|(s, _)| s)
-//         .sorted_unstable()
-//         .join(",")
-// }
+pub fn int_graph(puzzle: &IntGraph) -> String {
+    puzzle
+        .cliques()
+        .max_by_key(Vec::len)
+        .unwrap_or_default()
+        .into_iter()
+        .map(|n| {
+            let (a, b) = (
+                u32::from(n / 26 + u16::from(b'a')),
+                u32::from(n % 26 + u16::from(b'a')),
+            );
+            format!(
+                "{}{}",
+                char::from_u32(a).expect("known valid byte"),
+                char::from_u32(b).expect("known valid byte")
+            )
+        })
+        .join(",")
+}
 
 #[cfg(test)]
 mod tests {
@@ -136,12 +141,13 @@ mod tests {
     #[case::example("example.txt", "co,de,ka,ta")]
     #[case::example("part2.txt", "cl,ei,fd,hc,ib,kq,kv,ky,rv,vf,wk,yx,zf")]
     fn finds_solution(#[case] input_path: &str, #[case] expected: &str) -> Result<()> {
-        let input: Puzzle = common::read_input!(input_path).parse()?;
-        assert_eq!(initial(&input), expected);
-        assert_eq!(common_methods(&input), expected);
-        assert_eq!(fx_hash(&input), expected);
-        assert_eq!(bron_kerbosh(&input), expected);
-        // assert_eq!(counter(&input), expected);
+        let string: StringGraph = common::read_input!(input_path).parse()?;
+        let int: IntGraph = common::read_input!(input_path).parse()?;
+        assert_eq!(initial(&string), expected);
+        assert_eq!(common_methods(&string), expected);
+        assert_eq!(fx_hash(&string), expected);
+        assert_eq!(int_graph(&int), expected);
+        assert_eq!(bron_kerbosh(&string), expected);
         Ok(())
     }
 }

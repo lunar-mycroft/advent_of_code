@@ -1,13 +1,17 @@
 day_23_bench        fastest       │ slowest       │ median        │ mean          │ samples │ iters
-├─ parse            263 µs        │ 499.3 µs      │ 292.5 µs      │ 296.1 µs      │ 100     │ 100
+├─ parse                          │               │               │               │         │
+│  ├─ int_repr      80.59 µs      │ 116.1 µs      │ 81.99 µs      │ 84.71 µs      │ 100     │ 100
+│  ╰─ string_repr   286.6 µs      │ 399.4 µs      │ 311 µs        │ 314.1 µs      │ 100     │ 100
 ├─ part_1                         │               │               │               │         │
-│  ├─ common        4.301 ms      │ 7.783 ms      │ 4.439 ms      │ 4.681 ms      │ 100     │ 100
-│  ├─ edge_set      4.357 ms      │ 6.006 ms      │ 4.545 ms      │ 4.579 ms      │ 100     │ 100
-│  ├─ initial       4.323 ms      │ 4.6 ms        │ 4.391 ms      │ 4.4 ms        │ 100     │ 100
-│  ╰─ pre_filter    787 µs        │ 1.07 ms       │ 889.7 µs      │ 902.7 µs      │ 100     │ 100
+│  ├─ common        4.286 ms      │ 4.771 ms      │ 4.428 ms      │ 4.44 ms       │ 100     │ 100
+│  ├─ edge_set      4.438 ms      │ 5.806 ms      │ 4.607 ms      │ 4.625 ms      │ 100     │ 100
+│  ├─ initial       4.191 ms      │ 6.056 ms      │ 4.319 ms      │ 4.352 ms      │ 100     │ 100
+│  ├─ int_graph     326.7 µs      │ 369.7 µs      │ 330.9 µs      │ 336.3 µs      │ 100     │ 100
+│  ╰─ pre_filter    784.7 µs      │ 1.091 ms      │ 841 µs        │ 850.6 µs      │ 100     │ 100
 ╰─ part_2                         │               │               │               │         │
-   ├─ bron_kerbosh  120.6 ms      │ 141.8 ms      │ 122.8 ms      │ 124 ms        │ 100     │ 100
-   ├─ common        2.714 ms      │ 3.251 ms      │ 2.782 ms      │ 2.81 ms       │ 100     │ 100
-   ├─ fx_hash       1.296 ms      │ 1.703 ms      │ 1.326 ms      │ 1.349 ms      │ 100     │ 100
-   ╰─ initial       2.995 ms      │ 3.972 ms      │ 3.075 ms      │ 3.111 ms      │ 100     │ 100
+   ├─ bron_kerbosh  120.9 ms      │ 125.6 ms      │ 122.1 ms      │ 122.3 ms      │ 100     │ 100
+   ├─ common        2.72 ms       │ 2.916 ms      │ 2.774 ms      │ 2.782 ms      │ 100     │ 100
+   ├─ fx_hash       1.296 ms      │ 1.604 ms      │ 1.342 ms      │ 1.352 ms      │ 100     │ 100
+   ├─ initial       3.015 ms      │ 3.473 ms      │ 3.083 ms      │ 3.103 ms      │ 100     │ 100
+   ╰─ int_graph     675.5 µs      │ 783.9 µs      │ 712.4 µs      │ 717.9 µs      │ 100     │ 100
 
