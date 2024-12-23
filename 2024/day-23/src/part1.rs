@@ -122,6 +122,27 @@ pub fn int_graph(puzzle: &IntGraph) -> usize {
         .count()
 }
 
+#[must_use]
+pub fn array(puzzle: &IntGraph) -> usize {
+    let (connected_to, _) = crate::array::parse(puzzle);
+    connected_to
+        .prefixed_by(b't')
+        .flat_map(|(key, connections)| {
+            connections
+                .iter()
+                .combinations(2)
+                .filter(|pair| connected_to.get(pair[0]).contains(pair[1]))
+                .map(move |pair| {
+                    let mut arr = [key, pair[0], pair[1]];
+                    arr.sort_unstable();
+                    arr
+                })
+                .collect_vec()
+        })
+        .unique()
+        .count()
+}
+
 #[cfg(test)]
 mod tests {
     use color_eyre::eyre::Result;
@@ -140,6 +161,7 @@ mod tests {
         assert_eq!(edge_set(&string), expected);
         assert_eq!(pre_filter(&string), expected);
         assert_eq!(int_graph(&int), expected);
+        assert_eq!(array(&int), expected);
         Ok(())
     }
 }

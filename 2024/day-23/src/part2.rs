@@ -110,9 +110,29 @@ pub fn fx_hash(puzzle: &StringGraph) -> String {
         .join(",")
 }
 
-pub fn int_graph(puzzle: &IntGraph) -> String {
+pub fn array(puzzle: &IntGraph) -> String {
     puzzle
         .cliques()
+        .max_by_key(Vec::len)
+        .unwrap_or_default()
+        .into_iter()
+        .map(|n| {
+            let (a, b) = (
+                u32::from(n / 26 + u16::from(b'a')),
+                u32::from(n % 26 + u16::from(b'a')),
+            );
+            format!(
+                "{}{}",
+                char::from_u32(a).expect("known valid byte"),
+                char::from_u32(b).expect("known valid byte")
+            )
+        })
+        .join(",")
+}
+
+pub fn int_graph(puzzle: &IntGraph) -> String {
+    let (edges, nodes) = crate::array::parse(puzzle);
+    crate::array::cliques(&edges, &nodes)
         .max_by_key(Vec::len)
         .unwrap_or_default()
         .into_iter()
@@ -147,6 +167,7 @@ mod tests {
         assert_eq!(common_methods(&string), expected);
         assert_eq!(fx_hash(&string), expected);
         assert_eq!(int_graph(&int), expected);
+        assert_eq!(array(&int), expected);
         assert_eq!(bron_kerbosh(&string), expected);
         Ok(())
     }

@@ -67,6 +67,17 @@ mod part_1 {
                     .pipe_ref(part1::int_graph)
             });
     }
+
+    #[divan::bench]
+    fn array(bencher: divan::Bencher) {
+        bencher
+            .with_inputs(|| common::read_input!("part1.txt").parse::<IntGraph>())
+            .bench_values(|res| {
+                res.expect("parsing to suceed")
+                    .pipe(divan::black_box)
+                    .pipe_ref(part1::array)
+            });
+    }
 }
 
 #[allow(clippy::wildcard_imports)]
@@ -126,6 +137,17 @@ mod part_2 {
                 res.expect("parsing to suceed")
                     .pipe(divan::black_box)
                     .pipe_ref(part2::int_graph)
+            });
+    }
+
+    #[divan::bench]
+    fn array(bencher: divan::Bencher) {
+        bencher
+            .with_inputs(|| common::read_input!("part2.txt").parse::<IntGraph>())
+            .bench_values(|res| {
+                res.expect("parsing to suceed")
+                    .pipe(divan::black_box)
+                    .pipe_ref(part2::array)
             });
     }
 }
