@@ -1,5 +1,6 @@
 use std::mem::swap;
 
+use fxhash::FxHashMap;
 use tap::prelude::*;
 
 use crate::{Gate, Operation, Puzzle, Wire};
@@ -7,6 +8,11 @@ use crate::{Gate, Operation, Puzzle, Wire};
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
 pub fn process(puzzle: &Puzzle) -> Option<String> {
+    let output_of: FxHashMap<_, _> = puzzle
+        .operations
+        .iter()
+        .flat_map(|(key, val)| [(*val, *key), (val.reveresed(), *key)])
+        .collect();
     let mut swapped = Vec::new();
     let mut c = (None, None);
     for b in 0..45 {
@@ -14,37 +20,47 @@ pub fn process(puzzle: &Puzzle) -> Option<String> {
         let (mut r1, mut z1) = (None, None);
 
         // Half adder logic
-        let mut m1 = puzzle.output_of(Gate {
-            left: Wire::X(b),
-            op: Operation::Xor,
-            right: Wire::Y(b),
-        });
-        let mut n1 = puzzle.output_of(Gate {
-            left: Wire::X(b),
-            op: Operation::And,
-            right: Wire::Y(b),
-        });
-        if let Some(c0) = c.0 {
-            r1 = puzzle.output_of(Gate {
-                left: c0,
+        let mut m1 = output_of
+            .get(&Gate {
+                left: Wire::X(b),
+                op: Operation::Xor,
+                right: Wire::Y(b),
+            })
+            .copied();
+        let mut n1 = output_of
+            .get(&Gate {
+                left: Wire::X(b),
                 op: Operation::And,
-                right: m1?,
-            });
-            if r1.is_none() {
-                swap(&mut m1, &mut n1);
-                swapped.extend([puzzle.wire_str(m1?), puzzle.wire_str(n1?)]);
-                r1 = puzzle.output_of(Gate {
+                right: Wire::Y(b),
+            })
+            .copied();
+        if let Some(c0) = c.0 {
+            r1 = output_of
+                .get(&Gate {
                     left: c0,
                     op: Operation::And,
                     right: m1?,
-                });
+                })
+                .copied();
+            if r1.is_none() {
+                swap(&mut m1, &mut n1);
+                swapped.extend([puzzle.wire_str(m1?), puzzle.wire_str(n1?)]);
+                r1 = output_of
+                    .get(&Gate {
+                        left: c0,
+                        op: Operation::And,
+                        right: m1?,
+                    })
+                    .copied();
             }
 
-            z1 = puzzle.output_of(Gate {
-                left: c0,
-                op: Operation::Xor,
-                right: m1?,
-            });
+            z1 = output_of
+                .get(&Gate {
+                    left: c0,
+                    op: Operation::Xor,
+                    right: m1?,
+                })
+                .copied();
 
             if let Some(Wire::Z(_)) = m1 {
                 swap(&mut m1, &mut z1);
@@ -65,11 +81,13 @@ pub fn process(puzzle: &Puzzle) -> Option<String> {
             }
 
             // c.1 = puzzle.output_of(r1?, "OR", n1?);
-            c.1 = puzzle.output_of(Gate {
-                left: r1?,
-                op: Operation::Or,
-                right: n1?,
-            });
+            c.1 = output_of
+                .get(&Gate {
+                    left: r1?,
+                    op: Operation::Or,
+                    right: n1?,
+                })
+                .copied();
         }
 
         match c.1 {
@@ -92,7 +110,6 @@ pub fn process(puzzle: &Puzzle) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use color_eyre::eyre::Result;
-    use itertools::Itertools;
     use rstest::rstest;
 
     use super::*;

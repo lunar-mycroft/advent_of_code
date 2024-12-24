@@ -45,13 +45,6 @@ impl Gate {
 }
 
 impl Puzzle {
-    fn output_of(&self, gate: Gate) -> Option<Wire> {
-        self.operations
-            .iter()
-            .find_map(|(w, other)| (*other == gate || *other == gate.reveresed()).then_some(w))
-            .copied()
-    }
-
     fn wire_str(&self, wire: Wire) -> Cow<'_, str> {
         match wire {
             Wire::X(n) => format!("x{n:0>2}").into(),
