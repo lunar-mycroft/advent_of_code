@@ -78,40 +78,6 @@ impl Puzzle {
         self.state.insert(wire, out);
         Some(out)
     }
-
-    fn eval(&self, wire: Wire) -> bool {
-        match (
-            self.state.get(&wire).copied(),
-            self.operations.get(&wire).copied(),
-        ) {
-            (Some(b), _) => b,
-            (
-                None,
-                Some(Gate {
-                    left,
-                    op: Operation::Xor,
-                    right,
-                }),
-            ) => self.eval(left) != self.eval(right),
-            (
-                None,
-                Some(Gate {
-                    left,
-                    op: Operation::And,
-                    right,
-                }),
-            ) => self.eval(left) && self.eval(right),
-            (
-                None,
-                Some(Gate {
-                    left,
-                    op: Operation::Or,
-                    right,
-                }),
-            ) => self.eval(left) || self.eval(right),
-            (None, None) => unreachable!(),
-        }
-    }
 }
 
 impl std::str::FromStr for Puzzle {
