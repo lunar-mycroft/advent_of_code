@@ -12,7 +12,7 @@ pub mod part2;
 pub struct Puzzle {
     state: FxHashMap<Wire, bool>,
     operations: FxHashMap<Wire, Gate>,
-    other_wires: FxHashMap<u8, String>,
+    other_wires: Vec<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -57,7 +57,7 @@ impl Puzzle {
             Wire::X(n) => format!("x{n:0>2}").into(),
             Wire::Y(n) => format!("y{n:0>2}").into(),
             Wire::Z(n) => format!("z{n:0>2}").into(),
-            Wire::Other(n) => self.other_wires.get(&n).expect("to find the wire").into(),
+            Wire::Other(n) => (&self.other_wires[n as usize]).into(),
         }
     }
 
@@ -155,13 +155,8 @@ impl std::str::FromStr for Puzzle {
                 .try_collect()?,
             other_wires: other_map
                 .into_iter()
-                .map(|(s, n)| {
-                    (
-                        n.try_conv::<u8>()
-                            .expect("would have returned already if this wasn't valid"),
-                        s,
-                    )
-                })
+                .sorted_unstable_by_key(|(_, n)| *n)
+                .map(|(s, _)| s)
                 .collect(),
         }
         .pipe(Ok)
