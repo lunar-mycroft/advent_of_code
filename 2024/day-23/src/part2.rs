@@ -150,6 +150,45 @@ pub fn array(puzzle: &IntGraph) -> String {
         .join(",")
 }
 
+#[must_use]
+pub fn array_inline(puzzle: &IntGraph) -> String {
+    let (edges, nodes) = crate::array::parse(puzzle);
+    let mut seen = [false; 676];
+    let mut clique = Vec::with_capacity(16);
+    let mut largest = Vec::with_capacity(16);
+    for n1 in nodes.iter() {
+        if seen[n1 as usize] {
+            continue;
+        }
+        let neighbors = edges.get(n1);
+        clique.clear();
+        clique.push(n1);
+        for n2 in neighbors.iter() {
+            if clique.iter().all(|&c| edges.get(n2).contains(c)) {
+                seen[n2 as usize] = true;
+                clique.push(n2);
+            }
+        }
+        if clique.len() > largest.len() {
+            largest.clone_from(&clique);
+        }
+    }
+    largest
+        .into_iter()
+        .map(|n| {
+            let (a, b) = (
+                u32::from(n / 26 + u16::from(b'a')),
+                u32::from(n % 26 + u16::from(b'a')),
+            );
+            format!(
+                "{}{}",
+                char::from_u32(a).expect("known valid byte"),
+                char::from_u32(b).expect("known valid byte")
+            )
+        })
+        .join(",")
+}
+
 pub fn array_preparsed((edges, nodes): &(crate::array::EdgeMap, crate::array::NodeSet)) -> String {
     crate::array::cliques(edges, nodes)
         .max_by_key(Vec::len)
@@ -188,6 +227,7 @@ mod tests {
         assert_eq!(fx_hash(&string), expected);
         assert_eq!(int_graph(&int), expected);
         assert_eq!(array(&int), expected);
+        assert_eq!(array_inline(&int), expected);
         assert_eq!(
             crate::array::parse(&int).pipe_ref(array_preparsed),
             expected

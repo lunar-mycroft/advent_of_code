@@ -39,16 +39,19 @@ pub(crate) fn cliques(edges: &EdgeMap, nodes: &NodeSet) -> impl Iterator<Item = 
 }
 
 impl EdgeMap {
+    #[inline]
     pub(crate) fn get(&self, from: u16) -> NodeSet<'_> {
         self.0[((from as usize) * 676)..((from as usize + 1) * 676)]
             .pipe_ref(Cow::Borrowed)
             .pipe(NodeSet)
     }
 
+    #[inline]
     pub fn iter(&self) -> impl Iterator<Item = (u16, NodeSet<'_>)> {
         (0..676).map(|k| (k, self.get(k)))
     }
 
+    #[inline]
     pub fn prefixed_by(&self, c: u8) -> impl Iterator<Item = (u16, NodeSet<'_>)> {
         let c = u16::from(c - b'a');
         ((c * 26)..((c + 1) * 26)).map(|k| (k, self.get(k)))
@@ -57,6 +60,7 @@ impl EdgeMap {
 
 impl NodeSet<'_> {
     #[must_use]
+    #[inline]
     pub fn contains(&self, id: u16) -> bool {
         self.0[id as usize]
     }
@@ -65,6 +69,7 @@ impl NodeSet<'_> {
         clippy::cast_possible_truncation,
         reason = "check it once at the begining"
     )]
+    #[inline]
     pub fn iter(&self) -> impl Iterator<Item = u16> + '_ {
         debug_assert!(u16::try_from(self.0.len()).is_ok());
         self.0

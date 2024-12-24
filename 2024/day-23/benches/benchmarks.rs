@@ -167,6 +167,17 @@ mod part_2 {
     }
 
     #[divan::bench]
+    fn array_inline(bencher: divan::Bencher) {
+        bencher
+            .with_inputs(|| common::read_input!("part2.txt").parse::<IntGraph>())
+            .bench_values(|res| {
+                res.expect("parsing to suceed")
+                    .pipe(divan::black_box)
+                    .pipe_ref(part2::array_inline)
+            });
+    }
+
+    #[divan::bench]
     fn array_pre_parsed(bencher: divan::Bencher) {
         bencher
             .with_inputs(|| {
