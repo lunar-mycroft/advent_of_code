@@ -54,6 +54,31 @@ impl Puzzle {
         }
     }
 
+    fn eval_cached(&mut self, wire: Wire) -> Option<bool> {
+        if let Some(b) = self.state.get(&wire).copied() {
+            return Some(b);
+        }
+        let out = match self.operations.get(&wire).copied()? {
+            Gate {
+                left,
+                op: Operation::Xor,
+                right,
+            } => self.eval_cached(left)? != self.eval_cached(right)?,
+            Gate {
+                left,
+                op: Operation::Or,
+                right,
+            } => self.eval_cached(left)? || self.eval_cached(right)?,
+            Gate {
+                left,
+                op: Operation::And,
+                right,
+            } => self.eval_cached(left)? && self.eval_cached(right)?,
+        };
+        self.state.insert(wire, out);
+        Some(out)
+    }
+
     fn eval(&self, wire: Wire) -> bool {
         match (
             self.state.get(&wire).copied(),

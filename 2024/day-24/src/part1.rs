@@ -2,10 +2,10 @@ use crate::{Puzzle, Wire};
 
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
-pub fn process(puzzle: Puzzle) -> u64 {
+pub fn process(mut puzzle: Puzzle) -> u64 {
     (0..=45)
         .map(Wire::Z)
-        .map(|wire| puzzle.eval(wire))
+        .map(|wire| puzzle.eval_cached(wire).expect("to find all wires"))
         .rev()
         .fold(0, |mut res, bit| {
             res <<= 1;
