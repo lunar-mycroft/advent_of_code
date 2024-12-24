@@ -17,6 +17,7 @@ pub fn process(puzzle: &Puzzle) -> Option<String> {
     let mut c = (None, None);
     for b in 0..45 {
         c.1 = None;
+        #[allow(unused, reason = "r1 is actually used repeatedly in swaps")]
         let (mut r1, mut z1) = (None, None);
 
         // Half adder logic
