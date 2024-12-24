@@ -15,20 +15,6 @@ pub struct Puzzle {
 }
 
 impl Puzzle {
-    fn as_add(mut self, mut x: u64, mut y: u64) -> Self {
-        for idx in 0..45 {
-            let (k_x, k_y) = (format!("x{idx:0>2}"), format!("y{idx:0>2}"));
-            self.state.insert(k_x, x & 1 == 1);
-            self.state.insert(k_y, y & 1 == 1);
-            x >>= 1;
-            y >>= 1;
-            if x == 0 && y == 0 {
-                break;
-            }
-        }
-        self
-    }
-
     fn output_of(&self, lhs: &str, op: &str, rhs: &str) -> Option<&str> {
         self.operations
             .iter()
@@ -37,45 +23,6 @@ impl Puzzle {
                     .then_some(w)
             })
             .map(String::deref)
-    }
-
-    fn inspect(&self, wire: &str, depth: u8) -> Option<String> {
-        let Some((lhs, op, rhs)) = self.operations.get(wire) else {
-            return Some(wire.to_owned());
-        };
-        if depth == 0 {
-            format!("{lhs} {op} {rhs}").pipe(Some)
-        } else {
-            format!(
-                "({}) {op} ({})",
-                self.inspect(lhs, depth - 1)?,
-                self.inspect(rhs, depth - 1)?
-            )
-            .pipe(Some)
-        }
-    }
-
-    fn compute(mut self) -> u64 {
-        while self.operations.keys().any(|id| id.starts_with('z')) {
-            let mut new_ops = FxHashMap::default();
-            for (dest, (lhs, op, rhs)) in self.operations {
-                let (Some(lhs), Some(rhs)) =
-                    (self.state.get(&lhs).copied(), self.state.get(&rhs).copied())
-                else {
-                    new_ops.insert(dest, (lhs, op, rhs));
-                    continue;
-                };
-                let out = match op.as_str() {
-                    "OR" => lhs || rhs,
-                    "XOR" => lhs != rhs,
-                    "AND" => lhs && rhs,
-                    _ => unreachable!(),
-                };
-                self.state.insert(dest, out);
-            }
-            self.operations = new_ops;
-        }
-        self.z()
     }
 
     fn eval(&self, wire: &str) -> bool {
@@ -89,36 +36,8 @@ impl Puzzle {
             (None, Some((lhs, "XOR", rhs))) => self.eval(lhs) != self.eval(rhs),
             (None, Some((lhs, "AND", rhs))) => self.eval(lhs) && self.eval(rhs),
             (None, Some((lhs, "OR", rhs))) => self.eval(lhs) || self.eval(rhs),
-            (None, other) => {
-                dbg!(other, wire);
-                unreachable!()
-            }
+            (None, _) => unreachable!(),
         }
-    }
-
-    fn var(&self, name: char) -> u64 {
-        self.state
-            .iter()
-            .filter(|(s, _)| s.starts_with(name))
-            .sorted_unstable()
-            .rev()
-            .fold(0, |mut res, (_, bit)| {
-                res <<= 1;
-                res |= u64::from(*bit);
-                res
-            })
-    }
-
-    fn x(&self) -> u64 {
-        self.var('x')
-    }
-
-    fn y(&self) -> u64 {
-        self.var('y')
-    }
-
-    fn z(&self) -> u64 {
-        self.var('z')
     }
 }
 

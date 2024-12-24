@@ -1,13 +1,12 @@
 use std::mem::swap;
 
-use itertools::Itertools;
 use tap::prelude::*;
 
 use crate::Puzzle;
 
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
-pub fn process(puzzle: Puzzle) -> Option<String> {
+pub fn process(puzzle: &Puzzle) -> Option<String> {
     let mut swapped = Vec::new();
     let mut c = (None, None);
     for b in 0..45 {
@@ -54,15 +53,6 @@ pub fn process(puzzle: Puzzle) -> Option<String> {
 
         // c0 = c1 if c0 else n1
         c.0 = if c.0.is_some() { c.1 } else { n1 };
-        println!(
-            "{} {} {} {} {} {}",
-            m1.unwrap_or("None"),
-            n1.unwrap_or("None"),
-            r1.unwrap_or("None"),
-            z1.unwrap_or("None"),
-            c.0.unwrap_or("None"),
-            c.1.unwrap_or("None")
-        );
     }
     swapped.sort_unstable();
     swapped.join(",").pipe(Some)
@@ -79,7 +69,7 @@ mod tests {
     #[case::example("part2.txt", "btb,cmv,mwp,rdg,rmj,z17,z23,z30")]
     fn finds_solution(#[case] input_path: &str, #[case] expected: &str) -> Result<()> {
         let input: Puzzle = common::read_input!(input_path).parse()?;
-        let output = process(input);
+        let output = process(&input);
         assert_eq!(output.expect("to find a solution"), expected);
         Ok(())
     }
