@@ -7,6 +7,7 @@ TODO:
 - bitset (set of usizes where each item is stored as a bit)
 - counter
 - threading library
+- parsing utils?
 */
 
 #[macro_export]
