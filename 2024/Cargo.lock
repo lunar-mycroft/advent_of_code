@@ -741,6 +741,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "day-24"
+version = "0.1.0"
+dependencies = [
+ "color-eyre",
+ "common",
+ "displaydoc",
+ "divan",
+ "fxhash",
+ "glam",
+ "indexmap",
+ "itertools",
+ "rayon",
+ "regex",
+ "rstest",
+ "tap",
+ "thiserror",
+ "tracing",
+ "tracing-error",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "displaydoc"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
