@@ -54,6 +54,7 @@ pub fn process(puzzle: &Puzzle) -> Option<String> {
         // c0 = c1 if c0 else n1
         c.0 = if c.0.is_some() { c.1 } else { n1 };
     }
+    debug_assert_eq!(swapped.len(), 8);
     swapped.sort_unstable();
     swapped.join(",").pipe(Some)
 }
