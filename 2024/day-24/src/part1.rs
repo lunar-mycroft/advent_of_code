@@ -5,7 +5,7 @@ use crate::{Puzzle, Wire};
 pub fn process(mut puzzle: Puzzle) -> u64 {
     (0..=45)
         .map(Wire::Z)
-        .map(|wire| puzzle.eval_cached(wire).expect("to find all wires"))
+        .filter_map(|wire| puzzle.eval_cached(wire))
         .rev()
         .fold(0, |mut res, bit| {
             res <<= 1;
