@@ -2,7 +2,7 @@ use std::mem::swap;
 
 use tap::prelude::*;
 
-use crate::Puzzle;
+use crate::{Gate, Operation, Puzzle, Wire};
 
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
@@ -10,45 +10,75 @@ pub fn process(puzzle: &Puzzle) -> Option<String> {
     let mut swapped = Vec::new();
     let mut c = (None, None);
     for b in 0..45 {
-        let n = format!("{b:0>2}");
         c.1 = None;
         let (mut r1, mut z1) = (None, None);
 
         // Half adder logic
-        let mut m1 = puzzle.output_of(&format!("x{n}"), "XOR", &format!("y{n}"));
-        let mut n1 = puzzle.output_of(&format!("x{n}"), "AND", &format!("y{n}"));
+        let mut m1 = puzzle.output_of(Gate {
+            left: Wire::X(b),
+            op: Operation::Xor,
+            right: Wire::Y(b),
+        });
+        let mut n1 = puzzle.output_of(Gate {
+            left: Wire::X(b),
+            op: Operation::And,
+            right: Wire::Y(b),
+        });
         if let Some(c0) = c.0 {
-            // r1 = find(c0, m1, "AND", data[1])
-            r1 = puzzle.output_of(c0, "AND", m1?);
+            r1 = puzzle.output_of(Gate {
+                left: c0,
+                op: Operation::And,
+                right: m1?,
+            });
             if r1.is_none() {
                 swap(&mut m1, &mut n1);
-                swapped.extend([m1?, n1?]);
-                r1 = puzzle.output_of(c0, "AND", m1?);
+                swapped.extend([puzzle.wire_str(m1?), puzzle.wire_str(n1?)]);
+                r1 = puzzle.output_of(Gate {
+                    left: c0,
+                    op: Operation::And,
+                    right: m1?,
+                });
             }
 
-            z1 = puzzle.output_of(c0, "XOR", m1?);
+            z1 = puzzle.output_of(Gate {
+                left: c0,
+                op: Operation::Xor,
+                right: m1?,
+            });
 
-            if m1.is_some_and(|m| m.starts_with('z')) {
+            if let Some(Wire::Z(_)) = m1 {
                 swap(&mut m1, &mut z1);
-                swapped.extend([m1?, z1?]);
+                // swapped.extend([m1?, z1?]);
+                swapped.extend([puzzle.wire_str(m1?), puzzle.wire_str(z1?)]);
             }
 
-            if n1.is_some_and(|m| m.starts_with('z')) {
+            if let Some(Wire::Z(_)) = n1 {
                 swap(&mut n1, &mut z1);
-                swapped.extend([n1?, z1?]);
+                // swapped.extend([n1?, z1?]);
+                swapped.extend([puzzle.wire_str(n1?), puzzle.wire_str(z1?)]);
             }
 
-            if r1.is_some_and(|m| m.starts_with('z')) {
+            if let Some(Wire::Z(_)) = r1 {
                 swap(&mut r1, &mut z1);
-                swapped.extend([r1?, z1?]);
+                // swapped.extend([r1?, z1?]);
+                swapped.extend([puzzle.wire_str(r1?), puzzle.wire_str(z1?)]);
             }
 
-            c.1 = puzzle.output_of(r1?, "OR", n1?);
+            // c.1 = puzzle.output_of(r1?, "OR", n1?);
+            c.1 = puzzle.output_of(Gate {
+                left: r1?,
+                op: Operation::Or,
+                right: n1?,
+            });
         }
 
-        if c.1.is_some_and(|c| c.starts_with('z') && c != "z45") {
-            swap(&mut c.1, &mut z1);
-            swapped.extend([c.1?, z1?]);
+        match c.1 {
+            Some(Wire::Z(45) | Wire::X(_) | Wire::Y(_) | Wire::Other(_)) | None => (),
+            Some(Wire::Z(_)) => {
+                swap(&mut c.1, &mut z1);
+                // swapped.extend([c.1?, z1?]);
+                swapped.extend([puzzle.wire_str(c.1?), puzzle.wire_str(z1?)]);
+            }
         }
 
         // c0 = c1 if c0 else n1
@@ -62,6 +92,7 @@ pub fn process(puzzle: &Puzzle) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use color_eyre::eyre::Result;
+    use itertools::Itertools;
     use rstest::rstest;
 
     use super::*;

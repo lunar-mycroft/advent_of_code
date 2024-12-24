@@ -1,11 +1,11 @@
-use crate::Puzzle;
+use crate::{Puzzle, Wire};
 
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
 pub fn process(puzzle: Puzzle) -> u64 {
     (0..=45)
-        .map(|b| format!("z{b:0>2}"))
-        .map(|wire| puzzle.eval(&wire))
+        .map(Wire::Z)
+        .map(|wire| puzzle.eval(wire))
         .rev()
         .fold(0, |mut res, bit| {
             res <<= 1;
