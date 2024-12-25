@@ -6,27 +6,27 @@ pub mod part1;
 
 #[derive(Debug)]
 pub struct Puzzle {
-    items: Vec<Grid<u8>>,
+    items: Vec<Grid<char>>,
 }
 
-fn is_key(item: &Grid<u8>) -> bool {
+fn is_key(item: &Grid<char>) -> bool {
     (0..item.size().x)
         .map(|x| item.size().with_x(x) - IVec2::Y)
-        .all(|pos| *item.get(pos).expect("known good coord") == b'#')
+        .all(|pos| *item.get(pos).expect("known good coord") == '#')
 }
 
 #[inline]
-fn is_lock(item: &Grid<u8>) -> bool {
+fn is_lock(item: &Grid<char>) -> bool {
     !is_key(item)
 }
 
 #[allow(clippy::cast_sign_loss)]
-fn heights(item: &Grid<u8>) -> [u8; 5] {
+fn heights(item: &Grid<char>) -> [u8; 5] {
     let mut res = [0; 5];
     for (pos, &c) in item.positions().zip(item.iter()) {
         match c {
-            b'#' => res[pos.x as usize] += 1,
-            b'.' => (),
+            '#' => res[pos.x as usize] += 1,
+            '.' => (),
             _ => unreachable!(),
         }
     }

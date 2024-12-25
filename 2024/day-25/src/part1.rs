@@ -17,6 +17,7 @@ pub fn process(puzzle: Puzzle) -> usize {
         .filter(|g| is_lock(g))
         .map(heights)
         .collect_vec();
+
     lock_heights
         .into_iter()
         .cartesian_product(key_heights)
