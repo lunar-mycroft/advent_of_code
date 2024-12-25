@@ -1,28 +1,15 @@
 use itertools::Itertools;
 
-use crate::{heights, is_key, is_lock, Puzzle};
+use crate::Puzzle;
 
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
 pub fn process(puzzle: Puzzle) -> usize {
-    let key_heights = puzzle
+    puzzle
         .items
-        .iter()
-        .filter(|g| is_key(g))
-        .map(heights)
-        .collect_vec();
-    let lock_heights = puzzle
-        .items
-        .iter()
-        .filter(|g| is_lock(g))
-        .map(heights)
-        .collect_vec();
-
-    lock_heights
         .into_iter()
-        .cartesian_product(key_heights)
-        .filter_map(|(lock, key)| lock.into_iter().zip(key).map(|(l, k)| l + k).max())
-        .filter(|max_height| *max_height < 6)
+        .tuple_combinations()
+        .filter(|(a, b)| a & b == 0)
         .count()
 }
 

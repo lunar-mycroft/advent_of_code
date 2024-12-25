@@ -1,39 +1,11 @@
-use common::grid::Grid;
-use glam::IVec2;
 use itertools::Itertools;
+use tap::prelude::*;
 
 pub mod part1;
 
 #[derive(Debug)]
 pub struct Puzzle {
-    items: Vec<Grid<char>>,
-}
-
-fn is_key(item: &Grid<char>) -> bool {
-    (0..item.size().x)
-        .map(|x| item.size().with_x(x) - IVec2::Y)
-        .all(|pos| *item.get(pos).expect("known good coord") == '#')
-}
-
-#[inline]
-fn is_lock(item: &Grid<char>) -> bool {
-    !is_key(item)
-}
-
-#[allow(clippy::cast_sign_loss)]
-fn heights(item: &Grid<char>) -> [u8; 5] {
-    let mut res = [0; 5];
-    for (pos, &c) in item.positions().zip(item.iter()) {
-        match c {
-            '#' => res[pos.x as usize] += 1,
-            '.' => (),
-            _ => unreachable!(),
-        }
-    }
-    for n in &mut res {
-        *n -= 1;
-    }
-    res
+    items: Vec<u32>,
 }
 
 impl std::str::FromStr for Puzzle {
@@ -43,10 +15,16 @@ impl std::str::FromStr for Puzzle {
         s.split("\n\n")
             .map(str::trim)
             .filter(|s| !s.is_empty())
-            .map(str::parse)
-            .try_collect()
-            .map(|items| Self { items })
-            .map_err(From::from)
+            .map(|schematic| {
+                schematic
+                    .chars()
+                    .filter(char::is_ascii_punctuation)
+                    .map(|c| c as u32)
+                    .fold(0, |acc, c| (c & 1) | (acc << 1))
+            })
+            .collect_vec()
+            .pipe(|items| Self { items })
+            .pipe(Ok)
     }
 }
 
