@@ -20,6 +20,7 @@ impl std::str::FromStr for Puzzle {
                     .chars()
                     .filter(char::is_ascii_punctuation)
                     .map(|c| c as u32)
+                    // '#' has a 1 as it's least significant bit, '.' a zero
                     .fold(0, |acc, c| (c & 1) | (acc << 1))
             })
             .collect_vec()

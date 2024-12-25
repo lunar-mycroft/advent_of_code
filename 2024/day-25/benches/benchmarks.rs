@@ -22,6 +22,6 @@ fn part1(bencher: divan::Bencher) {
         .bench_values(|res| {
             res.expect("parsing to suceed")
                 .pipe(divan::black_box)
-                .pipe(part1::process)
+                .pipe_ref(part1::process)
         });
 }
