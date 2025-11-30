@@ -1,3 +1,4 @@
+pub mod counter;
 pub mod grid;
 pub mod min_heap;
 pub mod position_map;
