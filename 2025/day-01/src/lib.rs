@@ -1,14 +1,27 @@
+use itertools::Itertools;
+
 pub mod part1;
 pub mod part2;
 
 #[derive(Debug)]
-pub struct Puzzle {}
+pub struct Puzzle {
+    rotations: Vec<i16>,
+}
 
 impl std::str::FromStr for Puzzle {
     type Err = color_eyre::Report;
 
+    #[allow(clippy::cast_possible_wrap, reason = "not possible with two digits")]
     fn from_str(s: &str) -> color_eyre::Result<Self> {
-        todo!("day_01: parse input")
+        s.split_whitespace()
+            .filter(|s| !s.is_empty())
+            .map(|s| match s.as_bytes()[0] {
+                b'L' => Ok(-i16::from_str(&s[1..])?),
+                b'R' => Ok(i16::from_str(&s[1..])?),
+                _ => color_eyre::eyre::bail!("Invalid line {s:?}"),
+            })
+            .try_collect()
+            .map(|rotations| Self { rotations })
     }
 }
 
