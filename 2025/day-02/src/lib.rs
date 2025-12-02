@@ -22,8 +22,9 @@ impl Range {
         let begin = 10u64.pow((self.start_len / repetitions).max(1) - 1);
         (begin..)
             .map(move |n| {
+                let digits = n.checked_ilog10().unwrap_or(0) + 1;
                 (0..repetitions)
-                    .map(|p| 10u64.pow((n.checked_ilog10().unwrap_or(0) + 1) * p) * n)
+                    .map(|p| 10u64.pow(digits * p) * n)
                     .sum::<u64>()
             })
             .skip_while(move |&n| n < self.start)
