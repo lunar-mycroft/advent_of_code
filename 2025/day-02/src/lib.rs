@@ -6,7 +6,29 @@ pub mod part2;
 
 #[derive(Debug)]
 pub struct Puzzle {
-    ranges: Vec<(String, String)>,
+    pub ranges: Vec<Range>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Range {
+    pub start: u64,
+    pub end: u64,
+    pub start_len: u32,
+    pub end_len: u32,
+}
+
+impl Range {
+    fn repeat_n(&self, repetitions: u32) -> impl Iterator<Item = u64> + use<'_> {
+        let begin = 10u64.pow((self.start_len / repetitions).max(1) - 1);
+        (begin..)
+            .map(move |n| {
+                (0..repetitions)
+                    .map(|p| 10u64.pow((n.checked_ilog10().unwrap_or(0) + 1) * p) * n)
+                    .sum::<u64>()
+            })
+            .skip_while(move |&n| n < self.start)
+            .take_while(move |&n| n <= self.end)
+    }
 }
 
 impl std::str::FromStr for Puzzle {
@@ -19,8 +41,16 @@ impl std::str::FromStr for Puzzle {
                 .split(',')
                 .map(str::trim)
                 .filter_map(|s| s.trim().split_once('-'))
-                .map(|(first, last)| (first.to_owned(), last.to_owned()))
-                .collect(),
+                .map(|(start, end)| {
+                    Range {
+                        start: start.parse()?,
+                        end: end.parse()?,
+                        start_len: start.len().try_conv()?,
+                        end_len: end.len().try_conv()?,
+                    }
+                    .pipe(Ok::<_, color_eyre::Report>)
+                })
+                .try_collect()?,
         }
         .pipe(Ok)
     }
