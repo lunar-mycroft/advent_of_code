@@ -16,13 +16,24 @@ fn parse(bencher: divan::Bencher) {
 }
 
 #[divan::bench]
-fn part1(bencher: divan::Bencher) {
+fn part1_general(bencher: divan::Bencher) {
     bencher
         .with_inputs(|| common::read_input!("part1.txt").parse::<Puzzle>())
         .bench_values(|res| {
             res.expect("parsing to suceed")
                 .pipe(divan::black_box)
                 .pipe(part1::process)
+        });
+}
+
+#[divan::bench]
+fn part1_specialized(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| common::read_input!("part1.txt").parse::<Puzzle>())
+        .bench_values(|res| {
+            res.expect("parsing to suceed")
+                .pipe(divan::black_box)
+                .pipe(part1::process_specialized)
         });
 }
 
