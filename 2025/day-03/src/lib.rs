@@ -10,7 +10,7 @@ pub struct Puzzle {
     banks: Vec<Bank>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Bank(Vec<u8>);
 
 fn joltage(mut batteries: &[u8], take: usize) -> Option<u64> {
@@ -24,12 +24,15 @@ fn joltage(mut batteries: &[u8], take: usize) -> Option<u64> {
 }
 
 fn digit(batteries: &[u8], len: usize) -> Option<(usize, u8)> {
+    use std::cmp::Ordering;
     batteries[..=(batteries.len() - len)]
         .iter()
         .copied()
         .enumerate()
-        .rev()
-        .max_by_key(|(_, digit)| *digit)
+        .max_by(|(_, a), (_, b)| match a.cmp(b) {
+            Ordering::Less => Ordering::Less,
+            Ordering::Equal | Ordering::Greater => Ordering::Greater,
+        })
 }
 
 impl std::str::FromStr for Puzzle {

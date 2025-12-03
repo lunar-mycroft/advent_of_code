@@ -10,34 +10,6 @@ pub fn process(puzzle: Puzzle) -> u64 {
         .sum()
 }
 
-#[must_use]
-#[allow(clippy::needless_pass_by_value)]
-pub fn process_specialized(puzzle: Puzzle) -> u32 {
-    puzzle
-        .banks
-        .iter()
-        .map(|bank| joltage_specialized(&bank.0))
-        .map(u32::from)
-        .sum()
-}
-
-fn joltage_specialized(batteries: &[u8]) -> u8 {
-    (0..(batteries.len() - 1))
-        .map(|start| {
-            (
-                batteries[start],
-                batteries[start + 1..]
-                    .iter()
-                    .copied()
-                    .max()
-                    .expect("slices to be at least two long"),
-            )
-        })
-        .map(|(first, second)| first * 10 + second)
-        .max()
-        .expect("slices to be at least two long")
-}
-
 #[cfg(test)]
 mod tests {
     use color_eyre::eyre::Result;
