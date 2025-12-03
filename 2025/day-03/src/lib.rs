@@ -14,25 +14,21 @@ pub struct Puzzle {
 pub struct Bank(Vec<u8>);
 
 fn joltage(mut batteries: &[u8], take: usize) -> Option<u64> {
+    use std::cmp::Ordering;
     let mut res = 0;
     for len in (1..=take).rev() {
-        let (start, n) = digit(batteries, len)?;
+        let (start, n) = batteries[..=(batteries.len() - len)]
+            .iter()
+            .copied()
+            .enumerate()
+            .max_by(|(_, a), (_, b)| match a.cmp(b) {
+                Ordering::Less => Ordering::Less,
+                Ordering::Equal | Ordering::Greater => Ordering::Greater,
+            })?;
         res = res * 10 + u64::from(n);
         batteries = &batteries[start + 1..];
     }
     Some(res)
-}
-
-fn digit(batteries: &[u8], len: usize) -> Option<(usize, u8)> {
-    use std::cmp::Ordering;
-    batteries[..=(batteries.len() - len)]
-        .iter()
-        .copied()
-        .enumerate()
-        .max_by(|(_, a), (_, b)| match a.cmp(b) {
-            Ordering::Less => Ordering::Less,
-            Ordering::Equal | Ordering::Greater => Ordering::Greater,
-        })
 }
 
 impl std::str::FromStr for Puzzle {
