@@ -21,9 +21,9 @@ fn joltage(mut batteries: &[u8], take: usize) -> Option<u64> {
             .iter()
             .copied()
             .enumerate()
-            .max_by(|(_, a), (_, b)| match a.cmp(b) {
-                Ordering::Less => Ordering::Less,
-                Ordering::Equal | Ordering::Greater => Ordering::Greater,
+            .reduce(|lhs, rhs| match lhs.1.cmp(&rhs.1) {
+                Ordering::Less => rhs,
+                Ordering::Equal | Ordering::Greater => lhs,
             })?;
         res = res * 10 + u64::from(n);
         batteries = &batteries[start + 1..];
