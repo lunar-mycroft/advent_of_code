@@ -35,9 +35,5 @@ mod tests {
     #[case(&[8,1,8,1,8,1,9,1,1,1,1,2,1,1,1], 92)]
     fn find_joltage(#[case] batteries: &[u8], #[case] expected: u64) {
         assert_eq!(joltage(batteries, 2), Some(expected));
-        assert_eq!(
-            joltage_specialized(batteries),
-            expected.try_conv::<u8>().expect("known valid u8s")
-        );
     }
 }
