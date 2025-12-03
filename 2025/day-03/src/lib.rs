@@ -13,6 +13,25 @@ pub struct Puzzle {
 #[derive(Debug)]
 pub struct Bank(Vec<u8>);
 
+fn joltage(mut batteries: &[u8], take: usize) -> Option<u64> {
+    let mut res = 0;
+    for len in (1..=take).rev() {
+        let (start, n) = digit(batteries, len)?;
+        res = res * 10 + u64::from(n);
+        batteries = &batteries[start + 1..];
+    }
+    Some(res)
+}
+
+fn digit(batteries: &[u8], len: usize) -> Option<(usize, u8)> {
+    batteries[..=(batteries.len() - len)]
+        .iter()
+        .copied()
+        .enumerate()
+        .rev()
+        .max_by_key(|(_, digit)| *digit)
+}
+
 impl std::str::FromStr for Puzzle {
     type Err = color_eyre::Report;
 

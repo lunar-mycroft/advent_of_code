@@ -27,6 +27,17 @@ fn part1(bencher: divan::Bencher) {
 }
 
 #[divan::bench]
+fn part1_specialized(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| common::read_input!("part1.txt").parse::<Puzzle>())
+        .bench_values(|res| {
+            res.expect("parsing to suceed")
+                .pipe(divan::black_box)
+                .pipe(part1::process_specialized)
+        });
+}
+
+#[divan::bench]
 fn part2(bencher: divan::Bencher) {
     bencher
         .with_inputs(|| {

@@ -1,28 +1,13 @@
-use crate::Puzzle;
+use crate::{joltage, Puzzle};
 
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
 pub fn process(puzzle: Puzzle) -> u64 {
-    puzzle.banks.iter().map(|bank| joltage(&bank.0)).sum()
-}
-
-fn joltage(mut batteries: &[u8]) -> u64 {
-    let mut res = 0;
-    for len in (1usize..=12).rev() {
-        let (start, n) = digit(batteries, len).expect("");
-        res = res * 10 + u64::from(n);
-        batteries = &batteries[start + 1..];
-    }
-    res
-}
-
-fn digit(batteries: &[u8], len: usize) -> Option<(usize, u8)> {
-    batteries[..=(batteries.len() - len)]
+    puzzle
+        .banks
         .iter()
-        .copied()
-        .enumerate()
-        .rev()
-        .max_by_key(|(_, digit)| *digit)
+        .map(|bank| joltage(&bank.0, 12).expect("bank.0.len() to be >= 12"))
+        .sum()
 }
 
 #[cfg(test)]
@@ -48,6 +33,6 @@ mod tests {
     #[case(&[2,3,4,2,3,4,2,3,4,2,3,4,2,7,8], 434_234_234_278)]
     #[case(&[8,1,8,1,8,1,9,1,1,1,1,2,1,1,1], 888_911_112_111)]
     fn find_joltage(#[case] batteries: &[u8], #[case] expected: u64) {
-        assert_eq!(joltage(batteries), expected);
+        assert_eq!(joltage(batteries, 12), Some(expected));
     }
 }

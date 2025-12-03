@@ -1,17 +1,27 @@
-use crate::Puzzle;
+use crate::{joltage, Puzzle};
 
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
-pub fn process(puzzle: Puzzle) -> u32 {
+pub fn process(puzzle: Puzzle) -> u64 {
     puzzle
         .banks
         .iter()
-        .map(|bank| joltage(&bank.0))
+        .map(|bank| joltage(&bank.0, 2).expect("bank.0.len() to be >= 2"))
+        .sum()
+}
+
+#[must_use]
+#[allow(clippy::needless_pass_by_value)]
+pub fn process_specialized(puzzle: Puzzle) -> u32 {
+    puzzle
+        .banks
+        .iter()
+        .map(|bank| joltage_specialized(&bank.0))
         .map(u32::from)
         .sum()
 }
 
-fn joltage(batteries: &[u8]) -> u8 {
+fn joltage_specialized(batteries: &[u8]) -> u8 {
     (0..(batteries.len() - 1))
         .map(|start| {
             (
@@ -28,33 +38,18 @@ fn joltage(batteries: &[u8]) -> u8 {
         .expect("slices to be at least two long")
 }
 
-fn joltage_alt(batteries: &[u8]) -> u8 {
-    let (idx, first) = batteries[..batteries.len() - 1]
-        .iter()
-        .copied()
-        .enumerate()
-        .rev()
-        .max_by_key(|(_, digit)| *digit)
-        .expect("batteries.len() > 1");
-    batteries[idx + 1..]
-        .iter()
-        .copied()
-        .max()
-        .expect("batteries.len() > 1")
-        + first * 10
-}
-
 #[cfg(test)]
 mod tests {
     use color_eyre::eyre::Result;
     use rstest::rstest;
+    use tap::TryConv;
 
     use super::*;
 
     #[rstest]
     #[case::example("example.txt", 357)]
     #[case::part1("part1.txt", 17_109)]
-    fn finds_solution(#[case] input_path: &str, #[case] expected: u32) -> Result<()> {
+    fn finds_solution(#[case] input_path: &str, #[case] expected: u64) -> Result<()> {
         let input: Puzzle = common::read_input!(input_path).parse()?;
         let output = process(input);
         assert_eq!(output, expected);
@@ -66,8 +61,11 @@ mod tests {
     #[case(&[8,1,1,1,1,1,1,1,1,1,1,1,1,1,9], 89)]
     #[case(&[2,3,4,2,3,4,2,3,4,2,3,4,2,7,8], 78)]
     #[case(&[8,1,8,1,8,1,9,1,1,1,1,2,1,1,1], 92)]
-    fn find_joltage(#[case] batteries: &[u8], #[case] expected: u8) {
-        assert_eq!(joltage(batteries), expected);
-        assert_eq!(joltage_alt(batteries), expected);
+    fn find_joltage(#[case] batteries: &[u8], #[case] expected: u64) {
+        assert_eq!(joltage(batteries, 2), Some(expected));
+        assert_eq!(
+            joltage_specialized(batteries),
+            expected.try_conv::<u8>().expect("known valid u8s")
+        );
     }
 }
