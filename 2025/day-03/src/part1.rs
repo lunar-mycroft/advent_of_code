@@ -1,5 +1,3 @@
-use tap::prelude::*;
-
 use crate::Puzzle;
 
 #[must_use]
@@ -30,6 +28,22 @@ fn joltage(batteries: &[u8]) -> u8 {
         .expect("slices to be at least two long")
 }
 
+fn joltage_alt(batteries: &[u8]) -> u8 {
+    let (idx, first) = batteries[..batteries.len() - 1]
+        .iter()
+        .copied()
+        .enumerate()
+        .rev()
+        .max_by_key(|(_, digit)| *digit)
+        .expect("batteries.len() > 1");
+    batteries[idx + 1..]
+        .iter()
+        .copied()
+        .max()
+        .expect("batteries.len() > 1")
+        + first * 10
+}
+
 #[cfg(test)]
 mod tests {
     use color_eyre::eyre::Result;
@@ -39,7 +53,7 @@ mod tests {
 
     #[rstest]
     #[case::example("example.txt", 357)]
-    #[case::example("part1.txt", 0)]
+    #[case::part1("part1.txt", 17_109)]
     fn finds_solution(#[case] input_path: &str, #[case] expected: u32) -> Result<()> {
         let input: Puzzle = common::read_input!(input_path).parse()?;
         let output = process(input);
@@ -54,5 +68,6 @@ mod tests {
     #[case(&[8,1,8,1,8,1,9,1,1,1,1,2,1,1,1], 92)]
     fn find_joltage(#[case] batteries: &[u8], #[case] expected: u8) {
         assert_eq!(joltage(batteries), expected);
+        assert_eq!(joltage_alt(batteries), expected);
     }
 }
