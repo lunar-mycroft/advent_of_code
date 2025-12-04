@@ -23,16 +23,17 @@ pub struct Puzzle {
 impl Puzzle {
     fn reachable(&self, center: IVec2) -> bool {
         match self.grid.get(center).copied() {
-            Some(b'@') => (),
-            Some(_) | None => return false,
+            Some(b'@') => {
+                NEIGBORS
+                    .iter()
+                    .copied()
+                    .map(|pos| pos + center)
+                    .filter(|&pos| self.grid.get(pos).is_some_and(|&b| b == b'@'))
+                    .count()
+                    < 4
+            }
+            Some(_) | None => false,
         }
-        NEIGBORS
-            .iter()
-            .copied()
-            .map(|pos| pos + center)
-            .filter(|&pos| self.grid.get(pos).is_some_and(|&b| b == b'@'))
-            .count()
-            < 4
     }
 }
 

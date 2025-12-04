@@ -5,7 +5,7 @@ use crate::Puzzle;
 pub fn process(mut puzzle: Puzzle) -> usize {
     let mut res = 0;
     loop {
-        match puzzle.remove_removable() {
+        match puzzle.remove_reachable() {
             0 => break res,
             n => res += n,
         }
