@@ -13,18 +13,15 @@ pub fn process(mut puzzle: Puzzle) -> usize {
 }
 
 impl Puzzle {
-    fn remove_removable(&mut self) -> usize {
-        self.grid
-            .positions()
-            .map(|center| {
-                if self.reachable(center) {
-                    *self.grid.get_mut(center).expect("known to be inside") = b'.';
-                    1
-                } else {
-                    0
-                }
-            })
-            .sum()
+    fn remove_reachable(&mut self) -> usize {
+        let mut res = 0;
+        for center in self.grid.positions() {
+            if self.reachable(center) {
+                *self.grid.get_mut(center).expect("known to be inside") = b'.';
+                res += 1;
+            }
+        }
+        res
     }
 }
 
@@ -37,7 +34,7 @@ mod tests {
 
     #[rstest]
     #[case::example("example.txt", 43)]
-    #[case::example("part2.txt", 0)]
+    #[case::puzzle("part2.txt", 8758)]
     fn finds_solution(#[case] input_path: &str, #[case] expected: usize) -> Result<()> {
         let input: Puzzle = common::read_input!(input_path).parse()?;
         let output = process(input);
