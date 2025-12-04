@@ -34,9 +34,7 @@ impl<T> Grid<T> {
         assert!(size.min_element() >= 0, "Height and width must be positive");
         Self {
             #[allow(clippy::cast_sign_loss)]
-            items: std::iter::repeat(value)
-                .take((size.x as usize) * (size.y as usize))
-                .collect_vec(),
+            items: std::iter::repeat_n(value, (size.x as usize) * (size.y as usize)).collect_vec(),
             size,
         }
     }
@@ -65,6 +63,27 @@ impl<T> Grid<T> {
                 })
                 .expect("Not to query outside of image")
                 .pipe_ref(&make_pixel)
+            },
+        )
+    }
+
+    #[must_use]
+    pub fn pixel_positions<P>(
+        &self,
+        make_pixel: impl Fn(IVec2, &T) -> P,
+    ) -> ImageBuffer<P, Vec<P::Subpixel>>
+    where
+        P: image::Pixel,
+    {
+        ImageBuffer::from_fn(
+            self.size.x.try_into().expect(""),
+            self.size.y.try_into().expect(""),
+            |x, y| {
+                let pos = IVec2 {
+                    x: x.try_into().expect(""),
+                    y: y.try_into().expect(""),
+                };
+                make_pixel(pos, self.get(pos).expect("Not to query outside of image"))
             },
         )
     }
