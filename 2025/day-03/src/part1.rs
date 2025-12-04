@@ -14,7 +14,6 @@ pub fn process(puzzle: Puzzle) -> u64 {
 mod tests {
     use color_eyre::eyre::Result;
     use rstest::rstest;
-    use tap::TryConv;
 
     use super::*;
 
@@ -33,6 +32,7 @@ mod tests {
     #[case(&[8,1,1,1,1,1,1,1,1,1,1,1,1,1,9], 89)]
     #[case(&[2,3,4,2,3,4,2,3,4,2,3,4,2,7,8], 78)]
     #[case(&[8,1,8,1,8,1,9,1,1,1,1,2,1,1,1], 92)]
+    #[case(&[9,8,9,8,9,8,9,8,9,8,9,8,9,8,9,8,9,8], 99)]
     fn find_joltage(#[case] batteries: &[u8], #[case] expected: u64) {
         assert_eq!(joltage(batteries, 2), Some(expected));
     }
