@@ -15,12 +15,34 @@ const NEIGBORS: [IVec2; 8] = [
     IVec2::new(1, 1),
 ];
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Puzzle {
     pub grid: common::grid::Grid<u8>,
 }
 
 impl Puzzle {
+    fn reachable_stack(&self) -> Vec<IVec2> {
+        self.grid
+            .positions()
+            .filter(|&center| match self.grid.get(center).copied() {
+                Some(b'@') => {
+                    NEIGBORS
+                        .iter()
+                        .copied()
+                        .map(|pos| pos + center)
+                        .filter(|&pos| self.grid.get(pos).is_some_and(|&b| b == b'@'))
+                        .count()
+                        < 4
+                }
+                Some(_) | None => false,
+            })
+            // pre-allocate more than enough space for the rolls
+            .fold(Vec::with_capacity(self.grid.iter().len()), |mut q, pos| {
+                q.push(pos);
+                q
+            })
+    }
+
     fn reachable(&self, center: IVec2) -> bool {
         match self.grid.get(center).copied() {
             Some(b'@') => {

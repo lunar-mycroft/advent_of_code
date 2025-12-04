@@ -3,26 +3,21 @@ use crate::Puzzle;
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
 pub fn process(mut puzzle: Puzzle) -> usize {
-    let mut res = 0;
-    loop {
-        match puzzle.remove_reachable() {
-            0 => break res,
-            n => res += n,
+    let (mut count, mut queue) = (0, puzzle.reachable_stack());
+    while let Some(pos) = queue.pop() {
+        if puzzle.grid[pos] != b'@' {
+            continue;
         }
+        count += 1;
+        puzzle.grid[pos] = b'.';
+        let exposed = crate::NEIGBORS
+            .iter()
+            .copied()
+            .map(|offset| pos + offset)
+            .filter(|&center| puzzle.reachable(center));
+        queue.extend(exposed);
     }
-}
-
-impl Puzzle {
-    fn remove_reachable(&mut self) -> usize {
-        let mut res = 0;
-        for center in self.grid.positions() {
-            if self.reachable(center) {
-                *self.grid.get_mut(center).expect("known to be inside") = b'.';
-                res += 1;
-            }
-        }
-        res
-    }
+    count
 }
 
 #[cfg(test)]
