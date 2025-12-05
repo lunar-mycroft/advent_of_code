@@ -3,11 +3,24 @@ use crate::Puzzle;
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
 pub fn process(puzzle: Puzzle) -> usize {
+    use std::cmp::Ordering;
     puzzle
         .ids
         .iter()
         .copied()
-        .filter(|id| puzzle.ranges.iter().any(|range| range.contains(id)))
+        .filter(|id| {
+            puzzle
+                .ranges
+                .binary_search_by(|range| match (range.start().cmp(id), range.end().cmp(id)) {
+                    (Ordering::Less, Ordering::Less) => Ordering::Less,
+                    (_, Ordering::Equal)
+                    | (Ordering::Equal, _)
+                    | (Ordering::Less, Ordering::Greater) => Ordering::Equal,
+                    (Ordering::Greater, Ordering::Greater) => Ordering::Greater,
+                    (Ordering::Greater, Ordering::Less) => unreachable!(),
+                })
+                .is_ok()
+        })
         .count()
 }
 
