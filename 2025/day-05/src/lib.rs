@@ -7,7 +7,7 @@ use tap::prelude::*;
 pub mod part1;
 pub mod part2;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Puzzle {
     ranges: Vec<RangeInclusive<u64>>,
     ids: Vec<u64>,

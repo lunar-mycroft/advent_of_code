@@ -24,6 +24,7 @@ common.workspace = true
 [dev-dependencies]
 divan.workspace = true
 rstest.workspace = true
+pretty_assertions = "1"
 
 [lints]
 workspace = true

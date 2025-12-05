@@ -1,5 +1,3 @@
-use tap::prelude::*;
-
 use crate::Puzzle;
 
 #[must_use]
@@ -15,6 +13,7 @@ pub fn process(puzzle: Puzzle) -> usize {
 
 #[cfg(test)]
 mod tests {
+
     use color_eyre::eyre::Result;
     use rstest::rstest;
 
