@@ -29,7 +29,13 @@ impl std::str::FromStr for Puzzle {
                     .map(str::trim)
                     .map(|s| {
                         let (start, end) = s.split_once('-').ok_or_eyre("Missing '-'")?;
-                        ((start.parse()?)..=(end.parse()?)).pipe(Ok::<_, color_eyre::Report>)
+                        let (start, end): (u64, u64) = (start.parse()?, end.parse()?);
+                        if start > end {
+                            end..=start
+                        } else {
+                            start..=end
+                        }
+                        .pipe(Ok::<_, color_eyre::Report>)
                     })
                     .try_collect()?;
                 unmerged.sort_by_key(|r| *r.start());
