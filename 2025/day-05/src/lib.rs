@@ -22,15 +22,31 @@ impl std::str::FromStr for Puzzle {
             .split_once("\n\n")
             .ok_or_eyre("Missing blank line")?;
         Self {
-            ranges: ranges
-                .trim()
-                .lines()
-                .map(str::trim)
-                .map(|s| {
-                    let (start, end) = s.split_once('-').ok_or_eyre("Missing '-'")?;
-                    ((start.parse()?)..=(end.parse()?)).pipe(Ok::<_, color_eyre::Report>)
-                })
-                .try_collect()?,
+            ranges: {
+                let mut unmerged: Vec<_> = ranges
+                    .trim()
+                    .lines()
+                    .map(str::trim)
+                    .map(|s| {
+                        let (start, end) = s.split_once('-').ok_or_eyre("Missing '-'")?;
+                        ((start.parse()?)..=(end.parse()?)).pipe(Ok::<_, color_eyre::Report>)
+                    })
+                    .try_collect()?;
+                unmerged.sort_by_key(|r| *r.start());
+                let len = unmerged.len();
+                unmerged.into_iter().fold(
+                    Vec::<RangeInclusive<_>>::with_capacity(len),
+                    |mut v, curr| {
+                        match v.last_mut() {
+                            Some(last) if curr.start() <= last.end() => {
+                                *last = *last.start()..=*(last.end().max(curr.end()));
+                            }
+                            Some(_) | None => v.push(curr),
+                        }
+                        v
+                    },
+                )
+            },
             ids: ids.trim().lines().map(str::parse::<u64>).try_collect()?,
         }
         .pipe(Ok)
