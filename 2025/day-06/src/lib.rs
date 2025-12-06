@@ -1,15 +1,53 @@
+use color_eyre::eyre::{bail, OptionExt};
+use itertools::Itertools;
+use tap::prelude::*;
+
 pub mod part1;
 pub mod part2;
 
 #[derive(Debug)]
 pub struct Puzzle {
-    problems: Vec<Problem>,
+    numbers: String,
+    operations: Vec<Operator>,
 }
 
-#[derive(Debug)]
-pub enum Problem {
-    Add(Vec<u64>),
-    Mul(Vec<u64>),
+impl std::str::FromStr for Puzzle {
+    type Err = color_eyre::Report;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let (numbers, operators) = s
+            .trim()
+            .rsplit_once('\n')
+            .ok_or_eyre("Input doesn't contain a line break")?;
+        Self {
+            numbers: numbers.to_owned(),
+            operations: operators
+                .split_whitespace()
+                .map(|s| match s {
+                    "+" => Ok(Operator::Add),
+                    "*" => Ok(Operator::Mul),
+                    other => bail!("{other:?} is not a valid operator"),
+                })
+                .try_collect()?,
+        }
+        .pipe(Ok)
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Operator {
+    Add,
+    Mul,
+}
+
+impl Operator {
+    #[inline]
+    fn solve<E>(self, mut it: impl Iterator<Item = Result<u64, E>>) -> Result<u64, E> {
+        match self {
+            Self::Add => it.try_fold(0, |sum, res| Ok(sum + res?)),
+            Self::Mul => it.try_fold(1, |product, res| Ok(product * res?)),
+        }
+    }
 }
 
 pub fn init_tracing() -> color_eyre::Result<()> {
