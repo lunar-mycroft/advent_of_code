@@ -9,9 +9,9 @@ pub fn process(puzzle: Puzzle) -> usize {
     let mut counts: Grid<usize> = Grid::from_value(0, puzzle.grid.size());
     counts[IVec2::new(puzzle.start, 1)] = 1;
 
-    let mut current_row = 0;
+    let mut paths_in_row = 0;
     for y in 1..puzzle.grid.size().y - 1 {
-        current_row = 0;
+        paths_in_row = 0;
         for x in 0..puzzle.grid.size().x {
             let pos = IVec2::new(x, y);
             let paths = counts[pos];
@@ -21,19 +21,19 @@ pub fn process(puzzle: Puzzle) -> usize {
             let new_pos = pos + IVec2::Y;
             match puzzle.grid[new_pos] {
                 b'.' => {
-                    current_row += paths;
+                    paths_in_row += paths;
                     counts[new_pos] += paths;
                 }
                 b'^' => {
                     counts[new_pos + IVec2::X] += paths;
                     counts[new_pos - IVec2::X] += paths;
-                    current_row += paths * 2;
+                    paths_in_row += paths * 2;
                 }
                 _ => unreachable!(),
             }
         }
     }
-    current_row
+    paths_in_row
 }
 
 #[cfg(test)]
