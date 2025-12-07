@@ -29,20 +29,20 @@ pub fn process(mut puzzle: Puzzle) -> usize {
     res
 }
 
-#[cfg(test)]
-mod tests {
-    use color_eyre::eyre::Result;
-    use rstest::rstest;
+// #[cfg(test)]
+// mod tests {
+//     use color_eyre::eyre::Result;
+//     use rstest::rstest;
 
-    use super::*;
+//     use super::*;
 
-    #[rstest]
-    #[case::example("example.txt", 21)]
-    #[case::part1("part1.txt", 1672)]
-    fn finds_solution(#[case] input_path: &str, #[case] expected: usize) -> Result<()> {
-        let input: Puzzle = common::read_input!(input_path).parse()?;
-        let output = process(input);
-        assert_eq!(output, expected);
-        Ok(())
-    }
-}
+//     #[rstest]
+//     #[case::example("example.txt", 21)]
+//     #[case::part1("part1.txt", 1672)]
+//     fn finds_solution(#[case] input_path: &str, #[case] expected: usize) -> Result<()> {
+//         let input: Puzzle = common::read_input!(input_path).parse()?;
+//         let output = process(input);
+//         assert_eq!(output, expected);
+//         Ok(())
+//     }
+// }

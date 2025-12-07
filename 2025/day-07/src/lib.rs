@@ -1,4 +1,4 @@
-use color_eyre::eyre::{ensure, OptionExt};
+use color_eyre::eyre::{bail, ensure};
 use glam::IVec2;
 use tap::prelude::*;
 
@@ -7,7 +7,7 @@ use common::grid::Grid;
 pub mod part1;
 pub mod part2;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Puzzle {
     grid: Grid<u8>,
     start: i32,
@@ -31,14 +31,16 @@ impl std::str::FromStr for Puzzle {
 
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
-pub fn process(puzzle: Puzzle) -> (usize, usize) {
-    let mut counts: Grid<usize> = Grid::from_value(0, puzzle.grid.size());
-    counts[IVec2::new(puzzle.start, 1)] = 1;
-
-    let (mut paths_in_row, mut splits) = (0, 0);
-    for y in 1..puzzle.grid.size().y - 1 {
-        paths_in_row = 0;
-        for x in 0..puzzle.grid.size().x {
+pub fn process(puzzle: Puzzle) -> (u64, u64) {
+    fn update_counts(
+        splitters: &Grid<u8>,
+        counts: &mut Grid<u64>,
+        y: i32,
+        mut op: impl FnMut(u64),
+    ) -> u64 {
+        debug_assert_eq!(splitters.size(), counts.size());
+        let mut splits = 0;
+        for x in 0..counts.size().x {
             let pos = IVec2::new(x, y);
             let paths = counts[pos];
             if paths == 0 {
@@ -46,22 +48,38 @@ pub fn process(puzzle: Puzzle) -> (usize, usize) {
             }
 
             let new_pos = pos + IVec2::Y;
-            match puzzle.grid[new_pos] {
+            match splitters[new_pos] {
                 b'.' => {
                     counts[new_pos] += paths;
-                    paths_in_row += paths;
+                    op(paths);
                 }
                 b'^' => {
                     counts[new_pos + IVec2::X] += paths;
                     counts[new_pos - IVec2::X] += paths;
-                    paths_in_row += paths * 2;
+                    op(paths * 2);
                     splits += 1;
                 }
                 _ => unreachable!(),
             }
         }
+        splits
     }
-    (splits, paths_in_row)
+
+    let mut counts: Grid<u64> = Grid::from_value(0, puzzle.grid.size());
+    counts[IVec2::new(puzzle.start, 1)] = 1;
+
+    let mut splits = 0;
+    for y in 1..puzzle.grid.size().y - 2 {
+        splits += update_counts(&puzzle.grid, &mut counts, y, drop);
+    }
+    let mut part_2 = 0;
+    splits += update_counts(
+        &puzzle.grid,
+        &mut counts,
+        puzzle.grid.size().y - 2,
+        |amount| part_2 += amount,
+    );
+    (splits, part_2)
 }
 
 pub fn init_tracing() -> color_eyre::Result<()> {
@@ -96,8 +114,8 @@ mod tests {
     #[case::part1("part1.txt", 1672, 231_229_866_702_355)]
     fn finds_solution(
         #[case] input_path: &str,
-        #[case] part_1: usize,
-        #[case] part_2: usize,
+        #[case] part_1: u64,
+        #[case] part_2: u64,
     ) -> Result<()> {
         let input: Puzzle = common::read_input!(input_path).parse()?;
         let output = process(input);
