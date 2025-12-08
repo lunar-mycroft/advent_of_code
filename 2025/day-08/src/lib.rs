@@ -24,6 +24,24 @@ impl Puzzle {
         res.par_sort_unstable_by_key(|&((_, u), (_, v))| u.distance_squared(*v));
         res.into_iter().map(|((i, _), (j, _))| (i, j)).collect()
     }
+
+    #[must_use]
+    pub fn n_by_distance(&self, n: usize) -> Vec<(usize, usize)> {
+        let mut res = self
+            .boxes
+            .iter()
+            .enumerate()
+            .tuple_combinations::<(_, _)>()
+            .collect_vec();
+        let v = res
+            .select_nth_unstable_by_key(n, |&((_, u), (_, v))| u.distance_squared(*v))
+            .0
+            .iter()
+            .map(|&((i, _), (j, _))| (i, j))
+            .collect_vec();
+        debug_assert_eq!(v.len(), n);
+        v
+    }
 }
 
 impl std::str::FromStr for Puzzle {

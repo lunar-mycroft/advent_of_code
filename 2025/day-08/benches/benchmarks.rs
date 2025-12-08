@@ -27,11 +27,22 @@ fn sort(bencher: divan::Bencher) {
 }
 
 #[divan::bench]
+fn select(bencher: divan::Bencher) {
+    bencher
+        .with_inputs(|| {
+            common::read_input!("part1.txt")
+                .parse::<Puzzle>()
+                .map(divan::black_box)
+        })
+        .bench_values(|puzzle| puzzle.expect("parsing to succeed").n_by_distance(1000));
+}
+
+#[divan::bench]
 fn part1(bencher: divan::Bencher) {
     bencher
         .with_inputs(|| {
             let puzzle: Puzzle = common::read_input!("part1.txt").parse()?;
-            let by_distance = puzzle.by_distance();
+            let by_distance = puzzle.n_by_distance(1000);
             (puzzle, by_distance)
                 .pipe(divan::black_box)
                 .pipe(Ok::<_, color_eyre::Report>)
@@ -39,7 +50,7 @@ fn part1(bencher: divan::Bencher) {
         .bench_values(|res| {
             res.expect("parsing to suceed")
                 .pipe(divan::black_box)
-                .pipe(|input| part1::process(input, 1000))
+                .pipe(part1::process)
         });
 }
 

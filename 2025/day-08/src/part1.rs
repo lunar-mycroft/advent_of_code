@@ -4,9 +4,9 @@ use crate::{Dsu, Puzzle};
 
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
-pub fn process((Puzzle { boxes }, by_distance): (Puzzle, Vec<(usize, usize)>), n: usize) -> usize {
+pub fn process((Puzzle { boxes }, by_distance): (Puzzle, Vec<(usize, usize)>)) -> usize {
     let mut dsu = boxes.len().pipe(Dsu::new);
-    for &(u, v) in &by_distance[..n] {
+    for &(u, v) in &by_distance {
         dsu.unite(u, v).expect("known valid indicies");
     }
     dsu.nodes.sort_unstable_by_key(|circuit| circuit.size);
@@ -34,8 +34,8 @@ mod tests {
         #[case] expected: usize,
     ) -> Result<()> {
         let input: Puzzle = common::read_input!(input_path).parse()?;
-        let by_distance = input.by_distance();
-        let output = process((input, by_distance), n);
+        let by_distance = input.n_by_distance(n);
+        let output = process((input, by_distance));
         assert_eq!(output, expected);
         Ok(())
     }
