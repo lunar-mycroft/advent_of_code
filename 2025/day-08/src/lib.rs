@@ -13,6 +13,20 @@ pub struct Puzzle {
     boxes: Vec<IVec3>,
 }
 
+impl Puzzle {
+    #[must_use]
+    pub fn by_distance(&self) -> Vec<(IVec3, IVec3, i64)> {
+        let mut res = self
+            .boxes
+            .iter()
+            .tuple_combinations::<(_, _)>()
+            .map(|(a, b)| (*a, *b, a.distance_squared(*b)))
+            .collect_vec();
+        res.sort_unstable_by_key(|(_, _, r)| *r);
+        res
+    }
+}
+
 impl std::str::FromStr for Puzzle {
     type Err = color_eyre::Report;
 

@@ -7,20 +7,13 @@ use crate::{Dsu, Puzzle};
 
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
-pub fn process(Puzzle { boxes }: Puzzle, n: usize) -> usize {
-    let by_distance = {
-        let mut res = boxes
-            .iter()
-            .tuple_combinations::<(_, _)>()
-            .map(|(a, b)| (*a, *b, a.distance_squared(*b)))
-            .collect_vec();
-        res.sort_unstable_by_key(|(_, _, r)| *r);
-        res.truncate(n);
-        res
-    };
+pub fn process(
+    (Puzzle { boxes }, by_distance): (Puzzle, Vec<(IVec3, IVec3, i64)>),
+    n: usize,
+) -> usize {
     let mut circuits: HashMap<IVec3, HashSet<IVec3>> = HashMap::new();
     let mut dsu = Dsu::default();
-    for (u, v, _) in by_distance {
+    for &(u, v, _) in &by_distance[..n] {
         dsu.unite(u, v);
     }
     for junction in boxes {
@@ -44,18 +37,18 @@ mod tests {
 
     use super::*;
 
-    // #[rstest]
-    // #[case::example("example.txt", 10, 40)]
-    // #[case::puzzle("part1.txt", 1000, 62_186)]
-    // fn finds_solution(
-    //     #[case] input_path: &str,
-    //     #[case] n: usize,
-    //     #[case] expected: usize,
-    // ) -> Result<()> {
-    //     let input: Puzzle = common::read_input!(input_path).parse()?;
-    //     let output = process(input, n);
-    //     assert_eq!(output, expected);
-    //     panic!();
-    //     Ok(())
-    // }
+    #[rstest]
+    #[case::example("example.txt", 10, 40)]
+    #[case::puzzle("part1.txt", 1000, 62_186)]
+    fn finds_solution(
+        #[case] input_path: &str,
+        #[case] n: usize,
+        #[case] expected: usize,
+    ) -> Result<()> {
+        let input: Puzzle = common::read_input!(input_path).parse()?;
+        let by_distance = input.by_distance();
+        let output = process((input, by_distance), n);
+        assert_eq!(output, expected);
+        Ok(())
+    }
 }
