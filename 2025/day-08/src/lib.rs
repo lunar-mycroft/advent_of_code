@@ -1,6 +1,7 @@
 use color_eyre::eyre::{ensure, OptionExt};
 use glam::I64Vec3 as IVec3;
 use itertools::Itertools;
+use rayon::slice::ParallelSliceMut;
 use tap::prelude::*;
 
 pub mod part1;
@@ -20,7 +21,7 @@ impl Puzzle {
             .enumerate()
             .tuple_combinations::<(_, _)>()
             .collect_vec();
-        res.sort_unstable_by_key(|&((_, u), (_, v))| u.distance_squared(*v));
+        res.par_sort_unstable_by_key(|&((_, u), (_, v))| u.distance_squared(*v));
         res.into_iter().map(|((i, _), (j, _))| (i, j)).collect()
     }
 }
