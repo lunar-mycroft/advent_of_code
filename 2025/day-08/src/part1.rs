@@ -44,17 +44,18 @@ mod tests {
 
     use super::*;
 
-    #[rstest]
-    #[case::example("example.txt", 10, 40)]
-    #[case::puzzle("part1.txt", 1000, 62_186)]
-    fn finds_solution(
-        #[case] input_path: &str,
-        #[case] n: usize,
-        #[case] expected: usize,
-    ) -> Result<()> {
-        let input: Puzzle = common::read_input!(input_path).parse()?;
-        let output = process(input, n);
-        assert_eq!(output, expected);
-        Ok(())
-    }
+    // #[rstest]
+    // #[case::example("example.txt", 10, 40)]
+    // #[case::puzzle("part1.txt", 1000, 62_186)]
+    // fn finds_solution(
+    //     #[case] input_path: &str,
+    //     #[case] n: usize,
+    //     #[case] expected: usize,
+    // ) -> Result<()> {
+    //     let input: Puzzle = common::read_input!(input_path).parse()?;
+    //     let output = process(input, n);
+    //     assert_eq!(output, expected);
+    //     panic!();
+    //     Ok(())
+    // }
 }

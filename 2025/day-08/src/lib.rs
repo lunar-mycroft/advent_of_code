@@ -55,10 +55,13 @@ impl Dsu {
         u
     }
 
-    fn unite(&mut self, u: IVec3, v: IVec3) {
+    fn unite(&mut self, u: IVec3, v: IVec3) -> usize {
         let (pu, pv) = (self.parent(u), self.parent(v));
-        if pu != pv {
+        if pu == pv {
+            0
+        } else {
             self.parents.insert(pu, pv);
+            1
         }
     }
 }
