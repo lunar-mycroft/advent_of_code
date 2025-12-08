@@ -1,17 +1,14 @@
-use glam::I64Vec3 as IVec3;
-use itertools::Itertools as _;
+use tap::prelude::*;
 
 use crate::{Dsu, Puzzle};
 
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
-pub fn process((Puzzle { boxes }, by_distance): (Puzzle, Vec<(IVec3, IVec3, i64)>)) -> i64 {
-    let mut dsu = Dsu::default();
-    let mut n = 0;
-    for (u, v, _) in by_distance {
-        n += dsu.unite(u, v);
-        if n == boxes.len() - 1 {
-            return u.x * v.x;
+pub fn process((Puzzle { boxes }, by_distance): (Puzzle, Vec<(usize, usize)>)) -> i64 {
+    let mut dsu = boxes.len().pipe(Dsu::new);
+    for (u, v) in by_distance {
+        if dsu.unite(u, v).expect("known valid indicies") == boxes.len() {
+            return boxes[u].x * boxes[v].x;
         }
     }
     unreachable!();

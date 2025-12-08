@@ -1,33 +1,21 @@
-use std::collections::{HashMap, HashSet};
-
-use glam::I64Vec3 as IVec3;
-use itertools::Itertools;
+use tap::prelude::*;
 
 use crate::{Dsu, Puzzle};
 
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
-pub fn process(
-    (Puzzle { boxes }, by_distance): (Puzzle, Vec<(IVec3, IVec3, i64)>),
-    n: usize,
-) -> usize {
-    let mut circuits: HashMap<IVec3, HashSet<IVec3>> = HashMap::new();
-    let mut dsu = Dsu::default();
-    for &(u, v, _) in &by_distance[..n] {
-        dsu.unite(u, v);
+pub fn process((Puzzle { boxes }, by_distance): (Puzzle, Vec<(usize, usize)>), n: usize) -> usize {
+    let mut dsu = boxes.len().pipe(Dsu::new);
+    for &(u, v) in &by_distance[..n] {
+        dsu.unite(u, v).expect("known valid indicies");
     }
-    for junction in boxes {
-        circuits
-            .entry(dsu.parent(junction))
-            .or_default()
-            .insert(junction);
-    }
-    {
-        let mut v = circuits.values().map(HashSet::len).collect_vec();
-        v.sort_unstable();
-        v.reverse();
-        v[..3].iter().copied().product()
-    }
+    dsu.nodes.sort_unstable_by_key(|circuit| circuit.size);
+    dsu.nodes
+        .iter()
+        .rev()
+        .take(3)
+        .map(|circuit| circuit.size)
+        .product()
 }
 
 #[cfg(test)]

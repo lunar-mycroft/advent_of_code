@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use color_eyre::eyre::{ensure, OptionExt};
 use glam::I64Vec3 as IVec3;
 use itertools::Itertools;
@@ -15,15 +13,15 @@ pub struct Puzzle {
 
 impl Puzzle {
     #[must_use]
-    pub fn by_distance(&self) -> Vec<(IVec3, IVec3, i64)> {
+    pub fn by_distance(&self) -> Vec<(usize, usize)> {
         let mut res = self
             .boxes
             .iter()
+            .enumerate()
             .tuple_combinations::<(_, _)>()
-            .map(|(a, b)| (*a, *b, a.distance_squared(*b)))
             .collect_vec();
-        res.sort_unstable_by_key(|(_, _, r)| *r);
-        res
+        res.sort_unstable_by_key(|&((_, u), (_, v))| u.distance_squared(*v));
+        res.into_iter().map(|((i, _), (j, _))| (i, j)).collect()
     }
 }
 
@@ -56,27 +54,49 @@ impl std::str::FromStr for Puzzle {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 struct Dsu {
-    parents: HashMap<IVec3, IVec3>,
+    nodes: Box<[Circuit]>,
+}
+
+#[derive(Debug)]
+struct Circuit {
+    parent: usize,
+    size: usize,
 }
 
 impl Dsu {
-    fn parent(&self, mut u: IVec3) -> IVec3 {
-        while let Some(v) = self.parents.get(&u) {
-            u = *v;
+    fn new(len: usize) -> Self {
+        Self {
+            nodes: (0..len).map(|parent| Circuit { parent, size: 1 }).collect(),
         }
-        u
+    }
+    fn parent(&mut self, mut x: usize) -> Option<usize> {
+        loop {
+            let parent = self.nodes.get(x)?.parent;
+            if parent == x {
+                break Some(parent);
+            }
+            (x, self.nodes[x].parent) = (parent, self.nodes[parent].parent);
+        }
     }
 
-    fn unite(&mut self, u: IVec3, v: IVec3) -> usize {
-        let (pu, pv) = (self.parent(u), self.parent(v));
-        if pu == pv {
-            0
-        } else {
-            self.parents.insert(pu, pv);
-            1
+    fn unite(&mut self, u: usize, v: usize) -> Option<usize> {
+        let (larger, smaller) = {
+            let (pu, pv) = (self.parent(u)?, self.parent(v)?);
+            if self.nodes[pu].size < self.nodes[pv].size {
+                (pv, pu)
+            } else {
+                (pu, pv)
+            }
+        };
+        if larger == smaller {
+            return Some(self.nodes[u].size);
         }
+
+        self.nodes[smaller].parent = larger;
+        self.nodes[larger].size += self.nodes[smaller].size;
+        Some(self.nodes[larger].size)
     }
 }
 
