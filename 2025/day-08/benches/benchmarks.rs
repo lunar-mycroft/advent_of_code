@@ -37,21 +37,45 @@ fn select(bencher: divan::Bencher) {
         .bench_values(|puzzle| puzzle.expect("parsing to succeed").n_by_distance(1000));
 }
 
-#[divan::bench]
-fn part1(bencher: divan::Bencher) {
-    bencher
-        .with_inputs(|| {
-            let puzzle: Puzzle = common::read_input!("part1.txt").parse()?;
-            let by_distance = puzzle.n_by_distance(1000);
-            (puzzle, by_distance)
-                .pipe(divan::black_box)
-                .pipe(Ok::<_, color_eyre::Report>)
-        })
-        .bench_values(|res| {
-            res.expect("parsing to suceed")
-                .pipe(divan::black_box)
-                .pipe(part1::process)
-        });
+#[allow(clippy::wildcard_imports)]
+#[divan::bench_group]
+mod part_1 {
+    use super::*;
+
+    #[divan::bench]
+    fn part1_sort(bencher: divan::Bencher) {
+        bencher
+            .with_inputs(|| {
+                let puzzle: Puzzle = common::read_input!("part1.txt").parse()?;
+                let mut by_distance = puzzle.by_distance();
+                by_distance.truncate(1000);
+                (puzzle, by_distance)
+                    .pipe(divan::black_box)
+                    .pipe(Ok::<_, color_eyre::Report>)
+            })
+            .bench_values(|res| {
+                res.expect("parsing to suceed")
+                    .pipe(divan::black_box)
+                    .pipe(part1::process)
+            });
+    }
+
+    #[divan::bench]
+    fn part1_select(bencher: divan::Bencher) {
+        bencher
+            .with_inputs(|| {
+                let puzzle: Puzzle = common::read_input!("part1.txt").parse()?;
+                let by_distance = puzzle.n_by_distance(1000);
+                (puzzle, by_distance)
+                    .pipe(divan::black_box)
+                    .pipe(Ok::<_, color_eyre::Report>)
+            })
+            .bench_values(|res| {
+                res.expect("parsing to suceed")
+                    .pipe(divan::black_box)
+                    .pipe(part1::process)
+            });
+    }
 }
 
 #[divan::bench]
