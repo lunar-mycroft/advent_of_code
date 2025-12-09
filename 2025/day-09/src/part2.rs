@@ -35,31 +35,14 @@ pub fn process(Puzzle { tiles }: Puzzle) -> Option<u64> {
 
 fn intersects(rect: (IVec2, IVec2), seg: (IVec2, IVec2)) -> bool {
     let rect = (rect.0.min(rect.1), rect.0.max(rect.1));
-    if seg.0.x == seg.1.x {
-        let x = seg.0.x;
-        if !(rect.0.x < x && rect.1.x > x) {
-            return false;
-        }
-        let (min, max) = (seg.0.y.min(seg.1.y), seg.0.y.max(seg.1.y));
-        if max == rect.0.y || min == rect.1.y {
-            return false;
-        }
-        let range = min..=max;
-        range.contains(&rect.0.y) || range.contains(&rect.1.y)
-    } else if seg.0.y == seg.1.y {
-        let y = seg.0.y;
-        if !(rect.0.y < y && rect.1.y > y) {
-            return false;
-        }
-        let (min, max) = (seg.0.x.min(seg.1.x), seg.0.x.max(seg.1.x));
-        if max == rect.0.x || min == rect.1.x {
-            return false;
-        }
-        let range = min..=max;
-        range.contains(&rect.0.x) || range.contains(&rect.1.x)
-    } else {
-        unreachable!()
-    }
+    // Valid because segment is not diagonal
+    let seg = (seg.0.min(seg.1), seg.0.max(seg.1));
+
+    let left = rect.1.x <= seg.0.x;
+    let right = rect.0.x >= seg.1.x;
+    let above = rect.1.y <= seg.0.y;
+    let below = rect.0.y >= seg.1.y;
+    !(left || right || above || below)
 }
 
 #[cfg(test)]
