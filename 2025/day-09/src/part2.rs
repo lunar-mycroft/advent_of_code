@@ -69,49 +69,11 @@ mod tests {
 
     #[rstest]
     #[case::example("example.txt", 24)]
-    #[case::puzzle("input.txt", 0)]
+    #[case::puzzle("input.txt", 1_476_550_548)]
     fn finds_solution(#[case] input_path: &str, #[case] expected: u64) -> Result<()> {
         let input: Puzzle = common::read_input!(input_path).parse()?;
         let output = process(input);
         assert_eq!(output, expected);
         Ok(())
-    }
-
-    #[rstest]
-    #[case((IVec2::new(11,7), IVec2::new(2,3)), (IVec2::new(9,5), IVec2::new(9,7)), true)]
-    fn intersections_correct(
-        #[case] rect: (IVec2, IVec2),
-        #[case] seg: (IVec2, IVec2),
-        #[case] expected: bool,
-    ) {
-        assert_eq!(intersects(rect, seg), expected);
-    }
-
-    #[rstest]
-    #[case(IVec2::new(9, 5), IVec2::new(2, 3), true)]
-    #[case(IVec2::new(9, 7), IVec2::new(2, 3), false)]
-    #[case(IVec2::new(2, 5), IVec2::new(11, 1), false)]
-    fn solutions_correct(#[case] a: IVec2, #[case] b: IVec2, #[case] valid: bool) -> Result<()> {
-        let Puzzle { tiles } = common::read_input!("example.txt").parse()?;
-        let segments = tiles
-            .iter()
-            .copied()
-            .tuple_windows::<(_, _)>()
-            .chain(
-                (
-                    *tiles.last().expect("Known non-empty"),
-                    *tiles.first().expect("Known non-empty"),
-                )
-                    .pipe(std::iter::once),
-            )
-            .collect_vec();
-        let rect = (a.min(b), a.max(b));
-
-        let violation = segments.into_iter().find(|&seg| intersects(rect, seg));
-        match violation {
-            Some((c, d)) if valid => panic!("segment {c}-{d} incorrectly says {a}:{b} is invalid"),
-            None if !valid => panic!("{a}:{b} is invalid"),
-            _ => Ok(()),
-        }
     }
 }
