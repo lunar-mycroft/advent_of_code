@@ -19,7 +19,7 @@ pub fn process(Puzzle { tiles }: Puzzle) -> Option<u64> {
             .tuple_combinations::<(_, _)>()
             .map(|(a, b)| (a, b, crate::area(a, b)))
             .collect_vec();
-        by_area.sort_unstable_by_key(|&(_, _, area)| area);
+        by_area.sort_unstable_by(|&(_, _, a_0), (_, _, a_1)| a_0.cmp(a_1));
         by_area
     }
     .into_iter()
