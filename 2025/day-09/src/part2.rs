@@ -1,34 +1,31 @@
-use std::ops::RangeInclusive;
-
 use glam::IVec2;
 use itertools::Itertools;
-use tap::prelude::*;
 
 use crate::Puzzle;
 
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
-pub fn process(Puzzle { tiles }: Puzzle) -> u64 {
+pub fn process(Puzzle { tiles }: Puzzle) -> Option<u64> {
     let segments = tiles
         .iter()
         .copied()
-        .tuple_windows::<(_, _)>()
-        .chain(
-            (
-                *tiles.last().expect("Known non-empty"),
-                *tiles.first().expect("Known non-empty"),
-            )
-                .pipe(std::iter::once),
-        )
+        .circular_tuple_windows::<(_, _)>()
         .collect_vec();
-    tiles
-        .iter()
-        .copied()
-        .tuple_combinations::<(_, _)>()
-        .filter(|&rect| !segments.iter().copied().any(|seg| intersects(rect, seg)))
-        .map(|(a, b)| crate::area(a, b))
-        .max()
-        .expect("Knonw non-empty")
+
+    {
+        let mut by_area = tiles
+            .iter()
+            .copied()
+            .tuple_combinations::<(_, _)>()
+            .map(|(a, b)| (a, b, crate::area(a, b)))
+            .collect_vec();
+        by_area.sort_unstable_by_key(|&(_, _, area)| area);
+        by_area
+    }
+    .into_iter()
+    .rev()
+    .find(|&(a, b, _)| !segments.iter().copied().any(|seg| intersects((a, b), seg)))
+    .map(|(_, _, area)| area)
 }
 
 fn intersects(rect: (IVec2, IVec2), seg: (IVec2, IVec2)) -> bool {
@@ -56,7 +53,7 @@ fn intersects(rect: (IVec2, IVec2), seg: (IVec2, IVec2)) -> bool {
         let range = min..=max;
         range.contains(&rect.0.x) || range.contains(&rect.1.x)
     } else {
-        panic!("Diagonal segment")
+        unreachable!()
     }
 }
 
@@ -73,7 +70,7 @@ mod tests {
     fn finds_solution(#[case] input_path: &str, #[case] expected: u64) -> Result<()> {
         let input: Puzzle = common::read_input!(input_path).parse()?;
         let output = process(input);
-        assert_eq!(output, expected);
+        assert_eq!(output, Some(expected));
         Ok(())
     }
 }
