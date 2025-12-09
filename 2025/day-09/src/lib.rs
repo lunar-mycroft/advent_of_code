@@ -1,4 +1,4 @@
-use color_eyre::eyre::{ensure, OptionExt};
+use color_eyre::eyre::{bail, ensure, OptionExt};
 use glam::IVec2;
 use itertools::Itertools;
 use tap::prelude::*;
@@ -39,6 +39,15 @@ impl std::str::FromStr for Puzzle {
             tiles.iter().all(|tile| tile.x >= 0 && tile.y >= 0),
             "Negative tile found"
         );
+        match tiles
+            .iter()
+            .copied()
+            .circular_tuple_windows()
+            .find(|&(a, b)| a.x != b.x && a.y != b.y)
+        {
+            Some((a, b)) => bail!("Diagonal segment found: {a}-{b}"),
+            None => (),
+        }
         Ok(Self { tiles })
     }
 }
