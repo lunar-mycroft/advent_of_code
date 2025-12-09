@@ -24,8 +24,13 @@ pub fn process(Puzzle { tiles }: Puzzle) -> Option<u64> {
     }
     .into_iter()
     .rev()
-    .find(|&(a, b, _)| !segments.iter().copied().any(|seg| intersects((a, b), seg)))
-    .map(|(_, _, area)| area)
+    .find_map(|(a, b, area)| {
+        if segments.iter().copied().any(|seg| intersects((a, b), seg)) {
+            None
+        } else {
+            Some(area)
+        }
+    })
 }
 
 fn intersects(rect: (IVec2, IVec2), seg: (IVec2, IVec2)) -> bool {
