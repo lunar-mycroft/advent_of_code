@@ -10,8 +10,6 @@ use crate::Puzzle;
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
 pub fn process(Puzzle { tiles }: Puzzle) -> Option<u64> {
-    let segments = tiles.iter().copied().circular_tuple_windows::<(_, _)>();
-
     let shrunk = Shrunk::new(&tiles);
     let mut grid = Grid::from_value(
         (None, 0u64),
@@ -20,41 +18,7 @@ pub fn process(Puzzle { tiles }: Puzzle) -> Option<u64> {
             y: shrunk.ys.len().try_conv().expect("tiles.len() < i32::MAX"),
         },
     );
-    // fill with whether or not we're inside
-    {
-        for (start, end) in segments {
-            let (start, end) = (
-                shrunk.get(start).expect("point to be inside"),
-                shrunk.get(end).expect("point to be inside"),
-            );
-            for y in start.y.min(end.y)..=start.y.max(end.y) {
-                for x in start.x.min(end.x)..=start.x.max(end.x) {
-                    grid[IVec2::new(x, y)].0 = Some(true);
-                }
-            }
-        }
-        let mut stack = (grid.size().x * grid.size().y)
-            .try_conv()
-            .map(Vec::with_capacity)
-            .expect("area to be positive");
-        stack.push(IVec2::ZERO);
-        while let Some(point) = stack.pop() {
-            for next in [
-                point + IVec2::X,
-                point - IVec2::X,
-                point + IVec2::Y,
-                point - IVec2::Y,
-            ] {
-                match grid.get_mut(next) {
-                    Some((cell @ None, _)) => {
-                        *cell = Some(false);
-                        stack.push(next);
-                    }
-                    _ => (),
-                }
-            }
-        }
-    }
+    flood(&mut grid, &shrunk, &tiles);
     // compute summed area table
     for y in 1..grid.size().y {
         for x in 1..grid.size().y {
@@ -86,6 +50,44 @@ pub fn process(Puzzle { tiles }: Puzzle) -> Option<u64> {
             }
         })
         .max()
+}
+
+pub fn flood(grid: &mut Grid<(Option<bool>, u64)>, shrunk: &Shrunk, tiles: &[IVec2]) {
+    for (i, j) in (0..tiles.len()).circular_tuple_windows() {
+        let (start, end) = (shrunk.by_index[i], shrunk.by_index[j]);
+        for y in start.y.min(end.y)..=start.y.max(end.y) {
+            for x in start.x.min(end.x)..=start.x.max(end.x) {
+                grid[IVec2::new(x, y)].0 = Some(true);
+            }
+        }
+    }
+    let mut stack = (grid.size().x * grid.size().y)
+        .try_conv()
+        .map(Vec::with_capacity)
+        .expect("area to be positive");
+    stack.push(IVec2::ZERO);
+    while let Some(point) = stack.pop() {
+        for next in [
+            point + IVec2::X,
+            point - IVec2::X,
+            point + IVec2::Y,
+            point - IVec2::Y,
+        ] {
+            match grid.get_mut(next) {
+                Some((cell @ None, _)) => {
+                    *cell = Some(false);
+                    stack.push(next);
+                }
+                _ => (),
+            }
+        }
+    }
+}
+
+enum TileState {
+    Inside,
+    Outside,
+    Unknown,
 }
 
 pub struct Shrunk {
