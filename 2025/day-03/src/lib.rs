@@ -14,6 +14,7 @@ pub struct Puzzle {
 pub struct Bank(Vec<u8>);
 
 fn joltage(mut batteries: &[u8], take: usize) -> Option<u64> {
+    // TODO: https://www.reddit.com/r/adventofcode/comments/1pcvaj4/2025_day_3_solutions/ns4l2rs/?context=3
     use std::cmp::Ordering;
     let mut res = 0;
     for len in (1..=take).rev() {

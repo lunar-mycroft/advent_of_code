@@ -17,21 +17,30 @@ impl std::str::FromStr for Puzzle {
     type Err = color_eyre::Report;
 
     fn from_str(s: &str) -> color_eyre::Result<Self> {
+        ensure!(!s.contains("^^"), "Input contains adjacent splitters");
         let grid: Grid<u8> = s.parse()?;
-        ensure!(grid.iter().all(|b| matches!(b, b'^' | b'.' | b'S')));
-        Self {
-            start: (0..grid.size().x)
-                .find(|&x| grid[IVec2::new(x, 0)] == b'S')
-                .ok_or_eyre("Missing start")?,
-            grid,
-        }
-        .pipe(Ok)
+        let width = grid.size().x;
+        let start = width / 2;
+        grid.positions()
+            .map(|pos| (pos, grid[pos]))
+            .try_fold((), |(), (pos, b)| match b {
+                b'S' if pos == IVec2::new(start, 0) => Ok(()),
+                b'S' => bail!("Start in wrong location: {pos}"),
+                b'^' if pos.y % 2 == 1 => {
+                    bail!("location {pos} not empty")
+                }
+                b'^' | b'.' => Ok(()),
+                other => bail!("{other} is not a vaild byte"),
+            })?;
+
+        Self { grid, start }.pipe(Ok)
     }
 }
 
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
 pub fn process(puzzle: Puzzle) -> (u64, u64) {
+    #[inline]
     fn update_counts(
         splitters: &Grid<u8>,
         counts: &mut Grid<u64>,

@@ -7,12 +7,13 @@ use common::grid::Grid;
 
 use crate::Puzzle;
 
+// TODO: https://www.reddit.com/r/adventofcode/comments/1phywvn/2025_day_9_solutions/nt2nnxw/
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
 pub fn process(Puzzle { tiles }: Puzzle) -> Option<u64> {
     let shrunk = Shrunk::new(&tiles);
     let mut grid = Grid::from_value(
-        (None, 0u64),
+        (TileState::Unknown, 0u64),
         IVec2 {
             x: shrunk.xs.len().try_conv().expect("tiles.len() < i32::MAX"),
             y: shrunk.ys.len().try_conv().expect("tiles.len() < i32::MAX"),
@@ -23,7 +24,7 @@ pub fn process(Puzzle { tiles }: Puzzle) -> Option<u64> {
     for y in 1..grid.size().y {
         for x in 1..grid.size().y {
             let point = IVec2::new(x, y);
-            let value = grid[point].0 != Some(false);
+            let value = !matches!(grid[point].0, TileState::Outside);
             grid[point].1 = u64::from(value) + grid[point - IVec2::Y].1 + grid[point - IVec2::X].1
                 - grid[point - IVec2::ONE].1;
         }
@@ -52,12 +53,12 @@ pub fn process(Puzzle { tiles }: Puzzle) -> Option<u64> {
         .max()
 }
 
-pub fn flood(grid: &mut Grid<(Option<bool>, u64)>, shrunk: &Shrunk, tiles: &[IVec2]) {
+pub fn flood(grid: &mut Grid<(TileState, u64)>, shrunk: &Shrunk, tiles: &[IVec2]) {
     for (i, j) in (0..tiles.len()).circular_tuple_windows() {
         let (start, end) = (shrunk.by_index[i], shrunk.by_index[j]);
         for y in start.y.min(end.y)..=start.y.max(end.y) {
             for x in start.x.min(end.x)..=start.x.max(end.x) {
-                grid[IVec2::new(x, y)].0 = Some(true);
+                grid[IVec2::new(x, y)].0 = TileState::Inside;
             }
         }
     }
@@ -67,15 +68,10 @@ pub fn flood(grid: &mut Grid<(Option<bool>, u64)>, shrunk: &Shrunk, tiles: &[IVe
         .expect("area to be positive");
     stack.push(IVec2::ZERO);
     while let Some(point) = stack.pop() {
-        for next in [
-            point + IVec2::X,
-            point - IVec2::X,
-            point + IVec2::Y,
-            point - IVec2::Y,
-        ] {
+        for next in [IVec2::X, -IVec2::X, IVec2::Y, -IVec2::Y].map(|p| p + point) {
             match grid.get_mut(next) {
-                Some((cell @ None, _)) => {
-                    *cell = Some(false);
+                Some((cell @ TileState::Unknown, _)) => {
+                    *cell = TileState::Outside;
                     stack.push(next);
                 }
                 _ => (),
@@ -84,10 +80,45 @@ pub fn flood(grid: &mut Grid<(Option<bool>, u64)>, shrunk: &Shrunk, tiles: &[IVe
     }
 }
 
-enum TileState {
+#[cfg_attr(not(test), expect(unused))]
+fn scan(grid: &mut Grid<(TileState, u64)>, shrunk: &Shrunk, tiles: &[IVec2]) {
+    for (start, end) in (0..tiles.len())
+        .circular_tuple_windows()
+        .map(|(i, j)| (shrunk.by_index[i], shrunk.by_index[j]))
+        .filter(|(start, end)| start.x == end.x)
+    {
+        if start.y < end.y {
+            for y in start.y..end.y {
+                grid[IVec2::new(end.x, y)].0 = TileState::Up;
+            }
+        } else {
+            for y in end.y..start.y {
+                grid[IVec2::new(end.x, y)].0 = TileState::Down;
+            }
+        }
+    }
+    for y in 0..grid.size().y {
+        let mut direction = 0i8;
+        for x in 0..grid.size().x {
+            let point = IVec2::new(x, y);
+            match grid[point].0 {
+                TileState::Inside | TileState::Outside => (),
+                TileState::Unknown if direction == 0 => grid[point].0 = TileState::Outside,
+                TileState::Unknown => grid[point].0 = TileState::Inside,
+                TileState::Up => direction = (direction + 1).clamp(-1, 1),
+                TileState::Down => direction = (direction - 1).clamp(-1, 1),
+            }
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum TileState {
     Inside,
     Outside,
     Unknown,
+    Up,
+    Down,
 }
 
 pub struct Shrunk {
@@ -128,14 +159,6 @@ impl Shrunk {
             ys,
         }
     }
-
-    pub fn get(&self, point: IVec2) -> Option<IVec2> {
-        IVec2 {
-            x: *self.xs.get(&point.x)?,
-            y: *self.ys.get(&point.y)?,
-        }
-        .pipe(Some)
-    }
 }
 
 #[cfg(test)]
@@ -152,6 +175,51 @@ mod tests {
         let input: Puzzle = common::read_input!(input_path).parse()?;
         let output = process(input);
         assert_eq!(output, Some(expected));
+        Ok(())
+    }
+
+    #[rstest]
+    #[ignore = "WIP"]
+    #[case::example("example.txt")]
+    #[ignore = "WIP"]
+    #[case::puzzle("input.txt")]
+    fn scan_correct(#[case] input_path: &str) -> Result<()> {
+        let input: Puzzle = common::read_input!(input_path).parse()?;
+
+        let shrunk = Shrunk::new(&input.tiles);
+        let mut flooded = Grid::from_value(
+            (TileState::Unknown, 0u64),
+            IVec2 {
+                x: shrunk.xs.len().try_conv().expect("tiles.len() < i32::MAX"),
+                y: shrunk.ys.len().try_conv().expect("tiles.len() < i32::MAX"),
+            },
+        );
+        let mut scanned = Grid::from_value(
+            (TileState::Unknown, 0u64),
+            IVec2 {
+                x: shrunk.xs.len().try_conv().expect("tiles.len() < i32::MAX"),
+                y: shrunk.ys.len().try_conv().expect("tiles.len() < i32::MAX"),
+            },
+        );
+        flood(&mut flooded, &shrunk, &input.tiles);
+        scan(&mut scanned, &shrunk, &input.tiles);
+        for pos in flooded.positions() {
+            let (a, b) = (flooded[pos].0, scanned[pos].0);
+            match (a, b) {
+                (TileState::Inside, TileState::Inside | TileState::Up | TileState::Down)
+                | (TileState::Outside, TileState::Outside)
+                | (TileState::Unknown, TileState::Unknown | TileState::Inside) => (),
+                (TileState::Inside, TileState::Outside | TileState::Unknown)
+                | (
+                    TileState::Outside,
+                    TileState::Inside | TileState::Unknown | TileState::Up | TileState::Down,
+                )
+                | (TileState::Unknown, TileState::Outside | TileState::Up | TileState::Down) => {
+                    panic!("{pos}: {a:?} != {b:?}")
+                }
+                (TileState::Up | TileState::Down, _) => unreachable!(),
+            }
+        }
         Ok(())
     }
 }
