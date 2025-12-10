@@ -25,7 +25,7 @@ fn fewest_presses(machine: &Machine) -> Option<u64> {
                     }
                 })
                 .fold(0, |lights, button| lights ^ button);
-            machine.goal == actual
+            machine.lights == actual
         })
         .map(u16::count_ones)
         .min()

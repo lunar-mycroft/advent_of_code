@@ -12,7 +12,7 @@ pub struct Puzzle {
 
 #[derive(Debug)]
 pub struct Machine {
-    goal: u16,
+    lights: u16,
     buttons: Vec<u16>,
     joltages: Vec<u16>,
 }
@@ -49,7 +49,7 @@ impl std::str::FromStr for Machine {
         let goal_len: u32 = goal.len().try_conv()?;
 
         Self {
-            goal: goal.as_bytes().iter().try_fold(0u16, |out, &b| {
+            lights: goal.as_bytes().iter().try_fold(0u16, |out, &b| {
                 ensure!(matches!(b, b'.' | b'#'), "Invalid light");
                 Ok(out << 1 | (u16::from(b) & 1))
             })?,
@@ -61,9 +61,9 @@ impl std::str::FromStr for Machine {
                         .map(u32::from_str)
                         .try_fold(0u16, |out, res| {
                             match res.wrap_err("Failed to parse button") {
-                                Ok(n) if n < goal_len => (out | (1 << (goal_len - n - 1)))
+                                Ok(bit) if bit < goal_len => (out | (1 << (goal_len - bit - 1)))
                                     .pipe(Ok::<_, color_eyre::Report>),
-                                Ok(n) => bail!("Switch too large ({n})"),
+                                Ok(bit) => bail!("Switch too large ({bit})"),
                                 Err(err) => Err(err),
                             }
                         })
