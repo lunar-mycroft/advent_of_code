@@ -7,8 +7,14 @@ pub fn process(puzzle: Puzzle) -> u64 {
     const FFT: [u8; 3] = [b'f', b'f', b't'];
     const SVR: [u8; 3] = [b's', b'v', b'r'];
 
-    puzzle.count_paths(SVR, DAC) * puzzle.count_paths(DAC, FFT) * puzzle.count_paths(FFT, OUT)
-        + puzzle.count_paths(SVR, FFT) * puzzle.count_paths(FFT, DAC) * puzzle.count_paths(DAC, OUT)
+    let order = puzzle.topological_order();
+
+    puzzle.num_paths(SVR, DAC, &order)
+        * puzzle.num_paths(DAC, FFT, &order)
+        * puzzle.num_paths(FFT, OUT, &order)
+        + puzzle.num_paths(SVR, FFT, &order)
+            * puzzle.num_paths(FFT, DAC, &order)
+            * puzzle.num_paths(DAC, OUT, &order)
 }
 
 #[cfg(test)]

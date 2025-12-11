@@ -13,9 +13,9 @@ pub struct Puzzle {
 }
 
 impl Puzzle {
-    fn count_paths(&self, from: [u8; 3], to: [u8; 3]) -> u64 {
-        let (mut incoming_edges, mut queue, mut order, mut ways) =
-            (HashMap::new(), VecDeque::new(), Vec::new(), HashMap::new());
+    fn topological_order(&self) -> Vec<[u8; 3]> {
+        let (mut incoming_edges, mut queue, mut order) =
+            (HashMap::new(), VecDeque::new(), Vec::new());
         for snk in self.connections.values().flat_map(HashSet::iter).copied() {
             *incoming_edges.entry(snk).or_insert(0u32) += 1;
         }
@@ -47,8 +47,13 @@ impl Puzzle {
             }
             order.push(node);
         }
+        order
+    }
+
+    fn num_paths(&self, from: [u8; 3], to: [u8; 3], order: &[[u8; 3]]) -> u64 {
+        let mut ways = HashMap::new();
         ways.insert(from, 1u64);
-        for node in &order {
+        for node in order {
             for &neighbor in self
                 .connections
                 .get(node)

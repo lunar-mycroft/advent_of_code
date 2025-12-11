@@ -3,7 +3,8 @@ use crate::Puzzle;
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
 pub fn process(puzzle: Puzzle) -> u64 {
-    puzzle.count_paths([b'y', b'o', b'u'], crate::OUT)
+    let order = puzzle.topological_order();
+    puzzle.num_paths([b'y', b'o', b'u'], crate::OUT, &order)
 }
 
 #[cfg(test)]
