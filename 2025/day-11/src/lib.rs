@@ -18,18 +18,20 @@ pub struct Puzzle {
 
 impl Puzzle {
     fn topological_order(&self) -> Vec<u16> {
-        let (mut incoming_edges, mut order) = (vec![0u32; self.connections.len()], Vec::new());
+        let (mut incoming_edges, mut order, mut total_edges) =
+            (vec![0u32; self.connections.len()], Vec::new(), 0);
         for &snk in self.connections.iter().flat_map(|v| v.iter()) {
             incoming_edges[snk as usize] += 1;
+            total_edges += 1;
         }
         let mut queue = (0..self.connections.len())
             .filter(|&idx| incoming_edges[idx] == 0)
             .collect_vec();
         while let Some(node) = queue.pop() {
             for &neighbor in &self.connections[node] {
-                let n = incoming_edges[neighbor as usize];
-                incoming_edges[neighbor as usize] = n.saturating_sub(1);
-                if n <= 1 {
+                incoming_edges[neighbor as usize] -= 1;
+                total_edges -= 1;
+                if incoming_edges[neighbor as usize] == 0 {
                     queue.push(neighbor as usize);
                 }
             }
@@ -38,6 +40,7 @@ impl Puzzle {
                     .expect("there aren't enough nodes to overflow"),
             );
         }
+        debug_assert_eq!(total_edges, 0);
         order
     }
 

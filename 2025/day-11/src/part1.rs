@@ -1,10 +1,22 @@
+use itertools::Itertools;
+
 use crate::Puzzle;
 
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
 pub fn process(puzzle: Puzzle) -> u64 {
+    let you = puzzle.you.expect("To find you");
     let order = puzzle.topological_order();
-    puzzle.num_paths(puzzle.you.expect("To find 'you'"), puzzle.out, &order)
+    let ((i, start), (j, end)) = order
+        .iter()
+        .copied()
+        .enumerate()
+        .filter(|&(_, node)| node == you || node == puzzle.out)
+        .collect_tuple()
+        .expect("Missing you our out");
+    debug_assert_eq!(start, you);
+    debug_assert_eq!(end, puzzle.out);
+    puzzle.num_paths(you, puzzle.out, &order[i..j])
 }
 
 #[cfg(test)]

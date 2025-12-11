@@ -1,20 +1,33 @@
+use itertools::Itertools;
+
 use crate::Puzzle;
 
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
 pub fn process(puzzle: Puzzle) -> u64 {
-    let order = puzzle.topological_order();
-    let (dac, fft) = (
+    let (dac, fft, svr) = (
         puzzle.dac.expect("to find dac"),
         puzzle.fft.expect("to find fft"),
+        puzzle.svr.expect("To find svr"),
     );
+    debug_assert_ne!(dac, fft);
 
-    puzzle.num_paths(puzzle.svr.expect("To find svr"), dac, &order)
-        * puzzle.num_paths(dac, fft, &order)
-        * puzzle.num_paths(fft, puzzle.out, &order)
-        + puzzle.num_paths(puzzle.svr.expect("to find svr"), fft, &order)
-            * puzzle.num_paths(fft, dac, &order)
-            * puzzle.num_paths(dac, puzzle.out, &order)
+    let order = puzzle.topological_order();
+    let segments = order
+        .iter()
+        .copied()
+        .enumerate()
+        .filter(|(_, node)| [dac, fft, svr, puzzle.out].contains(node))
+        .collect_array::<4>()
+        .expect("Missing at least one of the required nodes");
+    debug_assert_eq!(segments[0].1, svr);
+    debug_assert_eq!(segments[3].1, puzzle.out);
+    debug_assert_ne!(segments[1].1, segments[2].1);
+    segments
+        .into_iter()
+        .tuple_windows()
+        .map(|((i, from), (j, to))| puzzle.num_paths(from, to, &order[i..j]))
+        .product()
 }
 
 #[cfg(test)]
