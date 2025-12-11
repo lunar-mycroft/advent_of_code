@@ -1,5 +1,5 @@
-use color_eyre::eyre::{eyre, OptionExt};
-use fxhash::{FxHashMap as HashMap, FxHashSet as HashSet};
+use color_eyre::eyre::{OptionExt, Result};
+use fxhash::FxHashMap as HashMap;
 use itertools::Itertools;
 use tap::prelude::*;
 
@@ -8,92 +8,111 @@ pub mod part2;
 
 #[derive(Debug)]
 pub struct Puzzle {
-    connections: HashMap<[u8; 3], HashSet<[u8; 3]>>,
+    connections: Vec<Vec<u16>>,
+    you: Option<u16>,
+    svr: Option<u16>,
+    dac: Option<u16>,
+    fft: Option<u16>,
+    out: u16,
 }
 
 impl Puzzle {
-    fn topological_order(&self) -> Vec<[u8; 3]> {
-        let (mut incoming_edges, mut order) = (HashMap::default(), Vec::new());
-        for snk in self.connections.values().flat_map(HashSet::iter).copied() {
-            *incoming_edges.entry(snk).or_insert(0u32) += 1;
+    fn topological_order(&self) -> Vec<u16> {
+        let (mut incoming_edges, mut order) = (vec![0u32; self.connections.len()], Vec::new());
+        for &snk in self.connections.iter().flat_map(|v| v.iter()) {
+            incoming_edges[snk as usize] += 1;
         }
-        let mut queue = {
-            let mut v = self
-                .connections
-                .values()
-                .flat_map(HashSet::iter)
-                .chain(self.connections.keys())
-                .copied()
-                .filter(|node| incoming_edges.get(node).is_none_or(|&n| n == 0))
-                .collect_vec();
-            v.sort_unstable();
-            v.dedup();
-            v
-        };
+        let mut queue = (0..self.connections.len())
+            .filter(|&idx| incoming_edges[idx] == 0)
+            .collect_vec();
         while let Some(node) = queue.pop() {
-            for neighbor in self.neighbors(node) {
-                let n = *incoming_edges
-                    .entry(neighbor)
-                    .and_modify(|n| *n -= 1)
-                    .or_insert(0);
-                if n == 0 {
-                    queue.push(neighbor);
+            for &neighbor in &self.connections[node] {
+                let n = incoming_edges[neighbor as usize];
+                incoming_edges[neighbor as usize] = n.saturating_sub(1);
+                if n <= 1 {
+                    queue.push(neighbor as usize);
                 }
             }
-            order.push(node);
+            order.push(
+                node.try_conv()
+                    .expect("there aren't enough nodes to overflow"),
+            );
         }
         order
     }
 
-    fn num_paths(&self, from: [u8; 3], to: [u8; 3], order: &[[u8; 3]]) -> u64 {
-        let mut ways = HashMap::default();
-        ways.insert(from, 1u64);
-        for node in order {
-            for neighbor in self.neighbors(*node) {
-                *ways.entry(neighbor).or_insert(0) += ways.get(node).copied().unwrap_or(0);
+    fn num_paths(&self, from: u16, to: u16, order: &[u16]) -> u64 {
+        let mut res = vec![0u64; self.connections.len()];
+        res[from as usize] = 1;
+        for &node in order {
+            for &neighbor in &self.connections[node as usize] {
+                res[neighbor as usize] += res[node as usize];
             }
         }
-        ways.get(&to).copied().unwrap_or(0)
-    }
-
-    fn neighbors(&self, node: [u8; 3]) -> impl Iterator<Item = [u8; 3]> + use<'_> {
-        self.connections
-            .get(&node)
-            .into_iter()
-            .flat_map(HashSet::iter)
-            .copied()
+        res[to as usize]
     }
 }
-
-const OUT: [u8; 3] = [b'o', b'u', b't'];
 
 impl std::str::FromStr for Puzzle {
     type Err = color_eyre::Report;
 
     fn from_str(s: &str) -> color_eyre::Result<Self> {
+        #[derive(Default)]
+        struct Interner<'s> {
+            strs: HashMap<&'s str, u16>,
+            connections: Vec<Vec<u16>>,
+        }
+        impl<'s> Interner<'s> {
+            fn index_of(&mut self, machine: &'s str) -> Result<u16> {
+                let n: u16 = self.strs.len().try_conv()?;
+                match self.strs.entry(machine) {
+                    std::collections::hash_map::Entry::Occupied(entry) => Ok(*entry.get()),
+                    std::collections::hash_map::Entry::Vacant(entry) => {
+                        self.connections.push(vec![]);
+                        entry.insert(n);
+                        Ok(n)
+                    }
+                }
+            }
+        }
+        let mut interner = Interner::default();
+        for line in s.lines().map(str::trim).filter(|s| !s.is_empty()) {
+            let (src, snk) = line
+                .split_once(": ")
+                .ok_or_eyre("Missing source and sinks")?;
+            let src = interner.index_of(src)?;
+            for seg in snk.split_whitespace() {
+                let neighbor = interner.index_of(seg)?;
+                interner.connections[src as usize].push(neighbor);
+            }
+        }
         Self {
-            connections: s
-                .lines()
-                .map(str::trim)
-                .filter(|s| !s.is_empty())
-                .map(|s| {
-                    let (src, snk) = s.split_once(": ").ok_or_eyre("Missing source and sinks")?;
-
-                    (
-                        src.as_bytes()
-                            .try_conv()
-                            .map_err(|_| eyre!("{src:?} is not exactly three bytes"))?,
-                        snk.split_whitespace()
-                            .map(|seg| {
-                                seg.as_bytes()
-                                    .try_conv::<[u8; 3]>()
-                                    .map_err(|_| eyre!("{seg:?} is not exactly three bytes"))
-                            })
-                            .try_collect::<_, HashSet<_>, _>()?,
-                    )
-                        .pipe(Ok::<_, color_eyre::Report>)
-                })
-                .try_collect()?,
+            you: interner
+                .strs
+                .get("you")
+                .copied()
+                .map(u16::try_from)
+                .transpose()?,
+            svr: interner
+                .strs
+                .get("svr")
+                .copied()
+                .map(u16::try_from)
+                .transpose()?,
+            out: (*interner.strs.get("out").ok_or_eyre("Missing out")?).try_conv()?,
+            dac: interner
+                .strs
+                .get("dac")
+                .copied()
+                .map(u16::try_from)
+                .transpose()?,
+            fft: interner
+                .strs
+                .get("fft")
+                .copied()
+                .map(u16::try_from)
+                .transpose()?,
+            connections: interner.connections,
         }
         .pipe(Ok)
     }

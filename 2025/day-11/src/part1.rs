@@ -4,7 +4,7 @@ use crate::Puzzle;
 #[allow(clippy::needless_pass_by_value)]
 pub fn process(puzzle: Puzzle) -> u64 {
     let order = puzzle.topological_order();
-    puzzle.num_paths([b'y', b'o', b'u'], crate::OUT, &order)
+    puzzle.num_paths(puzzle.you.expect("To find 'you'"), puzzle.out, &order)
 }
 
 #[cfg(test)]

@@ -1,20 +1,20 @@
-use crate::{Puzzle, OUT};
+use crate::Puzzle;
 
 #[must_use]
 #[allow(clippy::needless_pass_by_value)]
 pub fn process(puzzle: Puzzle) -> u64 {
-    const DAC: [u8; 3] = [b'd', b'a', b'c'];
-    const FFT: [u8; 3] = [b'f', b'f', b't'];
-    const SVR: [u8; 3] = [b's', b'v', b'r'];
-
     let order = puzzle.topological_order();
+    let (dac, fft) = (
+        puzzle.dac.expect("to find dac"),
+        puzzle.fft.expect("to find fft"),
+    );
 
-    puzzle.num_paths(SVR, DAC, &order)
-        * puzzle.num_paths(DAC, FFT, &order)
-        * puzzle.num_paths(FFT, OUT, &order)
-        + puzzle.num_paths(SVR, FFT, &order)
-            * puzzle.num_paths(FFT, DAC, &order)
-            * puzzle.num_paths(DAC, OUT, &order)
+    puzzle.num_paths(puzzle.svr.expect("To find svr"), dac, &order)
+        * puzzle.num_paths(dac, fft, &order)
+        * puzzle.num_paths(fft, puzzle.out, &order)
+        + puzzle.num_paths(puzzle.svr.expect("to find svr"), fft, &order)
+            * puzzle.num_paths(fft, dac, &order)
+            * puzzle.num_paths(dac, puzzle.out, &order)
 }
 
 #[cfg(test)]
