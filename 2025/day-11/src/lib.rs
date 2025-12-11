@@ -1,5 +1,3 @@
-use std::collections::VecDeque;
-
 use color_eyre::eyre::{eyre, OptionExt};
 use fxhash::{FxHashMap as HashMap, FxHashSet as HashSet};
 use itertools::Itertools;
@@ -15,35 +13,31 @@ pub struct Puzzle {
 
 impl Puzzle {
     fn topological_order(&self) -> Vec<[u8; 3]> {
-        let (mut incoming_edges, mut queue, mut order) =
-            (HashMap::default(), VecDeque::new(), Vec::new());
+        let (mut incoming_edges, mut order) = (HashMap::default(), Vec::new());
         for snk in self.connections.values().flat_map(HashSet::iter).copied() {
             *incoming_edges.entry(snk).or_insert(0u32) += 1;
         }
-        for node in self
-            .connections
-            .values()
-            .flat_map(HashSet::iter)
-            .chain(self.connections.keys())
-            .copied()
-            .filter(|node| incoming_edges.get(node).copied().unwrap_or(0) == 0)
-            .unique()
-        {
-            queue.push_back(node);
-        }
-        while let Some(node) = queue.pop_front() {
-            for &neighbor in self
+        let mut queue = {
+            let mut v = self
                 .connections
-                .get(&node)
-                .into_iter()
+                .values()
                 .flat_map(HashSet::iter)
-            {
+                .chain(self.connections.keys())
+                .copied()
+                .filter(|node| incoming_edges.get(node).is_none_or(|&n| n == 0))
+                .collect_vec();
+            v.sort_unstable();
+            v.dedup();
+            v
+        };
+        while let Some(node) = queue.pop() {
+            for neighbor in self.neighbors(node) {
                 let n = *incoming_edges
                     .entry(neighbor)
                     .and_modify(|n| *n -= 1)
                     .or_insert(0);
                 if n == 0 {
-                    queue.push_back(neighbor);
+                    queue.push(neighbor);
                 }
             }
             order.push(node);
@@ -55,16 +49,19 @@ impl Puzzle {
         let mut ways = HashMap::default();
         ways.insert(from, 1u64);
         for node in order {
-            for &neighbor in self
-                .connections
-                .get(node)
-                .into_iter()
-                .flat_map(HashSet::iter)
-            {
+            for neighbor in self.neighbors(*node) {
                 *ways.entry(neighbor).or_insert(0) += ways.get(node).copied().unwrap_or(0);
             }
         }
         ways.get(&to).copied().unwrap_or(0)
+    }
+
+    fn neighbors(&self, node: [u8; 3]) -> impl Iterator<Item = [u8; 3]> + use<'_> {
+        self.connections
+            .get(&node)
+            .into_iter()
+            .flat_map(HashSet::iter)
+            .copied()
     }
 }
 
