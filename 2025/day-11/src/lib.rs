@@ -52,69 +52,58 @@ impl Puzzle {
         res[to as usize]
     }
 }
-
 impl std::str::FromStr for Puzzle {
     type Err = color_eyre::Report;
 
     fn from_str(s: &str) -> color_eyre::Result<Self> {
-        #[derive(Default)]
-        struct Interner<'s> {
-            strs: HashMap<&'s str, u16>,
-            connections: Vec<Vec<u16>>,
+        let PuzzleBuilder { strs, connections } = PuzzleBuilder::from_str(s)?;
+        Self {
+            you: strs.get("you").copied().map(u16::try_from).transpose()?,
+            svr: strs.get("svr").copied().map(u16::try_from).transpose()?,
+            out: (*strs.get("out").ok_or_eyre("Missing out")?).try_conv()?,
+            dac: strs.get("dac").copied().map(u16::try_from).transpose()?,
+            fft: strs.get("fft").copied().map(u16::try_from).transpose()?,
+            connections,
         }
-        impl<'s> Interner<'s> {
-            fn index_of(&mut self, machine: &'s str) -> Result<u16> {
-                let n: u16 = self.strs.len().try_conv()?;
-                match self.strs.entry(machine) {
-                    std::collections::hash_map::Entry::Occupied(entry) => Ok(*entry.get()),
-                    std::collections::hash_map::Entry::Vacant(entry) => {
-                        self.connections.push(vec![]);
-                        entry.insert(n);
-                        Ok(n)
-                    }
-                }
-            }
-        }
-        let mut interner = Interner::default();
+        .pipe(Ok)
+    }
+}
+
+#[derive(Default)]
+struct PuzzleBuilder<'s> {
+    strs: HashMap<&'s str, u16>,
+    connections: Vec<Vec<u16>>,
+}
+
+impl<'s> PuzzleBuilder<'s> {
+    fn from_str(s: &'s str) -> color_eyre::Result<Self> {
+        let mut builder = Self {
+            strs: HashMap::default(),
+            connections: Vec::new(),
+        };
         for line in s.lines().map(str::trim).filter(|s| !s.is_empty()) {
             let (src, snk) = line
                 .split_once(": ")
                 .ok_or_eyre("Missing source and sinks")?;
-            let src = interner.index_of(src)?;
+            let src = builder.index_of(src)?;
             for seg in snk.split_whitespace() {
-                let neighbor = interner.index_of(seg)?;
-                interner.connections[src as usize].push(neighbor);
+                let neighbor = builder.index_of(seg)?;
+                builder.connections[src as usize].push(neighbor);
             }
         }
-        Self {
-            you: interner
-                .strs
-                .get("you")
-                .copied()
-                .map(u16::try_from)
-                .transpose()?,
-            svr: interner
-                .strs
-                .get("svr")
-                .copied()
-                .map(u16::try_from)
-                .transpose()?,
-            out: (*interner.strs.get("out").ok_or_eyre("Missing out")?).try_conv()?,
-            dac: interner
-                .strs
-                .get("dac")
-                .copied()
-                .map(u16::try_from)
-                .transpose()?,
-            fft: interner
-                .strs
-                .get("fft")
-                .copied()
-                .map(u16::try_from)
-                .transpose()?,
-            connections: interner.connections,
+        Ok(builder)
+    }
+
+    fn index_of(&mut self, machine: &'s str) -> Result<u16> {
+        let n: u16 = self.strs.len().try_conv()?;
+        match self.strs.entry(machine) {
+            std::collections::hash_map::Entry::Occupied(entry) => Ok(*entry.get()),
+            std::collections::hash_map::Entry::Vacant(entry) => {
+                self.connections.push(vec![]);
+                entry.insert(n);
+                Ok(n)
+            }
         }
-        .pipe(Ok)
     }
 }
 
