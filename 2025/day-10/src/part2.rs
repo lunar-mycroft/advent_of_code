@@ -52,8 +52,9 @@ fn branch_and_bound(initial: Vec<Vec<f64>>) -> Option<u64> {
     let (mut best_val, mut stack) = (f64::INFINITY, vec![initial]);
     while let Some(current) = stack.pop() {
         match simplex(&current) {
+            Some((..0.0, _)) => unreachable!(),
             None => (),
-            Some((val, _)) if val == -f64::INFINITY || val >= best_val - EPS => (),
+            Some((val, _)) if val >= best_val - EPS => (),
             Some((val, x)) => match x
                 .iter()
                 .copied()
@@ -93,6 +94,7 @@ fn branch_and_bound(initial: Vec<Vec<f64>>) -> Option<u64> {
 
 #[allow(clippy::too_many_lines)]
 fn simplex(lhs: &[Vec<f64>]) -> Option<(f64, Vec<f64>)> {
+    #[inline]
     fn best_key(
         (c_idx, c_key): (usize, (f64, i32)),
         (idx, key): (usize, (f64, i32)),
@@ -225,18 +227,25 @@ fn simplex(lhs: &[Vec<f64>]) -> Option<(f64, Vec<f64>)> {
     }
 
     if find(&mut d, &mut b_indices, &mut n_indices, 0) {
-        let mut x = vec![0.0; width];
-        for i in 0..height {
-            #[allow(clippy::cast_sign_loss)]
-            if b_indices[i] >= 0 && (b_indices[i] as usize) < width {
-                x[b_indices[i] as usize] = d[i][width + 1];
-            }
-        }
+        let x = (0..height)
+            .filter_map(|i| {
+                #[allow(clippy::cast_sign_loss)]
+                if b_indices[i] >= 0 && (b_indices[i] as usize) < width {
+                    (i, b_indices[i] as usize).pipe(Some)
+                } else {
+                    None
+                }
+            })
+            .fold(vec![0.0; width], |mut x, (i, j)| {
+                x[j] = d[i][width + 1];
+                x
+            });
 
-        return ((0..width).map(|i| x[i]).sum(), x).pipe(Some);
+        (x.iter().copied().sum(), x).pipe(Some)
+    } else {
+        None
     }
-
-    None
+    .filter(|&(val, _)| val >= 0.0)
 }
 
 const EPS: f64 = 1e-9;
