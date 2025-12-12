@@ -552,6 +552,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "day-12"
+version = "0.1.0"
+dependencies = [
+ "color-eyre",
+ "common",
+ "displaydoc",
+ "divan",
+ "fxhash",
+ "glam 0.30.9",
+ "indexmap",
+ "itertools 0.14.0",
+ "rayon",
+ "regex",
+ "rstest",
+ "tap",
+ "thiserror 2.0.17",
+ "tracing",
+ "tracing-error",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "diff"
 version = "0.1.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
