@@ -26,7 +26,7 @@ impl std::str::FromStr for Puzzle {
             .split("\n\n")
             .collect_array::<7>()
             .ok_or_eyre("Incorrect number of sections")?;
-        Self {
+        let this = Self {
             presents: presents
                 .into_iter()
                 .map(str::trim)
@@ -38,8 +38,12 @@ impl std::str::FromStr for Puzzle {
                 .try_conv()
                 .expect("Known correct length"),
             regions: regions.trim().lines().map(Region::from_str).try_collect()?,
-        }
-        .pipe(Ok)
+        };
+        ensure!(
+            this.validate(),
+            "At least one region could not be trivially checked"
+        );
+        Ok(this)
     }
 }
 
@@ -75,6 +79,45 @@ impl std::str::FromStr for Region {
                 })?,
         }
         .pipe(Ok)
+    }
+}
+
+impl Puzzle {
+    fn validate(&self) -> bool {
+        let areas = self
+            .presents
+            .iter()
+            .map(|grid| grid.iter().map(|&d| d & 1).sum::<u8>())
+            .map(u16::from)
+            .collect_vec();
+        self.regions.iter().all(|&region| {
+            let best_case = {
+                let region_area = u16::try_from(region.size.x * region.size.y)
+                    .expect("Size cannot be bigger than 10_000");
+                let present_area: u16 = region
+                    .quantities
+                    .iter()
+                    .copied()
+                    .map(u16::from)
+                    .zip(areas.iter().copied())
+                    .map(|(n, a)| n * a)
+                    .sum();
+
+                region_area >= present_area
+            };
+            let worst_case = {
+                let size = region.size / 3;
+                let region_area =
+                    u16::try_from(size.x * size.y).expect("Size cannot be bigger than 10_000");
+                let present_area = region.quantities.iter().copied().map(u16::from).sum();
+                region_area >= present_area
+            };
+            match (best_case, worst_case) {
+                (true, true) | (false, false) => true,
+                (true, false) => false,
+                (false, true) => unreachable!(),
+            }
+        })
     }
 }
 
