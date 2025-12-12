@@ -6,7 +6,7 @@ members = [
   "day-07", "day-08", "day-09", "day-10", "day-11"
 ]
 
-resolver = "2"
+resolver = "3"
 
 [workspace.dependencies]
 color-eyre = "0.6"
