@@ -40,7 +40,7 @@ impl std::str::FromStr for Puzzle {
             regions: regions.trim().lines().map(Region::from_str).try_collect()?,
         };
         ensure!(
-            this.validate(),
+            this.valid(),
             "At least one region could not be trivially checked"
         );
         Ok(this)
@@ -83,7 +83,7 @@ impl std::str::FromStr for Region {
 }
 
 impl Puzzle {
-    fn validate(&self) -> bool {
+    fn valid(&self) -> bool {
         let areas = self
             .presents
             .iter()
@@ -113,9 +113,9 @@ impl Puzzle {
                 region_area >= present_area
             };
             match (best_case, worst_case) {
-                (true, true) | (false, false) => true,
                 (true, false) => false,
                 (false, true) => unreachable!(),
+                (true, true) | (false, false) => true,
             }
         })
     }
